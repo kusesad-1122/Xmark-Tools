@@ -1,0 +1,11 @@
+[05-14 03:33:38] [ColorOSUnlock] ===== 关闭 ColorOS 云控锁帧解除 =====
+[05-14 03:33:38] [ColorOSUnlock] 已恢复 disable_cpufreq_limit
+[05-14 03:33:38] [ColorOSUnlock] 已清空 cpu_max_freq
+[05-14 03:33:40] [ColorOSUnlock] horae 已恢复原始启动
+[05-14 03:33:40] [ColorOSUnlock] 已恢复 oppo_theias、thermal_mnt_hal_service
+[05-14 03:33:40] [ColorOSUnlock] ColorOS 云控锁帧解除已关闭
+[05-14 03:33:40] [SignalBoost] ===== 关闭信号增强 =====
+[05-14 03:33:40] [SignalBoost] ✅ 挂载已卸载，系统原始应用自动恢复
+[05-14 03:33:41] [Yuki] 已停止 Yuki 引擎 (PID: 9928)
+[05-14 03:33:44] [SignalBoost] ===== 开启信号增强 =====
+[05-14 03:33:44] [SignalBoost] ✅ 挂载成功: /product/priv-app/BlackListApp/BlackListApp.apk

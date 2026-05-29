@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+    <meta name="theme-color" content="transparent">
+    <title>防设备标记状态</title>
+    <script src="/ksu.js"></script>
+    <script>
+        (function() {
+            if (typeof ksu !== 'undefined' && ksu.fullScreen) {
+                ksu.fullScreen(true);
+            }
+        })();
+    </script>
+    
+    
+    
+    <style>
+        
+        :root {
+            /* sizes identical to original */
+            --r-sm:10px; --r-md:16px;
+            --fs-xs:11px; --fs-sm:14px; --fs-md:17px;
+            --tx:#1c1c1e; --tx2:#3a3a3c; --tx3:#8e8e93;
+            --ac:#007aff; --ok:#34c759; --er:#ff3b30;
+            --blur:4px;
+            --safe-top:env(safe-area-inset-top,0px);
+            --rdyn:rgba(255,255,255,.35);
+            --spring:    cubic-bezier(0.34,1.52,0.64,1);
+            --spring-sm: cubic-bezier(0.34,1.38,0.64,1);
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html,body{
+            background:transparent!important;min-height:100vh;
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+            color:var(--tx);-webkit-tap-highlight-color:transparent;overflow-x:hidden;
+        }
+        #bg-layer{
+            position:fixed;top:0;left:0;width:100vw;height:100vh;
+            background:#f2f2f7;background-size:cover;background-position:center;
+            z-index:-2;transition:filter .3s;
+        }
+        /* WebGL lens canvas replaces the static bg as the live background */
+        #lens-canvas{
+            position:fixed;top:0;left:0;width:100vw;height:100vh;
+            z-index:-1;pointer-events:none;display:block;
+        }
+        .container{
+            max-width:420px;margin:0 auto;
+            padding:calc(90px + var(--safe-top)) 16px 100px;
+            display:flex;flex-direction:column;gap:16px;
+        }
+
+        
+        .card{
+            position:relative; overflow:hidden; isolation:isolate;
+            padding:16px;
+            /* subtle frosted glass over the WebGL lens canvas */
+            background:rgba(255,255,255,.03);
+            backdrop-filter:blur(var(--blur)) saturate(160%);
+            -webkit-backdrop-filter:blur(var(--blur)) saturate(160%);
+            border-radius:var(--r-md);
+            /* thick-glass rim: bright outer line, specular top, dark bottom */
+            box-shadow:
+                0 0 0 1.5px rgba(255,255,255,.42),
+                inset 0  1px 0 rgba(255,255,255,.62),
+                inset 0 -1px 0 rgba(0,0,0,.07),
+                inset  1px 0 0 rgba(255,255,255,.50),
+                inset -1px 0 0 rgba(255,255,255,.18),
+                0 6px 24px rgba(0,0,0,.12),
+                0 2px 6px  rgba(0,0,0,.07);
+            opacity:0;
+            transform:scale(.96) translateY(8px);
+            will-change:transform,opacity;
+        }
+
+        .card::before{
+            content:'';position:absolute;inset:0;border-radius:inherit;z-index:0;
+            background:
+                linear-gradient(180deg,rgba(255,255,255,.20) 0%,rgba(255,255,255,.04) 38%,transparent 62%),
+                linear-gradient(90deg, rgba(255,255,255,.18) 0%,transparent 28%),
+                linear-gradient(-90deg,rgba(255,255,255,.12) 0%,transparent 22%);
+            pointer-events:none;
+        }
+        .card::after{
+            content:'';
+            position:absolute; inset:0; border-radius:inherit;
+            z-index:1;
+            background:linear-gradient(118deg,
+                rgba(255,190,190,.07) 0%,
+                rgba(190,210,255,.07) 22%,
+                rgba(190,255,210,.05) 42%,
+                rgba(255,190,255,.07) 62%,
+                rgba(190,255,255,.05) 82%,
+                rgba(255,225,190,.07) 100%);
+            background-size:400% 400%;
+            animation:iridescent 11s ease-in-out infinite;
+            pointer-events:none;
+        }
+        @keyframes iridescent{
+            0%,100%{background-position:0% 50%;opacity:.5;}
+            25%    {background-position:50% 0%;opacity:.55;}
+            50%    {background-position:100% 50%;opacity:.38;}
+            75%    {background-position:50% 100%;opacity:.55;}
+        }
+        .card>*{position:relative;z-index:2;}
+
+        /* entrance spring — keep original scale range, add spring overshoot */
+        @keyframes cardSpring{
+            0%  {opacity:0;transform:scale(.76) translateY(12px);}
+            60% {opacity:1;transform:scale(1.015) translateY(-2px);}
+            80% {transform:scale(.996) translateY(.5px);}
+            100%{opacity:1;transform:scale(1) translateY(0);}
+        }
+        .card.in{animation:cardSpring .5s var(--spring) var(--del,0ms) both;}
+        .page.active .card{opacity:1;transform:none;}
+
+        .global-header{text-align:left;padding:0 0 8px 4px;margin-top:-20px;}
+        .global-header .main-title{
+            font-size:24px;font-weight:900;letter-spacing:1px;
+            background:linear-gradient(135deg,#4facfe 0%,#38f9d7 60%,#34c759 100%);
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+            background-clip:text;line-height:1.2;
+            filter:drop-shadow(0 2px 10px rgba(79,172,254,.38));
+        }
+        .global-header .sub-title{
+            font-size:var(--fs-xs);font-weight:600;letter-spacing:2px;
+            background:linear-gradient(135deg,#4facfe 0%,#38f9d7 60%,#34c759 100%);
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+            background-clip:text;margin-top:2px;opacity:.85;
+        }
+
+        .st-hero{display:flex;gap:12px;}
+        .st-main{
+            width:180px;height:180px;flex-shrink:0;
+            position:relative;overflow:hidden;isolation:isolate;
+            background:rgba(255,255,255,.03);
+            backdrop-filter:blur(var(--blur)) saturate(160%);
+            -webkit-backdrop-filter:blur(var(--blur)) saturate(160%);
+            border-radius:var(--r-md);
+            box-shadow:0 0 0 1.5px rgba(255,255,255,.42),
+                inset 0 1px 0 rgba(255,255,255,.62),
+                inset 0 -1px 0 rgba(0,0,0,.07),
+                inset 1px 0 0 rgba(255,255,255,.50),
+                inset -1px 0 0 rgba(255,255,255,.18),
+                0 6px 24px rgba(0,0,0,.12);
+            display:flex;flex-direction:column;padding:14px;
+        }
+        .st-main::before{
+            content:'';position:absolute;inset:0;border-radius:inherit;z-index:0;
+            background:
+                linear-gradient(180deg,rgba(255,255,255,.20) 0%,rgba(255,255,255,.04) 38%,transparent 62%),
+                linear-gradient(90deg, rgba(255,255,255,.18) 0%,transparent 30%),
+                linear-gradient(-90deg,rgba(255,255,255,.12) 0%,transparent 24%);
+            pointer-events:none;
+        }
+        .st-main>*{position:relative;z-index:2;}
+        .st-main-label{font-size:22px;font-weight:800;color:var(--tx);line-height:1.2;}
+        .st-main-sub  {font-size:var(--fs-xs);font-weight:600;color:var(--tx3);margin-top:4px;word-break:break-all;}
+        .st-main-icon {
+            position:absolute;right:-35px;bottom:-30px;width:170px;height:170px;
+            transition:transform .3s,color .3s;color:#aaa;
+        }
+        .status-on .st-main-icon{
+            color:var(--ok);
+            animation:iconFloat 3s ease-in-out infinite;
+        }
+        @keyframes iconFloat{
+            0%,100%{transform:scale(1);filter:drop-shadow(0 0 6px rgba(52,199,89,.5));}
+            50%    {transform:scale(1.09) rotate(2deg);filter:drop-shadow(0 0 14px rgba(52,199,89,.8));}
+        }
+        .st-side{flex:1;display:flex;flex-direction:column;gap:8px;}
+        .st-mini{
+            background:rgba(255,255,255,.03);
+            backdrop-filter:blur(var(--blur)) saturate(160%);
+            -webkit-backdrop-filter:blur(var(--blur)) saturate(160%);
+            border-radius:var(--r-md);
+            box-shadow:0 0 0 1.5px rgba(255,255,255,.42),
+                inset 0 1px 0 rgba(255,255,255,.62),
+                inset 0 -1px 0 rgba(0,0,0,.07),
+                inset 1px 0 0 rgba(255,255,255,.50),
+                inset -1px 0 0 rgba(255,255,255,.18),
+                0 4px 16px rgba(0,0,0,.10);
+            width:175px;height:88px;
+            display:flex;flex-direction:column;
+            justify-content:space-between;padding:10px 12px;
+        }
+        .st-mini-label{font-size:var(--fs-xs);color:var(--tx3);font-weight:500;text-align:left;}
+        .st-mini-val  {font-size:var(--fs-sm);font-weight:600;text-align:left;line-height:1.2;}
+
+        .info-card{padding:16px 16px;cursor:pointer;margin-top:6px;}
+        .sys-row{display:flex;flex-direction:column;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);}
+        .sys-label{font-size:var(--fs-xs);color:var(--tx3);margin-bottom:2px;}
+        .sys-value{font-size:var(--fs-sm);font-weight:600;font-family:monospace;word-break:break-all;}
+
+        .btn{
+            padding:10px 12px;border:none;border-radius:var(--r-sm);
+            background:rgba(255,255,255,.18);color:var(--tx);
+            font-size:var(--fs-sm);font-weight:600;cursor:pointer;
+            backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 0 0 .5px rgba(255,255,255,.28);
+            transition:transform .22s var(--spring),background .15s;
+        }
+        .btn:active{transform:scale(.93);background:rgba(255,255,255,.28);}
+
+        .toggle{position:relative;display:inline-block;width:42px;height:24px;}
+        .toggle input{display:none;}
+        .toggle-slider{
+            position:absolute;top:0;left:0;right:0;bottom:0;
+            background:rgba(120,140,160,.35);border-radius:34px;
+            transition:.3s;border:1px solid rgba(255,255,255,.5);
+        }
+        .toggle-slider::before{
+            content:'';height:18px;width:18px;position:absolute;left:3px;bottom:2px;
+            background:white;border-radius:50%;
+            transition:.35s var(--spring-sm);
+            box-shadow:0 1px 4px rgba(0,0,0,.2);
+        }
+        input:checked+.toggle-slider{background:var(--ok);}
+        input:checked+.toggle-slider::before{transform:translateX(18px);}
+
+        .log-page-container{padding:0 0 20px;}
+        .log-window{
+            background:#1e1e1e;color:#0f0;font-family:monospace;font-size:11px;
+            padding:14px;border-radius:8px;max-height:60vh;overflow-y:auto;
+            white-space:pre-wrap;word-break:break-all;
+            border:1px solid rgba(255,255,255,.2);margin:16px 0;
+        }
+
+        .floating-dock{
+            position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+            width:auto;min-width:330px;max-width:430px;
+            background:rgba(255,255,255,.04);
+            backdrop-filter:blur(var(--blur)) saturate(160%);
+            -webkit-backdrop-filter:blur(var(--blur)) saturate(160%);
+            border-radius:999px;
+            box-shadow:0 0 0 1.5px rgba(255,255,255,.42),
+                inset 0 1px 0 rgba(255,255,255,.58),
+                inset 0 -1px 0 rgba(0,0,0,.05),
+                0 8px 32px rgba(0,0,0,.14),
+                0 2px 8px rgba(0,0,0,.08);
+            padding:8px 12px;display:flex;z-index:100;gap:8px;
+        }
+        .dock-tab{
+            flex:1;text-align:center;padding:5px 0;border-radius:999px;
+            font-size:10px;font-weight:500;color:var(--tx3);cursor:pointer;
+            transition:color .2s;
+            display:flex;flex-direction:column;align-items:center;gap:3px;
+        }
+        .dock-tab .tab-icon {font-size:16px;line-height:1;}
+        .dock-tab .tab-label{font-size:10px;font-weight:500;}
+        .dock-tab.active{color:var(--tx);}
+        /* liquid pill: position:absolute inside the fixed dock */
+        #dockPill{
+            position:absolute;border-radius:999px;z-index:0;
+            background:rgba(255,255,255,.3);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 2px 6px rgba(0,0,0,.09);
+            pointer-events:none;
+            transition:left .38s var(--spring),width .38s var(--spring),
+                        top .3s var(--spring),height .3s var(--spring);
+        }
+
+        .page{display:none;} .page.active{display:block;}
+        .clean-section{margin-top:8px;}
+        .clean-list{margin-top:10px;padding-right:4px;}
+        .clean-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06);}
+        .clean-item:last-child{border-bottom:none;}
+        .clean-left{display:flex;align-items:center;gap:10px;flex:1;}
+        .game-icon-img{width:32px;height:32px;border-radius:6px;object-fit:cover;flex-shrink:0;}
+        .clean-info{display:flex;flex-direction:column;}
+        .game-name{font-size:var(--fs-sm);font-weight:600;margin-bottom:2px;}
+        .game-pkg {font-size:10px;color:var(--tx3);word-break:break-all;}
+        .clean-btn-group{display:flex;align-items:center;gap:8px;}
+        .clean-btn{
+            padding:6px 12px;font-size:var(--fs-xs);font-weight:600;
+            border:none;border-radius:8px;cursor:pointer;white-space:nowrap;
+            backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+            box-shadow:0 0 6px rgba(0,0,0,.1);
+            transition:transform .2s var(--spring),opacity .15s;
+        }
+        .clean-btn.danger{background:rgba(255,59,48,.15);color:#dc2626;}
+        .clean-btn.ssaid {background:rgba(155,89,182,.15);color:#9b59b6;}
+        .clean-btn:active{opacity:.75;transform:scale(.91);}
+        .custom-icon-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06);}
+        .custom-icon-row:last-child{border-bottom:none;}
+        .custom-icon-preview{width:40px;height:40px;border-radius:8px;object-fit:cover;margin-right:10px;}
+        .custom-icon-name{flex:1;font-weight:600;}
+        .back-btn{margin-bottom:10px;display:inline-block;}
+        .reset-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06);}
+        .reset-row:last-child{border-bottom:none;}
+        .reset-name{font-size:var(--fs-sm);font-weight:600;}
+        .touch-btn{
+            padding:10px 4px;font-size:var(--fs-xs);font-weight:600;border:none;
+            border-radius:var(--r-sm);background:rgba(255,255,255,.12);
+            backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+            color:var(--tx);cursor:pointer;transition:all .2s;
+        }
+        .touch-btn.active{background:var(--ok);color:white;box-shadow:0 0 8px rgba(52,199,89,.4);}
+        .touch-btn:active{transform:scale(.95);opacity:.8;}
+        .section-title{font-weight:700;margin-bottom:12px;font-size:var(--fs-md);letter-spacing:-.3px;}
+        .settings-spacing-top   {margin-bottom:20px;}
+        .settings-spacing-middle{margin-top:20px;}
+        .settings-spacing-bottom{margin-top:16px;}
+
+        .dot-pulse{
+            display:inline-block;width:8px;height:8px;border-radius:50%;
+            background:var(--ok);box-shadow:0 0 0 0 var(--ok);
+            animation:pulse 1.2s infinite;margin-right:6px;
+        }
+        @keyframes pulse{
+            0%  {transform:scale(.9);opacity:.7;}
+            70% {transform:scale(1.2);opacity:.2;}
+            100%{transform:scale(.9);opacity:.7;}
+        }
+        .detect-item{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:var(--fs-xs);}
+        .detect-key{color:var(--tx3);min-width:130px;font-weight:500;}
+        .detect-val{color:var(--tx2);word-break:break-word;text-align:right;max-width:60%;font-family:monospace;}
+        .detect-val.sensitive{color:var(--er);font-weight:600;}
+        .placeholder-page{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;color:var(--tx3);}
+        .func-switch-item{display:flex;flex-direction:column;margin-top:12px;padding-top:6px;border-top:1px solid rgba(0,0,0,.05);}
+        .func-switch-item:first-of-type{border-top:none;margin-top:0;}
+        .func-switch-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+        .func-switch-title{font-weight:700;font-size:var(--fs-sm);}
+        .func-switch-desc {font-size:var(--fs-xs);color:var(--tx3);line-height:1.5;}
+        .running-led{
+            display:inline-block;width:8px;height:8px;border-radius:50%;
+            background:var(--ok);margin-left:8px;
+            animation:ledBreath 1.2s ease-in-out infinite;vertical-align:middle;
+        }
+        @keyframes ledBreath{
+            0%  {opacity:.3;transform:scale(.8);box-shadow:0 0 0 0 var(--ok);}
+            50% {opacity:1; transform:scale(1.2);box-shadow:0 0 6px 2px var(--ok);}
+            100%{opacity:.3;transform:scale(.8);box-shadow:0 0 0 0 var(--ok);}
+        }
+        .led-container{display:flex;align-items:center;margin-top:6px;font-size:10px;color:var(--tx3);}
+        .led-container .running-led{margin-right:6px;margin-left:0;}
+
+        .dev-badge{
+            position:absolute;top:12px;left:12px;
+            background:rgba(100,150,255,.75);border:1.5px solid white;
+            backdrop-filter:blur(8px);padding:4px 10px;border-radius:20px;
+            font-size:10px;font-weight:600;color:white;letter-spacing:.5px;z-index:5;
+            animation:badgeBreath 2s ease-in-out infinite;
+        }
+        @keyframes badgeBreath{
+            0%,100%{opacity:.7;box-shadow:0 0 0 0 rgba(255,255,255,.4);}
+            50%    {opacity:1; box-shadow:0 0 6px 2px rgba(255,255,255,.8);}
+        }
+        .dev-card{position:relative;}
+        .dev-footer{display:flex;justify-content:flex-end;margin-top:12px;}
+        .dev-qq-btn{
+            background:rgba(255,255,255,.2);backdrop-filter:blur(4px);
+            border:none;border-radius:20px;padding:5px 12px;
+            font-size:11px;font-weight:600;color:var(--tx);cursor:pointer;
+            transition:transform .22s var(--spring),background .2s;
+        }
+        .dev-qq-btn:active{transform:scale(.93);background:rgba(255,255,255,.35);}
+        .about-card-content{display:flex;flex-direction:column;align-items:center;gap:8px;}
+        .avatar-img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:2px solid var(--rdyn);background:rgba(255,255,255,.2);max-width:100%;}
+        .avatar-wrapper{
+            width:110px;height:110px;border-radius:50%;
+            background:rgba(255,255,255,.15);backdrop-filter:blur(4px);
+            display:flex;align-items:center;justify-content:center;
+            box-shadow:0 0 0 2px rgba(255,255,255,.3),0 0 0 5px rgba(0,0,0,.05);max-width:100%;
+        }
+        .nickname-badge{display:inline-block;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.2);backdrop-filter:blur(4px);font-size:11px;font-weight:500;margin-top:-4px;margin-bottom:4px;box-shadow:0 1px 2px rgba(0,0,0,.1);}
+        .avatar-small-text{font-size:11px;opacity:.8;margin-top:4px;}
+        .glow-blue{animation:glowBlue 2s ease-in-out infinite;color:#5a9eff;font-weight:500;display:inline-block;}
+        .glow-pink{animation:glowPink 2s ease-in-out infinite;color:#ff99cc;font-weight:500;display:inline-block;}
+        @keyframes glowBlue{0%,100%{text-shadow:0 0 0 rgba(0,100,255,0);opacity:.7;}50%{text-shadow:0 0 6px rgba(0,100,255,.8);opacity:1;}}
+        @keyframes glowPink{0%,100%{text-shadow:0 0 0 rgba(255,105,180,0);opacity:.7;}50%{text-shadow:0 0 6px rgba(255,105,180,.8);opacity:1;}}
+
+        .process-input-group{display:flex;gap:8px;margin-bottom:16px;}
+        .process-input{flex:1;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);border-radius:var(--r-sm);padding:10px 12px;font-size:var(--fs-sm);color:var(--tx);outline:none;backdrop-filter:blur(4px);}
+        .process-input::placeholder{color:var(--tx3);}
+        .process-button-group{display:flex;gap:10px;margin-bottom:12px;}
+        .process-button-group .btn{flex:1;text-align:center;}
+        .process-hint{font-size:var(--fs-xs);color:var(--tx3);margin-bottom:20px;line-height:1.4;}
+        .process-window-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+        .process-window-header h4{font-size:var(--fs-sm);font-weight:600;color:var(--tx);}
+        .process-window-buttons{display:flex;gap:8px;}
+        .process-window-buttons .btn-sm{background:rgba(255,255,255,.18);border:none;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:var(--tx);cursor:pointer;backdrop-filter:blur(4px);}
+        .process-window{background:rgba(0,0,0,.2);border-radius:var(--r-sm);padding:12px;max-height:300px;overflow-y:auto;font-family:monospace;font-size:11px;color:var(--tx2);white-space:pre-wrap;word-break:break-all;}
+        .monitor-led{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--tx3);}
+
+        .settings-appearance-card{padding:16px!important;}
+        .settings-appearance-card .btn-row{display:flex;gap:10px;margin-bottom:16px;}
+        .settings-appearance-card .btn-row .btn{flex:1;padding:12px 0;border-radius:12px;font-size:14px;font-weight:600;background:rgba(255,255,255,.15);color:var(--tx);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer;transition:all .2s;}
+        .settings-appearance-card .btn-row .btn:active{transform:scale(.96);background:rgba(255,255,255,.25);}
+        .blur-control-row{display:flex;align-items:center;gap:12px;}
+        .blur-label{font-size:13px;font-weight:600;color:var(--tx);white-space:nowrap;}
+        input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:4px;background:rgba(255,255,255,.2);outline:none;flex:1;}
+        input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;background:white;border:2px solid var(--ac);box-shadow:0 2px 8px rgba(0,0,0,.15);cursor:pointer;transition:transform .15s;}
+        input[type=range]::-webkit-slider-thumb:active{transform:scale(1.15);}
+        .blur-value{font-family:monospace;font-weight:700;font-size:15px;color:var(--ac);min-width:42px;text-align:right;}
+        .blur-unit{font-size:11px;color:var(--tx3);}
+
+        .ripple{
+            position:fixed;border-radius:50%;pointer-events:none;
+            background:radial-gradient(circle,rgba(255,255,255,.5) 0%,rgba(255,255,255,0) 70%);
+            transform:scale(0);animation:rippleOut .55s ease-out forwards;z-index:9999;
+        }
+        @keyframes rippleOut{
+            0%  {transform:scale(0);opacity:1;}
+            60% {transform:scale(1);opacity:.35;}
+            100%{transform:scale(1.3);opacity:0;}
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="bg-layer"></div>
+<canvas id="lens-canvas"></canvas>
+<div class="container">
+
+    <div id="page-home" class="page active">
+        <div class="global-header">
+            <div class="main-title">苦涩or苳季</div>
+            <div class="sub-title mottoText">死寂的心 因你而燃</div>
+        </div>
+        <div class="st-hero">
+            <div class="st-main" id="statusCard">
+                <div class="st-main-label" id="statusText">未激活</div>
+                <div class="st-main-sub" id="gameNameDisplay">等待游戏</div>
+                <div class="st-main-icon" id="statusIcon">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="8"/>
+                        <path d="M24 51 L40 67 L72 31" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="st-side">
+                <div class="st-mini">
+                    <div class="st-mini-label">设备型号</div>
+                    <div class="st-mini-val" id="devModel">--</div>
+                </div>
+                <div class="st-mini">
+                    <div class="st-mini-label">内核版本</div>
+                    <div class="st-mini-val" id="kernelShort">--</div>
+                </div>
+            </div>
+        </div>
+        <div class="card info-card" id="infoCard" onclick="toggleSysPanel()">
+            <div class="sys-row"><span class="sys-label">电池温度</span><span class="sys-value" id="battTemp">--</span></div>
+            <div class="sys-row"><span class="sys-label">电池电量</span><span class="sys-value" id="battCap">--</span></div>
+            <div class="sys-row"><span class="sys-label">内核版本</span><span class="sys-value" id="kernVer">--</span></div>
+            <div class="sys-row"><span class="sys-label">充电循环</span><span class="sys-value" id="cycleCount">--</span></div>
+            <div class="sys-row"><span class="sys-label">安全补丁</span><span class="sys-value" id="secPatch">--</span></div>
+            <div class="sys-row"><span class="sys-label">设备指纹</span><span class="sys-value" id="fingerprint">--</span></div>
+            <div class="sys-row"><span class="sys-label">SELinux</span><span class="sys-value" id="selinux">--</span></div>
+            <div class="sys-row" style="border-bottom:none;"><span class="sys-label">模块版本</span><span class="sys-value" id="moduleVer">v3.4</span></div>
+        </div>
+    </div>
+
+    <div id="page-clean" class="page">
+        <div class="global-header">
+            <div class="main-title">苦涩or苳季</div>
+            <div class="sub-title mottoText">死寂的心 因你而燃</div>
+        </div>
+        <div class="card clean-section">
+            <div style="font-weight:700; margin-bottom:10px;">游戏高级清理</div>
+            <div class="clean-list" id="gameCleanList"></div>
+        </div>
+    </div>
+
+    <div id="page-func" class="page">
+        <div class="global-header">
+            <div class="main-title">苦涩or苳季</div>
+            <div class="sub-title mottoText">死寂的心 因你而燃</div>
+        </div>
+        <div class="card">
+            <div class="section-title">系统增强</div>
+            <div style="margin-bottom: 20px;">
+                <div style="font-weight:700; margin-bottom:10px;">触控采样率提升</div>
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+                    <button class="touch-btn" data-profile="default" onclick="setTouchRate('default', this)">默认</button>
+                    <button class="touch-btn" data-profile="125" onclick="setTouchRate('125', this)">125</button>
+                    <button class="touch-btn" data-profile="240" onclick="setTouchRate('240', this)">240</button>
+                    <button class="touch-btn" data-profile="241" onclick="setTouchRate('241', this)">241</button>
+                    <button class="touch-btn" data-profile="360" onclick="setTouchRate('360', this)">360</button>
+                    <button class="touch-btn" data-profile="361" onclick="setTouchRate('361', this)">361</button>
+                    <button class="touch-btn" data-profile="362" onclick="setTouchRate('362', this)">362</button>
+                    <button class="touch-btn" data-profile="600" onclick="setTouchRate('600', this)">600</button>
+                </div>
+                <div style="font-size:var(--fs-xs); color:var(--tx3); margin-top:8px; text-align:center; line-height:1.4;">无法全机型兼容 是否有效请自测<br>建议每一个档位都试一遍</div>
+            </div>
+            <div style="max-height:460px;overflow-y:auto;overflow-x:hidden;">
+            <div class="func-switch-item">
+                <div class="func-switch-header">
+                    <span class="func-switch-title">解除ColorOS云控锁帧</span>
+                    <label class="toggle"><input type="checkbox" id="colorosLockToggle" onchange="toggleColorOSLock()"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="func-switch-desc">启用后解除ColorOS云控限制，提升性能表现</div>
+                <div class="led-container" id="led-colorosLock" style="display: none;"><span class="running-led"></span> 运行中</div>
+            </div>
+            <div class="func-switch-item">
+                <div class="func-switch-header">
+                    <span class="func-switch-title">增强ColorOS信号</span>
+                    <label class="toggle"><input type="checkbox" id="colorosSignalToggle" onchange="toggleColorOSSignal()"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="func-switch-desc">移除系统伪基站应用 (BlackListApp)，提升 5G 信号稳定性。<br>原理：OPPO 默认开启伪基站且无开关，该应用会导致信号随距离衰减。替换为空壳后信号更稳定。</div>
+                <div class="led-container" id="led-colorosSignal" style="display: none;"><span class="running-led"></span> 运行中</div>
+            </div>
+            <div class="func-switch-item">
+                <div class="func-switch-header">
+                    <span class="func-switch-title">Unlock CN GMS</span>
+                    <label class="toggle"><input type="checkbox" id="unlockGmsToggle" onchange="toggleUnlockGms()"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="func-switch-desc">解除国行手机对 GMS 的部分功能阉割，例如 Google 位置历史、Google 相册人脸识别等。<br>注意：重启后生效，通过修改系统权限文件实现。</div>
+                <div class="led-container" id="led-unlockGms" style="display: none;"><span class="running-led"></span> 运行中</div>
+            </div>
+            <div class="func-switch-item">
+                <div class="func-switch-header">
+                    <span class="func-switch-title">一键修复RKP</span>
+                    <label class="toggle"><input type="checkbox" id="rkpToggle" onchange="toggleRKP()"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="func-switch-desc">备份 persist 并修复 key 中的 rkp（非烧录）</div>
+                <div class="led-container" id="led-rkp" style="display: none;"><span class="running-led"></span> 运行中</div>
+            </div>
+            <div class="func-switch-item">
+                <div class="func-switch-header">
+                    <span class="func-switch-title">过春秋Tee环境不可信</span>
+                    <label class="toggle"><input type="checkbox" id="soterToggle" onchange="toggleSOTER()"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="func-switch-desc">开启后更新sus配置文件，无susfs勿用</div>
+                <div class="led-container" id="led-soter" style="display: none;"><span class="running-led"></span> 运行中</div>
+            </div>
+            <div class="func-switch-item">
+                <div class="func-switch-header">
+                    <span class="func-switch-title">挂载空目录Pro</span>
+                    <label class="toggle"><input type="checkbox" id="hideStorageToggle" onchange="toggleHideStorage()"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="func-switch-desc">把一些特殊文件创造的文件在打开游戏时短暂移除以免被检测到</div>
+                <div class="led-container" id="led-hide-storage" style="display: none;"><span class="running-led"></span> 运行中</div>
+            </div>
+            <div class="func-switch-item">
+                <div class="func-switch-header">
+                    <span class="func-switch-title">自动卸载挂载</span>
+                    <label class="toggle"><input type="checkbox" id="autoUmountToggle" onchange="toggleAutoUmount()"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="func-switch-desc">Yuki 引擎定时卸载多余挂载点</div>
+                <div class="led-container" id="led-autoUmount" style="display: none;"><span class="running-led"></span> 运行中</div>
+            </div>
+            <div class="func-switch-item">
+                <div class="func-switch-header">
+                    <span class="func-switch-title">伪装白名单CPU型号</span>
+                    <label class="toggle"><input type="checkbox" id="cpuSpoofToggle" onchange="toggleCpuSpoof()"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="func-switch-desc">伪装白名单CPU信息概率解决某粥聚框问题</div>
+                <div class="led-container" id="led-cpuSpoof" style="display:none;"><span class="running-led"></span> 运行中</div>
+                <div id="cpuSpoofWindow" style="display:none;margin-top:10px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <span style="font-size:var(--fs-xs);color:var(--tx3);">挂载状态</span>
+                        <button class="btn-sm" onclick="checkCpuSpoofStatus()" style="background:rgba(255,255,255,.18);border:none;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;color:var(--tx);cursor:pointer;backdrop-filter:blur(4px);">刷新</button>
+                    </div>
+                    <div class="process-window" id="cpuSpoofLog" style="max-height:120px;font-size:10px;line-height:1.6;">检查中...</div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-env" class="page">
+        <div class="global-header">
+            <div class="main-title">苦涩or苳季</div>
+            <div class="sub-title mottoText">死寂的心 因你而燃</div>
+        </div>
+        <div class="card">
+            <div class="ch" style="margin-bottom: 12px;">
+                <span class="ct">检测环境</span>
+                <button class="btn" id="btn-detect" onclick="runDetection()" style="padding: 6px 12px; font-size: var(--fs-sm);">▶ 开始检测</button>
+            </div>
+            <div id="detect-result" style="max-height: 400px; overflow-y: auto; font-size: var(--fs-xs); line-height: 1.5;">
+                <div style="color: var(--tx3); text-align: center; padding: 20px;">点击上方按钮开始环境检测</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-process" class="page">
+        <div class="global-header">
+            <div class="main-title">苦涩or苳季</div>
+            <div class="sub-title mottoText">死寂的心 因你而燃</div>
+        </div>
+        <div class="card">
+            <div class="process-input-group">
+                <input type="text" class="process-input" id="pid-input" placeholder="输入要杀死的 PID">
+            </div>
+            <div class="process-button-group">
+                <button class="btn" id="kill-pid-btn">杀死进程</button>
+                <button class="btn" id="kill-all-btn">全部杀死</button>
+            </div>
+            <div class="process-hint">
+                <span class="monitor-led"><span class="running-led"></span> 实时监测中</span><br>
+                小心操作！本模块进程已被过滤，不会被误杀。
+            </div>
+            <div class="process-window-header">
+                <h4>已过滤自身进程</h4>
+                <div class="process-window-buttons">
+                    <button class="btn-sm" id="refresh-process-btn">刷新</button>
+                    <button class="btn-sm" id="clear-process-btn">清空</button>
+                </div>
+            </div>
+            <div class="process-window" id="process-list">
+                暂无进程数据，点击刷新加载...
+            </div>
+        </div>
+    </div>
+
+    <div id="page-settings" class="page">
+        <div class="global-header">
+            <div class="main-title">苦涩or苳季</div>
+            <div class="sub-title mottoText">死寂的心 因你而燃</div>
+        </div>
+        <div style="padding-top: 30px;">
+            <div class="card settings-spacing-top">
+                <div style="font-weight:700; margin-bottom:12px;">基础设置</div>
+                <div class="sys-row"><span class="sys-label">强制开启隐藏</span><label class="toggle"><input type="checkbox" id="forceHideToggle" onchange="toggleForceHide()"><span class="toggle-slider"></span></label></div>
+                <div class="sys-row"><span class="sys-label">常驻通知</span><label class="toggle"><input type="checkbox" id="notifyAlwaysToggle" onchange="toggleNotifyAlways()"><span class="toggle-slider"></span></label></div>
+                <div class="sys-row" style="border-bottom:none"><span class="sys-label">自动清理腾讯ano文件</span><label class="toggle"><input type="checkbox" id="autoCleanToggle" onchange="toggleAutoClean()"><span class="toggle-slider"></span></label></div>
+            </div>
+            <div class="card settings-appearance-card">
+                <div style="font-weight:700; margin-bottom:14px;">外观设置</div>
+                <div class="btn-row">
+                    <button class="btn" onclick="pickBg()">选择背景</button>
+                    <button class="btn" onclick="resetBg()">默认背景</button>
+                </div>
+                <div class="blur-control-row">
+                    <span class="blur-label">模糊度</span>
+                    <input type="range" id="blurSlider" min="0" max="40" value="18" oninput="updateBlur(this.value)">
+                    <span class="blur-value"><span id="blurValDisplay">18</span><span class="blur-unit">px</span></span>
+                </div>
+            </div>
+            <div class="card" style="padding:16px; margin-top:10px;">
+                <div style="font-weight:700; margin-bottom:14px;">液态玻璃调节</div>
+                <div class="blur-control-row" style="margin-bottom:12px;">
+                    <span class="blur-label">折射强度</span>
+                    <input type="range" id="lsStrength" min="0" max="60" value="26" oninput="updateLensParam('strength',this.value)">
+                    <span class="blur-value"><span id="lsStrengthV">26</span><span class="blur-unit">px</span></span>
+                </div>
+                <div class="blur-control-row" style="margin-bottom:12px;">
+                    <span class="blur-label">折射边宽</span>
+                    <input type="range" id="lsEdge" min="0" max="80" value="34" oninput="updateLensParam('edge',this.value)">
+                    <span class="blur-value"><span id="lsEdgeV">34</span><span class="blur-unit">px</span></span>
+                </div>
+                <div class="blur-control-row" style="margin-bottom:12px;">
+                    <span class="blur-label">高光宽度</span>
+                    <input type="range" id="lsRimW" min="0" max="20" value="4" oninput="updateLensParam('rimW',this.value)">
+                    <span class="blur-value"><span id="lsRimWV">4</span><span class="blur-unit">px</span></span>
+                </div>
+                <div class="blur-control-row" style="margin-bottom:12px;">
+                    <span class="blur-label">高光亮度</span>
+                    <input type="range" id="lsRimB" min="0" max="50" value="15" oninput="updateLensParam('rimB',this.value)">
+                    <span class="blur-value"><span id="lsRimBV">15</span><span class="blur-unit">%</span></span>
+                </div>
+                <div class="blur-control-row" style="margin-bottom:14px;">
+                    <span class="blur-label">玻璃染色</span>
+                    <input type="range" id="lsTint" min="0" max="10" value="0" oninput="updateLensParam('tint',this.value)">
+                    <span class="blur-value"><span id="lsTintV">0</span><span class="blur-unit">%</span></span>
+                </div>
+                <div style="display:flex;justify-content:flex-end;">
+                    <button class="btn" style="padding:5px 14px;font-size:12px;" onclick="resetLensParams()">恢复默认</button>
+                </div>
+            </div>
+            <div class="card" style="padding:16px; margin-top: 10px;">
+                <div style="font-weight:700; margin-bottom:10px;">重置设备标识 · 修改IMEI · 修改MAC</div>
+                <div class="fake-list">
+                    <div class="reset-row"><span class="reset-name">骁龙5.10</span><label class="toggle"><input type="checkbox" onchange="applyFakeReset(this, '骁龙5.10', 'qcom5.10')"><span class="toggle-slider"></span></label></div>
+                    <div class="reset-row"><span class="reset-name">骁龙5.15</span><label class="toggle"><input type="checkbox" onchange="applyFakeReset(this, '骁龙5.15', 'qcom5.15')"><span class="toggle-slider"></span></label></div>
+                    <div class="reset-row"><span class="reset-name">骁龙6.1</span><label class="toggle"><input type="checkbox" onchange="applyFakeReset(this, '骁龙6.1', 'qcom6.1')"><span class="toggle-slider"></span></label></div>
+                    <div class="reset-row"><span class="reset-name">骁龙6.6</span><label class="toggle"><input type="checkbox" onchange="applyFakeReset(this, '骁龙6.6', 'qcom6.6')"><span class="toggle-slider"></span></label></div>
+                    <div class="reset-row"><span class="reset-name">骁龙6.12</span><label class="toggle"><input type="checkbox" onchange="applyFakeReset(this, '骁龙6.12', 'qcom6.12')"><span class="toggle-slider"></span></label></div>
+                    <div class="reset-row"><span class="reset-name">天玑6.6</span><label class="toggle"><input type="checkbox" onchange="applyFakeReset(this, '天玑6.6', 'mtk6.6')"><span class="toggle-slider"></span></label></div>
+                    <div class="reset-row"><span class="reset-name">天玑6.12</span><label class="toggle"><input type="checkbox" onchange="applyFakeReset(this, '天玑6.12', 'mtk6.12')"><span class="toggle-slider"></span></label></div>
+                    <div class="reset-row" style="border-bottom:none;"><span class="reset-name" style="font-weight:400; color:var(--tx3); font-size:var(--fs-xs);">按自己内核版本来选择修改</span></div>
+                </div>
+            </div>
+            <div class="card settings-spacing-middle" style="padding:16px; cursor: pointer;" onclick="switchPage('log')">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-weight:700;">查看日志</div>
+                    <span style="font-size: 18px; opacity: 0.6;">›</span>
+                </div>
+            </div>
+            <div class="card settings-spacing-bottom" style="padding:12px;">
+                <button class="btn" onclick="switchPage('customicons')" style="width:100%;">自定义游戏图标</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-about" class="page">
+        <div class="global-header">
+            <div class="main-title">苦涩or苳季</div>
+            <div class="sub-title mottoText">死寂的心 因你而燃</div>
+        </div>
+        <div class="card" style="margin-bottom: 16px; position: relative;">
+            <div class="dev-badge">开发 功能 UI</div>
+            <div class="about-card-content">
+                <div class="avatar-wrapper">
+                    <img class="avatar-img" src="https://s3.bmp.ovh/2026/05/12/7j6HMOIP.jpg" alt="苦涩" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%233b82f6\'/%3E%3Ctext x=\'50\' y=\'67\' font-size=\'50\' text-anchor=\'middle\' fill=\'white\' font-weight=\'bold\'%3E苦%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div style="font-weight: 700; font-size: var(--fs-md);">苦涩</div>
+                <div class="nickname-badge"><span class="glow-blue">伦敦最忧郁之人</span></div>
+                <div class="avatar-small-text">命運的褶皺 是你在哭泣</div>
+                <div class="dev-footer">
+                    <button class="dev-qq-btn" onclick="openQQ('https://tool.gljlw.com/qq/?qq=2941806492')">QQ 主页 →</button>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="margin-bottom: 16px; position: relative;">
+            <div class="dev-badge">优化 支持 合作</div>
+            <div class="about-card-content">
+                <div class="avatar-wrapper">
+                    <img class="avatar-img" src="https://s3.bmp.ovh/2026/05/12/O3wfVdlX.jpg" alt="苳季" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23ff99cc\'/%3E%3Ctext x=\'50\' y=\'67\' font-size=\'50\' text-anchor=\'middle\' fill=\'white\' font-weight=\'bold\'%3E苳%3C/text%3E%3C/svg%3E'">
+                </div>
+                <div style="font-weight: 700; font-size: var(--fs-md);">苳季</div>
+                <div class="nickname-badge"><span class="glow-pink">糖taffy</span></div>
+                <div class="avatar-small-text">缘来缘去终会散.花开花败总归尘</div>
+                <div class="dev-footer">
+                    <button class="dev-qq-btn" onclick="openQQ('https://tool.gljlw.com/qq/?qq=1363214673')">QQ 主页 →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-customicons" class="page">
+        <div class="global-header">
+            <div class="main-title">苦涩or苳季</div>
+            <div class="sub-title mottoText">死寂的心 因你而燃</div>
+        </div>
+        <div style="margin-bottom:12px;">
+            <button class="btn back-btn" onclick="switchPage('settings')">← 返回设置</button>
+            <h2 style="font-size:var(--fs-md); margin-top:8px;">选择游戏图标</h2>
+            <p style="font-size:var(--fs-xs); color:var(--tx3);">点击"选择"为每个游戏更换图标</p>
+        </div>
+        <div class="card" style="padding:16px;">
+            <div id="customIconsList"></div>
+        </div>
+    </div>
+
+    <div id="page-log" class="page">
+        <div class="global-header">
+            <div class="main-title">苦涩or苳季</div>
+            <div class="sub-title mottoText">死寂的心 因你而燃</div>
+        </div>
+        <div style="margin-bottom:12px;">
+            <button class="btn back-btn" onclick="switchPage('settings')">← 返回设置</button>
+        </div>
+        <div class="card log-page-container" style="padding: 16px;">
+            <div style="font-weight:700; margin-bottom:8px;">模块日志</div>
+            <pre id="logWindowFull" class="log-window">读取中…</pre>
+            <button class="btn" onclick="clearLogFull()" style="margin-top:8px;">清理日志</button>
+        </div>
+    </div>
+</div>
+
+<div class="floating-dock" id="dockBar">
+    <div class="dock-tab active" data-page="home"><div class="tab-icon">⌂</div><div class="tab-label">首页</div></div>
+    <div class="dock-tab" data-page="clean"><div class="tab-icon">⌧</div><div class="tab-label">清理</div></div>
+    <div class="dock-tab" data-page="func"><div class="tab-icon">◉</div><div class="tab-label">功能</div></div>
+    <div class="dock-tab" data-page="env"><div class="tab-icon">⌘</div><div class="tab-label">环境</div></div>
+    <div class="dock-tab" data-page="process"><div class="tab-icon">⌲</div><div class="tab-label">进程</div></div>
+    <div class="dock-tab" data-page="settings"><div class="tab-icon">◩</div><div class="tab-label">设置</div></div>
+    <div class="dock-tab" data-page="about"><div class="tab-icon">ℹ</div><div class="tab-label">关于</div></div>
+</div>
+
+<input type="file" id="bgFile" accept="image/*" onchange="onBgFileSelected(this)" style="display:none">
+<input type="file" id="customIconInput" accept="image/*" onchange="onCustomIconSelected(this)" style="display:none">
+
+<script>
+    function $(id){ return document.getElementById(id); }
+    const pages = { 
+        home:$('page-home'), clean:$('page-clean'), func:$('page-func'), 
+        env:$('page-env'), process:$('page-process'), settings:$('page-settings'), 
+        about:$('page-about'), customicons:$('page-customicons'), log:$('page-log')
+    };
+    let currentPage = 'home';
+
+    function refreshPageCardsAnimation(pageId) {
+        document.querySelectorAll('.card').forEach(card => {
+            card.classList.remove('in');
+            card.style.removeProperty('--del');
+        });
+        const activePage = pages[pageId];
+        if (!activePage) return;
+        const cards = activePage.querySelectorAll('.card');
+        cards.forEach((card, idx) => {
+            card.style.setProperty('--del', (idx * 30) + 'ms');
+            card.classList.add('in');
+        });
+    }
+
+    function switchPage(p){
+        if(currentPage===p) return;
+        pages[currentPage].classList.remove('active');
+        pages[p].classList.add('active');
+        currentPage = p;
+        document.querySelectorAll('.dock-tab').forEach(t => t.classList.toggle('active', t.dataset.page === p));
+        refreshPageCardsAnimation(p);
+        
+        if(p === 'settings' || p === 'customicons') refreshLogSummary();
+        if(p === 'log') refreshLogFull();
+        if(p === 'customicons') buildCustomIconsList();
+        if(p === 'process') refreshProcessList();
+    }
+
+    document.querySelectorAll('.dock-tab').forEach(t => t.addEventListener('click', (e) => {
+        const tab = e.currentTarget;
+        tab.animate([{ transform: 'scale(0.9)' }, { transform: 'scale(1.1)' }, { transform: 'scale(1)' }], { duration: 300, easing: 'ease-out' });
+        switchPage(tab.dataset.page);
+    }));
+
+    function updateStatusCard(on, gameName = '') {
+        const card = $('statusCard');
+        if (on) {
+            card.classList.add('status-on');
+            $('statusText').textContent = '已激活';
+            $('gameNameDisplay').textContent = gameName || '游戏中';
+        } else {
+            card.classList.remove('status-on');
+            $('statusText').textContent = '未激活';
+            $('gameNameDisplay').textContent = '等待游戏';
+        }
+    }
+
+    function fetchStatus(){
+        fetch('status.txt?t='+Date.now()).then(r=>r.text()).then(t=>{
+            let p = t.trim().split('|');
+            const on = p[0]==='ON';
+            const gamePkg = on ? p[1] : '';
+            const gameInfo = games.find(g => g.pkg === gamePkg);
+            const gameName = gameInfo ? gameInfo.name : (gamePkg || '');
+            updateStatusCard(on, gameName);
+        });
+    }
+
+    function fetchSysinfo(){
+        fetch('sysinfo.txt?t='+Date.now()).then(r=>r.text()).then(t=>{
+            let m={}; t.trim().split('\n').forEach(l=>{let i=l.indexOf('='); if(i>0) m[l.substring(0,i).trim()]=l.substring(i+1).trim();});
+            $('devModel').textContent=m.DEVICE_MODEL||'--';
+            $('battTemp').textContent=(m.BATTERY_TEMP||'--')+'°C';
+            $('battCap').textContent=(m.BATTERY_CAPACITY||'--')+'%';
+            const fullKernel = m.KERNEL_VERSION || '--';
+            let shortKernel = '--';
+            if (fullKernel !== '--') {
+                const parts = fullKernel.split('.');
+                if (parts.length >= 3) {
+                    shortKernel = parts.slice(0,3).join('.');
+                } else {
+                    shortKernel = fullKernel;
+                }
+            }
+            $('kernVer').textContent = shortKernel;
+            if ($('kernelShort')) $('kernelShort').textContent = shortKernel;
+            $('cycleCount').textContent=m.CYCLE_COUNT;
+            $('secPatch').textContent=m.SECURITY_PATCH||'--';
+            $('fingerprint').textContent=m.FINGERPRINT;
+            $('selinux').textContent=m.SELINUX;
+            $('moduleVer').textContent='v'+(m.MODULE_VERSION||'3.4');
+        });
+    }
+
+    function refreshLogSummary(){}
+    function refreshLogFull(){ 
+        fetch('xinmaskplus.log?t='+Date.now()).then(r=>r.text()).then(t=>{
+            if($('logWindowFull')) $('logWindowFull').textContent = t || '日志为空';
+        });
+    }
+    function clearLogFull(){ 
+        if(confirm('清空日志？')) {
+            T('rm -f /data/local/tmp/xinmaskplus.log && touch /data/local/tmp/xinmaskplus.log').then(()=>{
+                refreshLogFull();
+            });
+        }
+    }
+
+    const bgLayer = document.getElementById('bg-layer');
+    function applyDefaultBg() {
+        const defaultBgUrl = 'default_bg.png';
+        const img = new Image();
+        img.onload = function() { bgLayer.style.backgroundImage = `url('${defaultBgUrl}')`; bgLayer.style.backgroundColor = 'transparent'; if(window.LensFX) LensFX.setWallpaper(defaultBgUrl); };
+        img.onerror = function() { bgLayer.style.backgroundImage = ''; bgLayer.style.backgroundColor = '#f2f2f7'; if(window.LensFX) LensFX.setWallpaper(null); };
+        img.src = defaultBgUrl;
+    }
+    function loadBgSettings() {
+        let blur = localStorage.getItem('xinmaskplus_blur') || 18;
+        blur = Math.max(0, Math.min(40, parseInt(blur)));
+        document.documentElement.style.setProperty('--blur', blur + 'px');
+        const slider = document.getElementById('blurSlider');
+        if (slider) slider.value = blur;
+        const display = document.getElementById('blurValDisplay');
+        if (display) display.textContent = blur;
+        const bgData = localStorage.getItem('xinmaskplus_bg_img');
+        if (bgData) {
+            bgLayer.style.backgroundImage = `url('${bgData}')`;
+            bgLayer.style.backgroundColor = 'transparent';
+            if(window.LensFX) LensFX.setWallpaper(bgData);
+        } else applyDefaultBg();
+    }
+    function pickBg(){ document.getElementById('bgFile').click(); }
+    function onBgFileSelected(input){
+        let f=input.files[0]; if(!f)return;
+        let r=new FileReader();
+        r.onload=function(e){ localStorage.setItem('xinmaskplus_bg_img',e.target.result); bgLayer.style.background=`url(${e.target.result}) center/cover`; if(window.LensFX) LensFX.setWallpaper(e.target.result); };
+        r.readAsDataURL(f); input.value='';
+    }
+    function resetBg(){ localStorage.removeItem('xinmaskplus_bg_img'); applyDefaultBg(); }
+    function updateBlur(v) {
+        document.documentElement.style.setProperty('--blur', v + 'px');
+        localStorage.setItem('xinmaskplus_blur', v);
+        const display = document.getElementById('blurValDisplay');
+        if (display) display.textContent = v;
+    }
+
+    let __execCounter = 0;
+    function T(cmd, timeout = 10000) {
+        if (typeof ksu !== "undefined" && ksu.exec) {
+            return new Promise(resolve => {
+                const cbName = "cb_" + Date.now() + "_" + (++__execCounter);
+                const timer = setTimeout(() => {
+                    delete window[cbName];
+                    resolve({ errno: -1, stdout: "", stderr: "timeout" });
+                }, timeout);
+                window[cbName] = (errno, stdout, stderr) => {
+                    clearTimeout(timer);
+                    delete window[cbName];
+                    resolve({ errno: Number(errno), stdout: stdout || "", stderr: stderr || "" });
+                };
+                try {
+                    ksu.exec(cmd, "{}", cbName);
+                } catch (e) {
+                    clearTimeout(timer);
+                    delete window[cbName];
+                    resolve({ errno: -1, stdout: "", stderr: String(e) });
+                }
+            });
+        }
+        return Promise.resolve({ errno: -1, stdout: "", stderr: "No supported exec interface" });
+    }
+
+    function openQQ(url) {
+        T(`am start -a android.intent.action.VIEW -d "${url}"`);
+    }
+
+    // ========== 基础开关（只操作标志文件，不写 feature_status.txt） ==========
+    async function toggleForceHide(){ let on=$('forceHideToggle').checked; await T(on?'touch /data/adb/modules/xinmaskplus/pid/force_hide':'rm -f /data/adb/modules/xinmaskplus/pid/force_hide'); updateRunningLeds(); }
+    async function toggleNotifyAlways(){ let on=$('notifyAlwaysToggle').checked; await T(on?'touch /data/adb/modules/xinmaskplus/pid/notify_always':'rm -f /data/adb/modules/xinmaskplus/pid/notify_always'); updateRunningLeds(); }
+    async function toggleAutoClean(){ let on=$('autoCleanToggle').checked; await T(on?'touch /data/adb/modules/xinmaskplus/pid/auto_clean':'rm -f /data/adb/modules/xinmaskplus/pid/auto_clean'); updateRunningLeds(); }
+
+    // ========== 同步 UI 状态（仅读取 feature_status.txt） ==========
+    async function syncSwitchesFromConfig() {
+        try {
+            const resp = await fetch('feature_status.txt?t=' + Date.now());
+            const text = await resp.text();
+            const map = {};
+            text.trim().split('\n').forEach(line => {
+                const idx = line.indexOf('=');
+                if (idx > 0) map[line.substring(0, idx).trim()] = line.substring(idx + 1).trim();
+            });
+            const switches = [
+                { id: 'forceHideToggle', flag: 'force_hide' },
+                { id: 'notifyAlwaysToggle', flag: 'notify_always' },
+                { id: 'autoCleanToggle', flag: 'auto_clean' },
+                { id: 'colorosLockToggle', flag: 'coloros_lock' },
+                { id: 'colorosSignalToggle', flag: 'coloros_signal' },
+                { id: 'unlockGmsToggle', flag: 'unlock_gms' },
+                { id: 'rkpToggle', flag: 'rkp' },
+                { id: 'soterToggle', flag: 'soter' },
+                { id: 'hideStorageToggle', flag: 'hide_storage' },
+                { id: 'autoUmountToggle', flag: 'auto_umount' },
+                { id: 'cpuSpoofToggle', flag: 'cpu_spoof' }
+            ];
+            for (const sw of switches) {
+                const configEnabled = (map[sw.flag] === '1');
+                const el = document.getElementById(sw.id);
+                if (!el) continue;
+                // 跳过已禁用（已修复）的 RKP 开关
+                if (sw.id === 'rkpToggle' && el.disabled) continue;
+                if (el.checked !== configEnabled) {
+                    el.checked = configEnabled;
+                }
+            }
+            updateRunningLeds();
+            // 刷新 CPU 伪装窗口状态
+            const cpuEl = document.getElementById('cpuSpoofToggle');
+            if (cpuEl && cpuEl.checked) checkCpuSpoofStatus();
+        } catch (e) {}
+    }
+
+    function updateRunningLeds() {
+        const ledMap = {
+            colorosLockToggle: 'led-colorosLock',
+            colorosSignalToggle: 'led-colorosSignal',
+            unlockGmsToggle: 'led-unlockGms',
+            rkpToggle: 'led-rkp',
+            soterToggle: 'led-soter',
+            hideStorageToggle: 'led-hide-storage',
+            autoUmountToggle: 'led-autoUmount',
+            cpuSpoofToggle: 'led-cpuSpoof'
+        };
+        for (const [toggleId, ledId] of Object.entries(ledMap)) {
+            const toggle = document.getElementById(toggleId);
+            const ledDiv = document.getElementById(ledId);
+            if (toggle && ledDiv) {
+                if (toggle.disabled && toggle.style.opacity === '0.5') {
+                    ledDiv.style.display = 'none';
+                } else {
+                    ledDiv.style.display = toggle.checked ? 'flex' : 'none';
+                }
+            }
+        }
+    }
+
+    // ========== 功能开关 ==========
+    async function toggleColorOSLock() {
+        const on = document.getElementById('colorosLockToggle').checked;
+        if (on) {
+            await T('mkdir -p /data/adb/modules/xinmaskplus/pid && touch /data/adb/modules/xinmaskplus/pid/coloros_lock');
+            await T('sh /data/adb/modules/xinmaskplus/scripts/coloros_unlock.sh on');
+        } else {
+            await T('rm -f /data/adb/modules/xinmaskplus/pid/coloros_lock');
+            await T('sh /data/adb/modules/xinmaskplus/scripts/coloros_unlock.sh off');
+        }
+        updateRunningLeds();
+        refreshLogFull();
+    }
+
+    async function toggleColorOSSignal() {
+        const on = document.getElementById('colorosSignalToggle').checked;
+        if (on) {
+            await T('mkdir -p /data/adb/modules/xinmaskplus/pid && touch /data/adb/modules/xinmaskplus/pid/coloros_signal');
+            await T('sh /data/adb/modules/xinmaskplus/scripts/signal_boost.sh on');
+        } else {
+            await T('rm -f /data/adb/modules/xinmaskplus/pid/coloros_signal');
+            await T('sh /data/adb/modules/xinmaskplus/scripts/signal_boost.sh off');
+        }
+        updateRunningLeds();
+        refreshLogFull();
+    }
+
+    async function toggleUnlockGms() {
+        const on = document.getElementById('unlockGmsToggle').checked;
+        if (on) {
+            await T('mkdir -p /data/adb/modules/xinmaskplus/pid && touch /data/adb/modules/xinmaskplus/pid/unlock_gms');
+        } else {
+            await T('rm -f /data/adb/modules/xinmaskplus/pid/unlock_gms');
+        }
+        updateRunningLeds();
+        refreshLogFull();
+    }
+
+    async function toggleRKP() {
+        const checkbox = document.getElementById('rkpToggle');
+        if (!checkbox) return;
+        const label = checkbox.closest('.func-switch-header')?.querySelector('.func-switch-title');
+
+        if (checkbox.checked) {
+            // 执行修复
+            if (label) label.textContent = '修复中… RKP';
+            checkbox.disabled = true;
+            await T('touch /data/adb/modules/xinmaskplus/pid/rkp_trigger');
+            try {
+                await T('sh /data/adb/modules/xinmaskplus/scripts/fix_rkp.sh');
+            } catch(e) {}
+            await T('rm -f /data/adb/modules/xinmaskplus/pid/rkp_trigger');
+            checkbox.disabled = false;
+            if (label) label.textContent = '已修复 · RKP（关闭可重置）';
+        } else {
+            // 重置状态
+            await T('rm -f /data/adb/modules/xinmaskplus/pid/rkp_done');
+            if (label) label.textContent = '一键修复RKP';
+        }
+        updateRunningLeds();
+    }
+
+    async function toggleHideStorage() {
+        const on = document.getElementById('hideStorageToggle').checked;
+        const tag = `[$(date +'%m-%d %H:%M:%S')] [HIDE_PRO]`;
+        if (on) {
+            await T('mkdir -p /data/adb/modules/xinmaskplus/pid && touch /data/adb/modules/xinmaskplus/pid/hide_storage');
+            await T(`echo "${tag} 用户开启 挂载空目录Pro监控" >> /data/local/tmp/xinmaskplus.log`);
+        } else {
+            await T('rm -f /data/adb/modules/xinmaskplus/pid/hide_storage');
+            // 关闭监控的同时，如有已隐藏项目立即还原
+            await T('sh /data/adb/modules/xinmaskplus/scripts/hide_storage.sh off');
+            await T(`echo "${tag} 用户关闭 挂载空目录Pro监控" >> /data/local/tmp/xinmaskplus.log`);
+        }
+        updateRunningLeds();
+        refreshLogFull();
+    }
+
+    async function toggleSOTER() {
+        const on = document.getElementById('soterToggle').checked;
+        const tag = `[$(date +'%m-%d %H:%M:%S')] [SOTER]`;
+        if (on) {
+            await T(`echo "${tag} 用户开启 过春秋Tee环境不可信" >> /data/local/tmp/xinmaskplus.log`);
+            await T('sh /data/adb/modules/xinmaskplus/scripts/fix_soter.sh on');
+            await T(`echo "${tag} sus路径写入完成" >> /data/local/tmp/xinmaskplus.log`);
+        } else {
+            await T(`echo "${tag} 用户关闭 过春秋Tee环境不可信" >> /data/local/tmp/xinmaskplus.log`);
+            await T('sh /data/adb/modules/xinmaskplus/scripts/fix_soter.sh off');
+            await T(`echo "${tag} sus路径已移除" >> /data/local/tmp/xinmaskplus.log`);
+        }
+        updateRunningLeds();
+        refreshLogFull();
+    }
+
+    async function toggleAutoUmount() {
+        const on = document.getElementById('autoUmountToggle').checked;
+        if (on) {
+            await T('mkdir -p /data/adb/modules/xinmaskplus/pid && touch /data/adb/modules/xinmaskplus/pid/auto_umount');
+            await T('sh /data/adb/modules/xinmaskplus/scripts/yuki_control.sh start');
+        } else {
+            await T('rm -f /data/adb/modules/xinmaskplus/pid/auto_umount');
+            await T('sh /data/adb/modules/xinmaskplus/scripts/yuki_control.sh stop');
+        }
+        updateRunningLeds();
+        refreshLogFull();
+    }
+
+    async function toggleCpuSpoof() {
+        const on = document.getElementById('cpuSpoofToggle').checked;
+        const tag = "[$(date +'%m-%d %H:%M:%S')] [CpuSpoof]";
+        if (on) {
+            await T('touch /data/adb/modules/xinmaskplus/pid/cpu_spoof');
+            await T(`echo "${tag} 用户开启 CPU 信息伪装" >> /data/local/tmp/xinmaskplus.log`);
+        } else {
+            await T('rm -f /data/adb/modules/xinmaskplus/pid/cpu_spoof');
+            await T(`echo "${tag} 用户关闭 CPU 信息伪装" >> /data/local/tmp/xinmaskplus.log`);
+        }
+        updateRunningLeds();
+        checkCpuSpoofStatus();
+        if (confirm('本功能需要重新启动才能生效\n是否立即重启？')) {
+            await T('reboot');
+        }
+    }
+
+    async function checkCpuSpoofStatus() {
+        const win = document.getElementById('cpuSpoofWindow');
+        const log = document.getElementById('cpuSpoofLog');
+        const on  = document.getElementById('cpuSpoofToggle').checked;
+        if (win) win.style.display = on ? 'block' : 'none';
+        if (!on || !log) return;
+        log.textContent = '检查中...';
+        const mountRes = await T("mount | grep '/proc/cpuinfo'");
+        const isMounted = mountRes.stdout.trim().length > 0;
+        const logRes = await T("grep '\\[CpuSpoof\\]\\|CPU.*伪装' /data/local/tmp/xinmaskplus.log 2>/dev/null | tail -6");
+        const lines = [];
+        lines.push(isMounted ? '✓ /proc/cpuinfo 已挂载（伪装生效）' : '✗ /proc/cpuinfo 未挂载（重启后生效）');
+        if (logRes.stdout.trim()) lines.push('', logRes.stdout.trim());
+        log.textContent = lines.join('\n');
+    }
+
+
+    async function setTouchRate(profile, btn) {
+        await T(`echo ${profile} > /data/adb/modules/xinmaskplus/pid/touch_profile && sh /data/adb/modules/xinmaskplus/scripts/touch_rate.sh ${profile}`);
+        document.querySelectorAll('.touch-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        refreshLogFull();
+    }
+
+    async function initTouchProfile() {
+        const res = await T("cat /data/adb/modules/xinmaskplus/pid/touch_profile 2>/dev/null");
+        const currentProfile = res.stdout.trim();
+        if (currentProfile) {
+            const btn = document.querySelector(`.touch-btn[data-profile="${currentProfile}"]`);
+            if (btn) btn.classList.add('active');
+        }
+    }
+
+    let mottos = [];
+    let mottoIndex = 0;
+    async function loadMottos() {
+        try {
+            const resp = await fetch('mottos.txt?' + Date.now());
+            if (!resp.ok) throw new Error('No mottos file');
+            const text = await resp.text();
+            mottos = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        } catch (e) {
+            mottos = ['死寂的心 因你而燃'];
+        }
+        const saved = localStorage.getItem('xinmaskplus_motto_index');
+        if (saved !== null) { mottoIndex = parseInt(saved) % mottos.length; }
+        else { mottoIndex = Math.floor(Math.random() * mottos.length); }
+        updateMottoDisplay();
+    }
+    function updateMottoDisplay() {
+        if (mottos.length === 0) return;
+        const currentText = mottos[mottoIndex % mottos.length];
+        document.querySelectorAll('.mottoText').forEach(el => { el.textContent = currentText; });
+        localStorage.setItem('xinmaskplus_motto_index', mottoIndex);
+    }
+    function nextMotto() {
+        if (mottos.length === 0) return;
+        mottoIndex = (mottoIndex + 1) % mottos.length;
+        updateMottoDisplay();
+    }
+
+    async function initSwitches(){
+        await syncSwitchesFromConfig();
+        initTouchProfile();
+        updateRunningLeds();
+        
+        const rkpDone = (await T('[ -f /data/adb/modules/xinmaskplus/pid/rkp_done ] && echo 1 || echo 0')).stdout.trim();
+        if (rkpDone === '1') {
+            const checkbox = document.getElementById('rkpToggle');
+            if (checkbox) {
+                checkbox.checked = true;
+                checkbox.disabled = false;
+                checkbox.style.opacity = '';
+                const label = checkbox.closest('.func-switch-header')?.querySelector('.func-switch-title');
+                if (label) label.textContent = '已修复 · RKP（关闭可重置）';
+            }
+        }
+    }
+
+    const games = [
+        { name:'王者荣耀', pkg:'com.tencent.tmgp.sgame' },
+        { name:'和平精英', pkg:'com.tencent.tmgp.pubgmhd' },
+        { name:'CF手游', pkg:'com.tencent.tmgp.cf' },
+        { name:'三角洲国服', pkg:'com.tencent.tmgp.dfm' },
+        { name:'三角洲台服', pkg:'com.garena.game.df' },
+        { name:'三角洲国际服', pkg:'com.proxima.dfm' },
+        { name:'暗区国服', pkg:'com.tencent.mf.uam' },
+        { name:'暗区国际服', pkg:'com.proximabeta.mf.uamo' },
+        { name:'暗区台服', pkg:'com.tw.mf.uamo.kbinstaller' },
+        { name:'暗区越南服', pkg:'com.vng.mf.uamo' },
+        { name:'无畏契约', pkg:'com.tencent.tmgp.codev' },
+        { name:'使命召唤', pkg:'com.tencent.tmgp.cod' },
+        { name:'王者荣耀世界', pkg:'com.tencent.ngr' }
+    ];
+
+    function getGameIconSrc(pkg) { return `icons/${pkg}.png`; }
+    function buildGameList(){
+        let html = '';
+        games.forEach(g => {
+            let iconSrc = getGameIconSrc(g.pkg);
+            let imgTag = `<img src="${iconSrc}" class="game-icon-img" onerror="this.style.display='none';">`;
+            html += `<div class="clean-item">
+                <div class="clean-left">
+                    ${imgTag}
+                    <div class="clean-info"><div class="game-name">${g.name}</div><div class="game-pkg">${g.pkg}</div></div>
+                </div>
+                <div class="clean-btn-group">
+                    <button class="clean-btn ssaid" onclick="changeSsaid('${g.pkg}','${g.name}')">修改ID</button>
+                    <button class="clean-btn danger" onclick="cleanGame('${g.pkg}','${g.name}')">清理</button>
+                </div>
+            </div>`;
+        });
+        if($('gameCleanList')) $('gameCleanList').innerHTML = html;
+    }
+
+    window.cleanGame = function(pkg, name){
+        if(!confirm(`确定要深度清理 ${name} 吗？`)) return;
+        T(`sh /data/adb/modules/xinmaskplus/scripts/clean_game.sh ${pkg}`).then(()=>{ alert(`${name} 清理完成`); refreshLogFull(); });
+    };
+    window.changeSsaid = function(pkg, name){
+        if(!confirm(`确定要修改 ${name} 的 SSAID 吗？\n\n这可能导致应用数据重置，请谨慎操作。`)) return;
+        T(`sh /data/adb/modules/xinmaskplus/scripts/change_ssaid.sh ${pkg}`).then(res=>{
+            if(res.stdout && res.stdout.trim() === 'OK') alert(`${name} SSAID 修改成功`); else alert(`${name} SSAID 修改失败`);
+            refreshLogFull();
+        });
+    };
+
+    let currentCustomPkg = null;
+    function buildCustomIconsList() {
+        let html = '';
+        games.forEach(g => {
+            html += `<div class="custom-icon-row"><img src="icons/${g.pkg}.png?t=${Date.now()}" class="custom-icon-preview" onerror="this.style.display='none'"><span class="custom-icon-name">${g.name}</span><button class="btn" style="padding:4px 12px;font-size:var(--fs-xs)" onclick="selectCustomIcon('${g.pkg}')">选择图标</button></div>`;
+        });
+        if($('customIconsList')) $('customIconsList').innerHTML = html;
+    }
+    window.selectCustomIcon = function(pkg) { currentCustomPkg = pkg; document.getElementById('customIconInput').click(); };
+    window.onCustomIconSelected = function(input) {
+        let file = input.files[0]; if(!file||!currentCustomPkg) return;
+        let img = new Image(); let reader = new FileReader();
+        reader.onload = function(e) {
+            img.onload = function() {
+                let canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height;
+                let ctx = canvas.getContext('2d'); ctx.beginPath();
+                const r = Math.min(img.width, img.height) * 0.2;
+                ctx.moveTo(r,0); ctx.lineTo(canvas.width-r,0); ctx.quadraticCurveTo(canvas.width,0,canvas.width,r);
+                ctx.lineTo(canvas.width,canvas.height-r); ctx.quadraticCurveTo(canvas.width,canvas.height,canvas.width-r,canvas.height);
+                ctx.lineTo(r,canvas.height); ctx.quadraticCurveTo(0,canvas.height,0,canvas.height-r); ctx.lineTo(0,r);
+                ctx.quadraticCurveTo(0,0,r,0); ctx.closePath(); ctx.clip(); ctx.drawImage(img,0,0);
+                let base64 = canvas.toDataURL('image/png').split(',')[1];
+                T(`echo '${base64}' | base64 -d > /data/adb/modules/xinmaskplus/webroot/icons/${currentCustomPkg}.png`);
+                alert('图标已更新'); buildCustomIconsList(); buildGameList();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file); input.value = '';
+    };
+
+    function applyFakeReset(el, name, param) {
+        if (el.checked) {
+            T(`sh /data/adb/modules/xinmaskplus/scripts/random_ids.sh ${param}`);
+            setTimeout(() => { el.checked = false; }, 500);
+        }
+    }
+
+    async function runDetection() {
+        const resultDiv = document.getElementById('detect-result');
+        if (!resultDiv) return;
+        const startTime = performance.now();
+        resultDiv.innerHTML = '<div class="dot-pulse"></div> 检测中，请稍等...';
+
+        async function get(cmd) {
+            const res = await T(cmd);
+            return res.stdout.trim();
+        }
+        async function exists(path) {
+            const res = await T(`test -e "${path}" && echo exists || echo missing`);
+            return res.stdout.trim() === 'exists';
+        }
+
+        let selinuxStatus = "未知";
+        try {
+            const resp = await fetch('sysinfo.txt?t=' + Date.now());
+            const text = await resp.text();
+            const match = text.match(/SELINUX=(.+)/);
+            if (match && match[1]) {
+                let raw = match[1].trim();
+                if (raw === "Enforcing") selinuxStatus = "强制模式 (Enforcing)";
+                else if (raw === "Permissive") selinuxStatus = "宽容模式 (Permissive)";
+                else selinuxStatus = raw;
+            } else {
+                const res = await T("getenforce");
+                let raw = res.stdout.trim();
+                if (raw === "Enforcing") selinuxStatus = "强制模式 (Enforcing)";
+                else if (raw === "Permissive") selinuxStatus = "宽容模式 (Permissive)";
+                else selinuxStatus = raw;
+            }
+        } catch(e) {
+            const res = await T("getenforce");
+            let raw = res.stdout.trim();
+            if (raw === "Enforcing") selinuxStatus = "强制模式 (Enforcing)";
+            else if (raw === "Permissive") selinuxStatus = "宽容模式 (Permissive)";
+            else selinuxStatus = raw;
+        }
+
+        let bl = await get("getprop ro.boot.verifiedbootstate");
+        let locked = await get("getprop ro.boot.flash.locked");
+        let vbmeta = await get("getprop ro.boot.vbmeta.device_state");
+        let bootloader = "未知";
+        if ((bl === "green" || vbmeta === "locked") && locked === "1") {
+            bootloader = "已锁定 (green)";
+        } else if (bl === "orange" || bl === "yellow" || vbmeta === "unlocked") {
+            bootloader = "已解锁 (orange)";
+        } else if (bl === "red") {
+            bootloader = "损坏/违规 (red)";
+        } else if (bl) {
+            bootloader = bl;
+        }
+
+        const isEmu = await get("getprop ro.kernel.qemu") === "1" || await get("getprop ro.hardware") === "goldfish" || await exists("/system/bin/qemu-props");
+        const vms = await exists("/data/user/0/com.vmos.pro") || await exists("/data/user/0/com.parallel.space") || await exists("/data/user/0/com.lody.virtual");
+        const mt2 = await exists("/storage/emulated/0/MT2");
+        const by = await exists("/storage/emulated/0/Android/data/com.byyoung.setting");
+        const hma = await exists("/storage/emulated/0/HMA_Config.json");
+        const wx = await exists("/storage/emulated/0/WechatXposed") || await exists("/storage/emulated/0/Download/WechatXposed");
+        const tmpRes = await exists("/data/local/tmp/luckys") || await exists("/data/local/tmp/HyperCeiler") || await exists("/data/local/tmp/simpleHook") || await exists("/data/local/tmp/mount_mask");
+        const hyper = await get("getprop persist.hyperceiler.log.level");
+        const lucky = await get("getprop persist.com.luckyzyx.luckytool.log.level");
+        const toolProp = (hyper === "1" || lucky === "1");
+        const debuggable = await get("getprop ro.debuggable");
+        const secure = await get("getprop ro.secure");
+        const buildType = await get("getprop ro.build.type");
+        const sysOk = (debuggable !== "1" && secure === "1" && buildType === "user");
+        const voldProp = await get("grep -E 'persist.sys.vold_app_data_isolation_enabled|persist.zygote.app_data_isolation' /data/property/persistent_properties 2>/dev/null");
+        const inode = await get("stat -c '%i' /data/local/tmp 2>/dev/null");
+        const inodeOk = (inode !== "1" && inode !== "");
+        const driver = await exists("/data/nh") || await exists("/data/nh2") || await exists("/data/jz.sh") || await exists("/data/system/1iboxmem.so") || await exists("/data/BingPUBG") || await exists("/data/HPX") || await exists("/data/system/HPX") || await exists("/storage/emulated/0/落叶配置") || await exists("/storage/emulated/0/BY物资");
+        const fp = await get("getprop ro.build.fingerprint");
+        const hasGreek = /[αβγδεζηθικλμνξοπρστυφχψω]/i.test(fp);
+        const hiddenApi = await get("settings get global hidden_api_policy");
+        const hidePolicy = (hiddenApi === "1" || hiddenApi === "2");
+        const verity = await get("getprop ro.boot.veritymode");
+        const vbmeta2 = await get("getprop ro.boot.vbmeta.device_state");
+        const avbOk = (verity === "enforcing" && vbmeta2 === "locked");
+        const adb = await get("settings get global adb_enabled");
+        const adbEnabled = (adb === "1");
+        const usbState = await get("getprop sys.usb.state");
+        const usbAdb = usbState.includes("adb");
+        const scene = await exists("/data/scene") || await exists("/data/omarea") || await exists("/data/vtools") || await exists("/storage/emulated/0/Scene");
+        const lsp = await exists("/data/lspd") || await exists("/data/lsposed") || await exists("/data/misc/lspd") || await exists("/sdcard/lspd.log");
+
+        const lines = [];
+        lines.push(isEmu ? "❌ 模拟器特征: 检测到" : "✅ 模拟器特征: 未检测到");
+lines.push(vms ? "⚠️ 虚拟化/多开: 检测到虚拟空间痕迹" : "✅ 虚拟化/多开: 未检测到");
+lines.push(mt2 ? "⚠️ MT2文件夹: 存在" : "✅ MT2文件夹: 未检测到");
+lines.push(by ? "❌ 爱玩机工具箱: 检测到残留" : "✅ 爱玩机工具箱: 未检测到");
+lines.push(hma ? "❌ HMA配置文件: 检测到" : "✅ HMA配置文件: 未检测到");
+lines.push(wx ? "⚠️ 微信Xposed模块: 检测到" : "✅ 微信Xposed模块: 未检测到");
+lines.push(tmpRes ? "⚠️ /data/local/tmp 残留: 存在可疑文件" : "✅ /data/local/tmp 残留: 未检测到");
+lines.push(toolProp ? "⚠️ 工具模块属性: 检测到 HyperCeiler/LuckyTool" : "✅ 工具模块属性: 未检测到");
+lines.push(sysOk ? "✅ 系统属性: 正常" : "⚠️ 系统属性: 可能存在调试痕迹");
+lines.push(voldProp ? "⚠️ Vold数据隔离持久化属性: 检测到修改" : "✅ Vold数据隔离持久化属性: 未检测到");
+lines.push(inodeOk ? "✅ tmp目录inode: 正常" : "⚠️ tmp目录inode: 异常 (可能被挂载)");
+lines.push(driver ? "❌ 内核/驱动残留: 检测到可疑驱动" : "✅ 内核/驱动残留: 未检测到");
+lines.push(hasGreek ? "⚠️ 指纹无希腊字母篡改: 检测到异常字符" : "✅ 指纹无希腊字母篡改: 正常");
+lines.push(hidePolicy ? "⚠️ 隐藏API策略: 已修改" : "✅ 隐藏API策略: 未修改");
+lines.push(avbOk ? "✅ AVB验证状态: 正常" : "❌ AVB验证状态: 可能异常");
+lines.push(adbEnabled ? "⚠️ ADB调试: 已开启" : "✅ ADB调试: 未开启");
+lines.push(usbAdb ? "⚠️ USB调试: 已连接ADB" : "✅ USB调试: 未开启");
+lines.push(scene ? "⚠️ Scene痕迹: 检测到" : "✅ Scene痕迹: 未检测到");
+lines.push(lsp ? "⚠️ LSPosed/EdXposed痕迹: 检测到" : "✅ LSPosed/EdXposed痕迹: 未检测到");
+lines.push(selinuxStatus.includes("强制") ? "✅ SELinux状态: 强制模式 (Enforcing)" : `❌ SELinux状态: ${selinuxStatus}`);
+
+        const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+        const header = `🔍 环境深度检测报告 (耗时 ${elapsed}s)`;
+        const output = [header, ...lines].join('\n');
+        resultDiv.innerHTML = `<pre style="font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; background: transparent; border: none; padding: 0; margin: 0;">${escapeHtml(output)}</pre>`;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m));
+    }
+
+    function toggleSysPanel() { }
+
+    const processWindow = document.getElementById('process-list');
+    const pidInput = document.getElementById('pid-input');
+    const refreshBtn = document.getElementById('refresh-process-btn');
+    const killPidBtn = document.getElementById('kill-pid-btn');
+    const killAllBtn = document.getElementById('kill-all-btn');
+    const clearBtn = document.getElementById('clear-process-btn');
+
+    function refreshProcessList() {
+        if (!processWindow) return;
+        processWindow.innerHTML = '加载中...';
+        T('sh /data/adb/modules/xinmaskplus/scripts/suspect_kill.sh list').then(res => {
+            const output = res.stdout.trim();
+            if (output) {
+                processWindow.innerHTML = output;
+            } else {
+                processWindow.innerHTML = '没有发现可疑进程';
+            }
+        }).catch(() => {
+            processWindow.innerHTML = '执行失败';
+        });
+    }
+
+    function killPid() {
+        const pid = pidInput ? pidInput.value.trim() : '';
+        if (!pid) {
+            alert('请输入 PID');
+            return;
+        }
+        T(`sh /data/adb/modules/xinmaskplus/scripts/suspect_kill.sh kill ${pid}`).then(res => {
+            processWindow.innerHTML = res.stdout.trim();
+            refreshProcessList();
+        });
+    }
+
+    function killAllPid() {
+        if (!confirm('确定要杀死所有可疑进程吗？')) return;
+        T('sh /data/adb/modules/xinmaskplus/scripts/suspect_kill.sh kill-all').then(res => {
+            processWindow.innerHTML = res.stdout.trim();
+            refreshProcessList();
+        });
+    }
+
+    function clearProcessWindow() {
+        if (processWindow) processWindow.innerHTML = '已清空';
+    }
+
+    if (refreshBtn) refreshBtn.addEventListener('click', refreshProcessList);
+    if (killPidBtn) killPidBtn.addEventListener('click', killPid);
+    if (killAllBtn) killAllBtn.addEventListener('click', killAllPid);
+    if (clearBtn) clearBtn.addEventListener('click', clearProcessWindow);
+
+    window.addEventListener('load', ()=>{
+        if (typeof ksu !== 'undefined' && ksu.fullScreen) {
+            ksu.fullScreen(true);
+        }
+        loadBgSettings();
+        loadLensSettings();
+        T('mkdir -p /data/adb/modules/xinmaskplus/webroot');
+        initSwitches();
+        buildGameList();
+        fetchStatus(); fetchSysinfo();
+        loadMottos();
+        setInterval(() => { if (document.visibilityState === 'visible') nextMotto(); }, 12000);
+        refreshLogFull();
+        refreshPageCardsAnimation('home');
+        setInterval(() => { syncSwitchesFromConfig(); }, 5000);
+        updateRunningLeds();
+    });
+    setInterval(fetchStatus, 2000);
+    setInterval(fetchSysinfo, 3000);
+    
+    window.switchPage = switchPage;
+    window.toggleSysPanel = toggleSysPanel;
+    window.runDetection = runDetection;
+    window.pickBg = pickBg;
+    window.resetBg = resetBg;
+    window.updateBlur = updateBlur;
+    window.toggleForceHide = toggleForceHide;
+    window.toggleNotifyAlways = toggleNotifyAlways;
+    window.toggleAutoClean = toggleAutoClean;
+    window.toggleColorOSLock = toggleColorOSLock;
+    window.toggleColorOSSignal = toggleColorOSSignal;
+    window.toggleUnlockGms = toggleUnlockGms;
+    window.toggleRKP = toggleRKP;
+    window.toggleSOTER = toggleSOTER;
+    window.toggleHideStorage = toggleHideStorage;
+    window.toggleAutoUmount = toggleAutoUmount;
+    window.toggleCpuSpoof = toggleCpuSpoof;
+    window.checkCpuSpoofStatus = checkCpuSpoofStatus;
+    window.setTouchRate = setTouchRate;
+    window.applyFakeReset = applyFakeReset;
+    window.cleanGame = cleanGame;
+    window.changeSsaid = changeSsaid;
+    window.selectCustomIcon = selectCustomIcon;
+    window.clearLogFull = clearLogFull;
+
+    // tap ripple
+    document.addEventListener('touchstart', e => {
+        const t = e.touches[0], r = document.createElement('div'), sz = 80;
+        r.className = 'ripple';
+        r.style.cssText = `left:${t.clientX-sz/2}px;top:${t.clientY-sz/2}px;width:${sz}px;height:${sz}px`;
+        document.body.appendChild(r);
+        r.addEventListener('animationend', () => r.remove());
+    }, { passive:true });
+
+    // liquid dock pill
+    (function(){
+        const dock = document.getElementById('dockBar');
+        if (!dock) return;
+        const pill = document.createElement('div');
+        pill.id = 'dockPill';
+        dock.insertBefore(pill, dock.firstChild);
+        function movePill(tab) {
+            const dr = dock.getBoundingClientRect(), tr = tab.getBoundingClientRect();
+            pill.style.left   = (tr.left - dr.left) + 'px';
+            pill.style.top    = (tr.top  - dr.top)  + 'px';
+            pill.style.width  = tr.width  + 'px';
+            pill.style.height = tr.height + 'px';
+        }
+        function initPill() {
+            const a = dock.querySelector('.dock-tab.active');
+            if (!a) return;
+            pill.style.transition = 'none';
+            movePill(a);
+            requestAnimationFrame(() => { pill.style.transition = ''; });
+        }
+        const _sp = window.switchPage;
+        if (_sp) {
+            window.switchPage = function(p) {
+                _sp(p);
+                requestAnimationFrame(() => { const t = dock.querySelector('.dock-tab.active'); if (t) movePill(t); });
+            };
+        }
+        dock.querySelectorAll('.dock-tab').forEach(t => t.addEventListener('click', () => movePill(t)));
+        if (document.readyState === 'complete') setTimeout(initPill, 80);
+        else window.addEventListener('load', () => setTimeout(initPill, 80));
+    })();
+
+    // staggered card spring entrance
+    window.refreshPageCardsAnimation = function(pageId) {
+        document.querySelectorAll('.card').forEach(c => { c.classList.remove('in'); c.style.removeProperty('--del'); });
+        const pg = document.getElementById('page-' + pageId);
+        if (!pg) return;
+        pg.querySelectorAll('.card').forEach((card, i) => {
+            card.style.setProperty('--del', (i * 55) + 'ms');
+            requestAnimationFrame(() => card.classList.add('in'));
+        });
+        if (window.LensFX) LensFX.refresh(750);
+    };
+
+    //  LIQUID GLASS LENS ENGINE (WebGL)
+    //  Full-screen canvas renders the wallpaper; every glass
+    //  card region refracts it with an outward edge lens.
+    window.LensFX = (function(){
+        const canvas = document.getElementById('lens-canvas');
+        if (!canvas) return { refresh(){}, setWallpaper(){} };
+        let gl = canvas.getContext('webgl', { premultipliedAlpha:false, alpha:false })
+              || canvas.getContext('experimental-webgl');
+        if (!gl) {
+            // WebGL unavailable → fall back to static bg-layer
+            canvas.style.display = 'none';
+            document.getElementById('bg-layer').style.zIndex = '-1';
+            return { refresh(){}, setWallpaper(){} };
+        }
+
+        const MAXR = 24;  // max glass rects per frame
+
+        const VS = `
+            attribute vec2 aPos;
+            void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }
+        `;
+        const FS = `
+            precision highp float;
+            uniform sampler2D uBg;
+            uniform vec2  uRes;
+            uniform vec2  uTexScale;
+            uniform vec2  uTexOffset;
+            uniform int   uCount;
+            uniform vec4  uRects[${MAXR}];   // x,y,w,h  (physical px, top-left origin)
+            uniform float uRadii[${MAXR}];
+            uniform float uStrength;
+            uniform float uEdge;             // edge band width (px)
+            uniform float uRimW;             // rim highlight width (px)
+            uniform float uRimBright;        // rim highlight brightness 0-1
+            uniform float uTint;             // glass centre tint 0-1
+
+            float sdRound(vec2 p, vec2 b, float r){
+                vec2 q = abs(p) - b + r;
+                return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r;
+            }
+
+            void main(){
+                // top-left origin frag coords
+                vec2 frag = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
+                vec2 sampleFrag = frag;
+                float rim = 0.0;
+                float tint = 0.0;
+
+                for (int i=0; i<${MAXR}; i++){
+                    if (i >= uCount) break;
+                    vec4 R = uRects[i];
+                    vec2 c = R.xy + R.zw*0.5;
+                    vec2 hf = R.zw*0.5;
+                    vec2 lp = frag - c;
+                    float sd = sdRound(lp, hf, uRadii[i]);
+                    if (sd < 0.0){
+                        float edgeDist = -sd;                       // 0 at border → grows inward
+                        float band = 1.0 - smoothstep(0.0, uEdge, edgeDist);
+                        // SDF gradient (points outward) via finite diff
+                        float e = 1.5;
+                        float gx = sdRound(lp+vec2(e,0.0),hf,uRadii[i]) - sdRound(lp-vec2(e,0.0),hf,uRadii[i]);
+                        float gy = sdRound(lp+vec2(0.0,e),hf,uRadii[i]) - sdRound(lp-vec2(0.0,e),hf,uRadii[i]);
+                        vec2 grad = normalize(vec2(gx,gy)+vec2(1e-5));
+                        // sample OUTWARD near edges → refracts surrounding bg inward (liquid-glass look)
+                        sampleFrag = frag + grad * band * band * uStrength;
+                        // edge specular highlight
+                        rim = (1.0 - smoothstep(0.0, uRimW, edgeDist)) * uRimBright;
+                        tint = uTint;
+                    }
+                }
+
+                vec2 uv = (sampleFrag / uRes) * uTexScale + uTexOffset;
+                uv = clamp(uv, 0.0, 1.0);
+                vec3 col = texture2D(uBg, uv).rgb;
+                col = mix(col, vec3(1.0), tint);
+                col += rim;
+                gl_FragColor = vec4(col, 1.0);
+            }
+        `;
+
+        function compile(type, src){
+            const sh = gl.createShader(type);
+            gl.shaderSource(sh, src); gl.compileShader(sh);
+            if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS))
+                console.warn('shader err', gl.getShaderInfoLog(sh));
+            return sh;
+        }
+        const prog = gl.createProgram();
+        gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS));
+        gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+        gl.linkProgram(prog);
+        gl.useProgram(prog);
+
+        // full-screen quad
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+        const aPos = gl.getAttribLocation(prog, 'aPos');
+        gl.enableVertexAttribArray(aPos);
+        gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+        const U = {
+            bg:        gl.getUniformLocation(prog,'uBg'),
+            res:       gl.getUniformLocation(prog,'uRes'),
+            texScale:  gl.getUniformLocation(prog,'uTexScale'),
+            texOffset: gl.getUniformLocation(prog,'uTexOffset'),
+            count:     gl.getUniformLocation(prog,'uCount'),
+            rects:     gl.getUniformLocation(prog,'uRects'),
+            radii:     gl.getUniformLocation(prog,'uRadii'),
+            strength:  gl.getUniformLocation(prog,'uStrength'),
+            edge:      gl.getUniformLocation(prog,'uEdge'),
+            rimW:      gl.getUniformLocation(prog,'uRimW'),
+            rimBright: gl.getUniformLocation(prog,'uRimBright'),
+            tint_u:    gl.getUniformLocation(prog,'uTint'),
+        };
+
+        // texture
+        const tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        // 1x1 placeholder until wallpaper loads
+        gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([238,234,240,255]));
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        let imgW = 1, imgH = 1, hasImg = false;
+        // tuning knobs (adjustable):
+        const DEFAULTS = { strength:26, edge:34, rimW:4, rimB:15, tint:0 };
+        let lensConfig = Object.assign({}, DEFAULTS);
+
+        function setWallpaper(url){
+            if (!url){ hasImg = false; render(); return; }
+            const im = new Image();
+            im.crossOrigin = 'anonymous';
+            im.onload = function(){
+                imgW = im.naturalWidth; imgH = im.naturalHeight;
+                gl.bindTexture(gl.TEXTURE_2D, tex);
+                try {
+                    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,im);
+                    hasImg = true;
+                } catch(e){ hasImg = false; }
+                render();
+            };
+            im.onerror = function(){ hasImg = false; render(); };
+            im.src = url;
+        }
+
+        function resize(){
+            const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+            const w = Math.floor(window.innerWidth * dpr);
+            const h = Math.floor(window.innerHeight * dpr);
+            if (canvas.width !== w || canvas.height !== h){
+                canvas.width = w; canvas.height = h;
+                canvas.style.width = window.innerWidth + 'px';
+                canvas.style.height = window.innerHeight + 'px';
+            }
+        }
+
+        function collectRects(){
+            const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+            const out = [];
+            const active = document.querySelector('.page.active');
+            const els = [];
+            if (active) active.querySelectorAll('.card, .st-main, .st-mini').forEach(e=>els.push(e));
+            const dock = document.querySelector('.floating-dock');
+            if (dock) els.push(dock);
+            const vh = window.innerHeight;
+            for (const el of els){
+                const r = el.getBoundingClientRect();
+                if (r.width < 2 || r.height < 2) continue;
+                if (r.bottom < -40 || r.top > vh + 40) continue;
+                let rad = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
+                rad = Math.min(rad, Math.min(r.width, r.height)/2);
+                out.push([r.left*dpr, r.top*dpr, r.width*dpr, r.height*dpr, rad*dpr]);
+                if (out.length >= MAXR) break;
+            }
+            return out;
+        }
+
+        function render(){
+            resize();
+            const W = canvas.width, H = canvas.height;
+            gl.viewport(0,0,W,H);
+            gl.useProgram(prog);
+
+            // cover-fit
+            let ts=[1,1], to=[0,0];
+            if (hasImg){
+                const s = Math.max(W/imgW, H/imgH);
+                const dw = imgW*s, dh = imgH*s;
+                const ox = (W-dw)/2, oy=(H-dh)/2;
+                ts = [ W/dw, H/dh ];
+                to = [ -ox/dw, -oy/dh ];
+            }
+
+            const rects = collectRects();
+            const flat = new Float32Array(MAXR*4);
+            const radii = new Float32Array(MAXR);
+            for (let i=0;i<rects.length;i++){
+                flat[i*4]   = rects[i][0];
+                flat[i*4+1] = rects[i][1];
+                flat[i*4+2] = rects[i][2];
+                flat[i*4+3] = rects[i][3];
+                radii[i]    = rects[i][4];
+            }
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            gl.uniform1i(U.bg, 0);
+            gl.uniform2f(U.res, W, H);
+            gl.uniform2f(U.texScale, ts[0], ts[1]);
+            gl.uniform2f(U.texOffset, to[0], to[1]);
+            gl.uniform1i(U.count, rects.length);
+            gl.uniform4fv(U.rects, flat);
+            gl.uniform1fv(U.radii, radii);
+            const _dpr = Math.min(window.devicePixelRatio||1,2.5);
+            const _c   = lensConfig;
+            gl.uniform1f(U.strength,  (_c.strength!==undefined?_c.strength:26) * _dpr);
+            gl.uniform1f(U.edge,      (_c.edge    !==undefined?_c.edge    :34) * _dpr);
+            gl.uniform1f(U.rimW,      (_c.rimW    !==undefined?_c.rimW    : 4) * _dpr);
+            gl.uniform1f(U.rimBright, (_c.rimB    !==undefined?_c.rimB    :15) * 0.01);
+            gl.uniform1f(U.tint_u,    (_c.tint    !==undefined?_c.tint    : 0) * 0.01);
+
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+
+        // render scheduler: RAF burst for a duration after a trigger
+        let rafId = null, until = 0;
+        function pump(){
+            render();
+            if (performance.now() < until) rafId = requestAnimationFrame(pump);
+            else rafId = null;
+        }
+        function kick(ms){
+            until = performance.now() + (ms||1);
+            if (!rafId) rafId = requestAnimationFrame(pump);
+        }
+
+        // triggers
+        window.addEventListener('scroll', ()=>kick(120), { passive:true });
+        window.addEventListener('resize', ()=>kick(300));
+        document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') kick(60); });
+
+        function setParams(cfg){
+            lensConfig = Object.assign({}, DEFAULTS, cfg);
+            render();
+        }
+        return {
+            refresh(dur){ kick(dur||650); },
+            setWallpaper,
+            render,
+            setParams
+        };
+    })();
+
+    function updateLensParam(param, rawVal){
+        const v = parseInt(rawVal, 10);
+        const cfg = JSON.parse(localStorage.getItem('xinmaskplus_lens')||'{}');
+        cfg[param] = v;
+        localStorage.setItem('xinmaskplus_lens', JSON.stringify(cfg));
+        const dispIds = {strength:'lsStrengthV',edge:'lsEdgeV',rimW:'lsRimWV',rimB:'lsRimBV',tint:'lsTintV'};
+        const el = document.getElementById(dispIds[param]);
+        if(el) el.textContent = v;
+        if(window.LensFX) LensFX.setParams(cfg);
+    }
+    function resetLensParams(){
+        localStorage.removeItem('xinmaskplus_lens');
+        loadLensSettings();
+    }
+    function loadLensSettings(){
+        const saved = JSON.parse(localStorage.getItem('xinmaskplus_lens')||'{}');
+        const defs  = {strength:26, edge:34, rimW:4, rimB:15, tint:0};
+        const cfg   = Object.assign({}, defs, saved);
+        const sliders = {strength:'lsStrength',edge:'lsEdge',rimW:'lsRimW',rimB:'lsRimB',tint:'lsTint'};
+        const vals    = {strength:'lsStrengthV',edge:'lsEdgeV',rimW:'lsRimWV',rimB:'lsRimBV',tint:'lsTintV'};
+        for(const [p,id] of Object.entries(sliders)){const e=document.getElementById(id);if(e)e.value=cfg[p];}
+        for(const [p,id] of Object.entries(vals))   {const e=document.getElementById(id);if(e)e.textContent=cfg[p];}
+        if(window.LensFX) LensFX.setParams(cfg);
+    }
+    window.updateLensParam = updateLensParam;
+    window.resetLensParams = resetLensParams;
+
+</script>
+</body>
+</html>

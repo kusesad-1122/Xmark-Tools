@@ -1,0 +1,11 @@
+force_hide=0
+notify_always=0
+auto_clean=0
+coloros_lock=0
+coloros_signal=0
+unlock_gms=0
+rkp=0
+soter=0
+auto_umount=0
+hide_storage=0
+cpu_spoof=0
