@@ -1,4 +1,4 @@
-# 苳季or苦涩环境助手
+# 苦涩or苳季环境助手
 
 > Magisk / KernelSU / APatch 游戏环境伪装模块
 
