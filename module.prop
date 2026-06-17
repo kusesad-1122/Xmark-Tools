@@ -1,7 +1,7 @@
 id=xinmaskplus
 name=Xmark-Tools
-version=v2.2
-versionCode=2
+version=v2.3
+versionCode=3
 author=苦涩开发原创or苳季优化适配
 description=命運的褶皺 是你在哭泣 | 苦涩Q2941806492 苳季Q1363214673 | 官方分发: 群文件/GitHub | 安装前请用群公告SHA256核验包完整性
 webui=webroot://index.html
