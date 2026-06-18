@@ -18,15 +18,19 @@ jobs:
         run: |
           wget -q https://dl.google.com/android/repository/android-ndk-r27c-linux.zip
           unzip -q android-ndk-r27c-linux.zip -d $HOME
+      - name: Download source
+        run: |
+          wget -q -O zygisk_src.zip https://github.com/kusesad-1122/Xmark-Tools/releases/download/v2.4-src/zygisk_source_v2.4.zip
+          unzip -q zygisk_src.zip
       - name: Compile
         run: |
           export NDK=$HOME/android-ndk-r27c
-          cd zygisk
+          cd gh_push/zygisk
           bash build.sh
       - name: Show result
-        run: ls -lh zygisk/arm64-v8a.so && sha256sum zygisk/arm64-v8a.so
+        run: ls -lh gh_push/zygisk/arm64-v8a.so && sha256sum gh_push/zygisk/arm64-v8a.so
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: arm64-v8a
-          path: zygisk/arm64-v8a.so
+          path: gh_push/zygisk/arm64-v8a.so
