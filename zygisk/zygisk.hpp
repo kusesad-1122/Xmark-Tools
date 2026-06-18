@@ -1,0 +1,1 @@
+$(cat /tmp/zygmod_extract/zygisk.hpp | base64 -w0)

@@ -1,0 +1,1 @@
+$(cat /tmp/src_june15/build.sh | base64 -w0)

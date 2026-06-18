@@ -1,0 +1,1 @@
+$(cat /tmp/zygmod_extract/zygisk_cpuinfo.cpp | base64 -w0)
