@@ -12,25 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install deps
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq wget unzip
       - name: Download NDK r27c
         run: |
           wget -q https://dl.google.com/android/repository/android-ndk-r27c-linux.zip
           unzip -q android-ndk-r27c-linux.zip -d $HOME
-      - name: Download source
-        run: |
-          wget -q -O zygisk_src.zip https://github.com/kusesad-1122/Xmark-Tools/releases/download/v2.4-src/zygisk_source_v2.4.zip
-          unzip -q zygisk_src.zip
       - name: Compile
         run: |
           export NDK=$HOME/android-ndk-r27c
-          cd gh_push/zygisk
+          cd zygisk
           bash build.sh
-      - name: Show result
-        run: ls -lh gh_push/zygisk/arm64-v8a.so && sha256sum gh_push/zygisk/arm64-v8a.so
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: arm64-v8a
-          path: gh_push/zygisk/arm64-v8a.so
+          path: zygisk/arm64-v8a.so
