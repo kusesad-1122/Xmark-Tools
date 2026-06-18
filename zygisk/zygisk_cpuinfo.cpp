@@ -1,4 +1,4 @@
-/**
+/*
  * zygisk_cpuinfo.cpp — XinmaskPlus CPU 伪装 Zygisk 模块 (正式版)
  * 署名: 苦涩or苳季
  */
