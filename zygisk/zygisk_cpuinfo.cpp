@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include <sys/mount.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include "zygisk.hpp"
@@ -124,7 +125,7 @@ static void ensure_empty(void){ mkdir(EMPTY_DIR,0755); int fd=open(EMPTY_FILE,O_
 static void force_umount(const char*path){
     for(int i=0;i<16;i++){ if(umount2(path,MNT_DETACH)!=0) break; }
 }
-// mountinfo 里的特殊字符是八进制转义(空格=\040 等), 卸载前还原成真实路径
+// mountinfo 里的特殊字符是八进制转义(空格=\\040 等), 卸载前还原成真实路径
 static void mnt_unescape(char*str){
     char*o=str;
     for(char*q=str;*q;){
@@ -134,7 +135,7 @@ static void mnt_unescape(char*str){
     }
     *o=0;
 }
-// 兜底���载: 不靠 readdir(FUSE 下 /storage/emulated/0 的 readdir 偶发漏列已绑定项, 是"退出不解挂"的根因),
+// 兜底卸载: 不靠 readdir(FUSE 下 /storage/emulated/0 的 readdir 偶发漏列已绑定项, 是"退出不解挂"的根因),
 // 直接扫真实挂载表 /proc/self/mountinfo, 卸掉 base 下所有"首段子名不在 keep"的挂载点, 逆序弹、循环到清空。
 static void umount_under(const char*base,const char**keep){
     size_t blen=strlen(base);
@@ -204,6 +205,10 @@ static void companion_handler(int client){
     int nlen=0; if(!xread(client,&nlen,sizeof(nlen))||nlen<=0||nlen>240)return;
     char nice[256]={0}; if(!xread(client,nice,(size_t)nlen))return; nice[nlen]=0;
 
+    // v2.5: 读取 app PID 用于轮询兜底 (ZN 的 dlclose 可能导致 zygote 端的 fd 永不关闭)
+    int app_pid=0; xread(client,&app_pid,sizeof(app_pid));
+    flog("COMPANION nice=%s pid=%d",nice,app_pid);
+
     bool cpu_t  = decide_target(nice);   // CPU 伪装: cpu_spoof + cpu_games.txt
     bool hide_t = hide_decide(nice);     // 防标记挂空: hide_games.txt + 无 anti_mark_off
     // 两者都不是: 回 0 结束
@@ -225,9 +230,26 @@ static void companion_handler(int client){
         return;
     }
 
-    // 在此 socket 上阻塞, 直到 app 进程死亡导致对端关闭(EOF) -> 立刻还原
+    // 设 3s 超时: socket EOF 是快速路径, 超时后轮询 /proc/<pid> 兜底
+    struct timeval tv={3,0};
+    setsockopt(client,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof(tv));
+
     char buf[8];
-    for(;;){ ssize_t k=read(client,buf,sizeof(buf)); if(k>0)continue; if(k<0&&errno==EINTR)continue; break; }
+    for(;;){
+        ssize_t k=read(client,buf,sizeof(buf));
+        if(k>0)continue;
+        if(k<0&&errno==EINTR)continue;
+        if(k<0&&(errno==EAGAIN||errno==EWOULDBLOCK)){
+            // 超时 → 轮询 /proc/<pid> 判定 app 是否存活
+            if(app_pid>0){
+                char pp[64]; snprintf(pp,sizeof(pp),"/proc/%d",app_pid);
+                if(access(pp,F_OK)!=0){flog("APP-DIED pid=%d (/proc)",app_pid);break;}
+            }
+            continue;
+        }
+        flog("SOCKET-EOF k=%zd err=%d",k,k<0?errno:0);
+        break; // EOF 或致命错误
+    }
 
     pthread_mutex_lock(&g_lock);
     if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
@@ -248,10 +270,13 @@ public:
         const char*nice=env->GetStringUTFChars(args->nice_name,nullptr); if(!nice)return;
         int fd=api->connectCompanion();
         if(fd>=0){
-            int nlen=(int)strlen(nice); unsigned char st=0;
-            if(xwrite(fd,&nlen,sizeof(nlen))&&xwrite(fd,nice,(size_t)nlen)&&xread(fd,&st,1)){
+            int nlen=(int)strlen(nice);
+            int my_pid=getpid(); // v2.5: 发送 PID 供 companion 轮询兜底
+            unsigned char st=0;
+            if(xwrite(fd,&nlen,sizeof(nlen))&&xwrite(fd,nice,(size_t)nlen)&&xwrite(fd,&my_pid,sizeof(my_pid))&&xread(fd,&st,1)){
                 if(st==1){
                     // 目标且已挂载: 保持 socket 打开, 不关! app 死亡时内核自动关闭它 -> companion 收到 EOF 还原
+                    // v2.5: 若 socket EOF 失效(zygote 端 fd 未闭), companion 轮询 /proc/<pid> 兜底
                     env->ReleaseStringUTFChars(args->nice_name,nice);
                     return; // 故意泄漏 fd: 它的生命周期 = app 进程生命周期
                 }
