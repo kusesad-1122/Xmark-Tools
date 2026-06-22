@@ -34,8 +34,8 @@ jobs:
       - name: Upload .so to release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v2.7-so
-          name: Xmark-Tools v2.7 compiled .so
+          tag_name: v2.7fix-so
+          name: Xmark-Tools v2.7fix compiled .so
           files: zygisk/arm64-v8a.so
           generate_release_notes: true
         env:
