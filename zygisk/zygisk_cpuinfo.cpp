@@ -204,6 +204,8 @@ static void do_hide_umount_pro(void){
 }
 static int  g_hide_count = 0;
 static bool g_hide_on    = false;
+static int  g_hide_count_pro = 0;
+static bool g_hide_on_pro    = false;
 
 // v2.8: 子进程完全不计入CPU引用计数, 只有主进程(不带:)参与挂载+计数
 // v2.9.3: file-based counting + monitoring thread (CPU伪装1.7 approach)
