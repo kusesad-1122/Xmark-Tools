@@ -208,8 +208,8 @@ static void companion_handler(int client){
         g_count++;
         cpu_inc=true;
     }
-    // 防标记挂空: 所有进程一视同仁(包括子进程)
-    if(hide_t){ if(g_hide_count==0) g_hide_on=do_hide_mount(); g_hide_count++; hide_inc=true; }
+    // 防标记挂空: 只主进程参与挂载+计数(同CPU)
+    if(hide_t && is_main){ if(g_hide_count==0) g_hide_on=do_hide_mount(); g_hide_count++; hide_inc=true; }
     pthread_mutex_unlock(&g_lock);
 
     unsigned char status = (cpu_inc || g_hide_on) ?1:0;
