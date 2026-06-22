@@ -92,8 +92,6 @@ static void do_global_umount(void){
     flog("UMOUNT /proc/cpuinfo");
 }
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
-static time_t g_last_cpu_umount = 0;
-static time_t g_last_hide_umount = 0;
 static int  g_count   = 0;
 static bool g_mounted = false;
 
@@ -206,18 +204,18 @@ static void companion_handler(int client){
     pthread_mutex_lock(&g_lock);
     // CPU: 只有主进程(不带:)才参与挂载+计数, 子进程完全忽略CPU
     if(cpu_t && is_main){
-        if(!g_mounted && time(NULL)-g_last_cpu_umount>=30) g_mounted=do_global_mount();
+        if(!g_mounted) g_mounted=do_global_mount();
         if(g_mounted) { g_count++; cpu_inc=true; }
     }
     // 防标记挂空: 只主进程参与挂载+计数(同CPU)
-    if(hide_t && is_main){ if(!g_hide_on && time(NULL)-g_last_hide_umount>=30) g_hide_on=do_hide_mount(); if(g_hide_on) { g_hide_count++; hide_inc=true; } }
+    if(hide_t && is_main){ if(!g_hide_on) g_hide_on=do_hide_mount(); if(g_hide_on) { g_hide_count++; hide_inc=true; } }
     pthread_mutex_unlock(&g_lock);
 
     unsigned char status = (cpu_inc || g_hide_on) ?1:0;
     if(!xwrite(client,&status,1)){
         pthread_mutex_lock(&g_lock);
-        if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; g_last_cpu_umount=time(NULL); }
-        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; g_last_hide_umount=time(NULL); }
+        if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
+        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
         pthread_mutex_unlock(&g_lock);
         return;
     }
@@ -251,8 +249,8 @@ static void companion_handler(int client){
     if(inotify_fd>=0) close(inotify_fd);
 
     pthread_mutex_lock(&g_lock);
-    if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; g_last_cpu_umount=time(NULL); }
-    if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; g_last_hide_umount=time(NULL); }
+    if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
+    if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
     pthread_mutex_unlock(&g_lock);
 }
 
