@@ -1,1 +1,0 @@
-$(cat /tmp/zygmod_extract/cpuinfo_presets.h | base64 -w0)
