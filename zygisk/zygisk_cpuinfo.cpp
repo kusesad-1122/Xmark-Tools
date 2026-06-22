@@ -1,1 +1,318 @@
-LyoKICogenlnaXNrX2NwdWluZm8uY3BwIOKAlCBYaW5tYXNrUGx1cyBDUFUg5Lyq6KOFIFp5Z2lzayDmqKHlnZcgKOato+W8j+eJiCkKICog572y5ZCNOiDoi6bmtqlvcuiLs+WtowogKiDmnLrliLYo5a6M5YWo5a+56b2QIGNwdXd6IOeahCLlhbPmuLjmiI/np5Lov5jljp8iKToKICogICAtIOebruagh+a4uOaIj+WQr+WKqCAtPiBtb2R1bGUg5Y2KIGNvbm5lY3RDb21wYW5pb24g5Y+R5YyF5ZCNLCBjb21wYW5pb24ocm9vdCkg5Yik5a6a5Li655uu5qCH5ZCOCiAqICAgICDlvJXnlKjorqHmlbAgMC0+MSDml7bmioogLnNvIOWGheW1jOmihOiuvuWGmeWHuuWIsCBydW5uaW5nX3N0YXRlLy5pbnRlcm5hbF9jcHUg5bm25YWo5bGAIGJpbmQg5YiwIC9wcm9jL2NwdWluZm/jgIIKICogICAtIGNvbXBhbmlvbiDlj5Hlm54gMSDlrZfoioLnirbmgIHlkI4sIOWcqOivpSBzb2NrZXQg5LiKIumYu+WhnuetieW+hSLjgIJtb2R1bGUg5Y2K5pS25Yiw54q25oCB5ZCOIuS/neaMgSBzb2NrZXQg5LiN5YWzIiwKICogICAgIOebtOWIsCBhcHAg6L+b56iL5q275LqhIC0+IHNvY2tldCBFT0YgLT4gY29tcGFuaW9uIOW8leeUqOiuoeaVsCAtMSwg5YeP5YiwIDAg5b2T5Zy6IHVtb3VudCDov5jljp/jgIIKICogICAgIOaMgi/ljbjpg73lnKggY29tcGFuaW9uIOWQjOS4gOS4quaMgui9veWRveWQjeepuumXtOWGheWujOaIkCwg6YWN5ZCIIFpOIOS7hei/mOWOn+aMgui9ve+8jOWFqOWxgOS4gOagh+W4u+WxgOWPmOWPr+S7pei/mOWOn+OAgui/mOWOn+WPr+S7pee7meW6lOeUqOS4reaEj+ioiOetieaIkOWKn+OAggogKiDml6Xlv5c6IC9kYXRhL2FkYi94aW5tYXNrcGx1cy9sb2cvY3B1X3p5Z2lzay5sb2cKICogdjIuNjog5pS55biI4p6F5YmVaW5vdGlmeSArIHBvbGwg5Y+R6Lev5q2j5b2T5rWP5r2Y5rWL5r+A5r2u77yM6Kej5Ye6IFpOIERMQ0xPU0VfTU9EVUxFX0xJQlJBUlkg5a+75L2O44CK5b2T5YqfIEVPRuWksei0peeahOmXuuOAmwogKi8KI2RlZmluZSBfR05VX1NPVVJDRQojaW5jbHVkZSA8am5pLmg+CiNpbmNsdWRlIDx1bmlzdGQuaD4KI2luY2x1ZGUgPGZjbnRsLmg+CiNpbmNsdWRlIDxzdHJpbmcuaD4KI2luY2x1ZGUgPHN0ZGxpYi5oPgojaW5jbHVkZSA8c3RkaW8uaD4KI2luY2x1ZGUgPHN0ZGFyZy5oPgojaW5jbHVkZSA8dGltZS5oPgojaW5jbHVkZSA8ZXJybm8uaD4KI2luY2x1ZGUgPHBvbGwuaD4KI2luY2x1ZGUgPHB0aHJlYWQuaD4KI2luY2x1ZGUgPHN5cy9tb3VudC5oPgojaW5jbHVkZSA8c3lzL3NvY2tldC5oPgojaW5jbHVkZSA8c3lzL3N0YXQuaD4KI2luY2x1ZGUgPHN5cy9pbm90aWZ5Lmg+CiNpbmNsdWRlIDxkaXJlbnQuaD4KI2luY2x1ZGUgInp5Z2lzay5ocHAiCiNpbmNsdWRlICJjcHVpbmZvX3ByZXNldHMuaCIKdXNpbmcgenlnaXNrOjpBcGk7IHVzaW5nIHp5Z2lzazo6QXBwU3BlY2lhbGl6ZUFyZ3M7IHVzaW5nIHp5Z2lzazo6U2VydmVyU3BlY2lhbGl6ZUFyZ3M7CmV4dGVybiAiQyIgaW50ICBfX2N4YV9ndWFyZF9hY3F1aXJlKGxvbmcgbG9uZyAqZyl7cmV0dXJuICEqKCh2b2xhdGlsZSBjaGFyKilnKTt9CmV4dGVybiAiQyIgdm9pZCBfX2N4YV9ndWFyZF9yZWxlYXNlKGxvbmcgbG9uZyAqZyl7Kigodm9sYXRpbGUgY2hhciopZyk9MTt9CmV4dGVybiAiQyIgdm9pZCBfX2N4YV9ndWFyZF9hYm9ydChsb25nIGxvbmcgKmcpeyh2b2lkKWc7fQoKI2RlZmluZSBNT0RESVIgICAgICIvZGF0YS9hZGIvbW9kdWxlcy94aW5tYXNrcGx1cyIKI2RlZmluZSBHQU1FU19GICAgIE1PRERSICIvcGlkL2NwdV9nYW1lcy50eHQiCiNkZWZpbmUgUFJPRklMRV9GICBNT0RESVIgIi9waWQvY3B1X3Byb2ZpbGUiCiNkZWZpbmUgU1RBVEVfRElSICBNT0RESVIgIi9ydW5uaW5nX3N0YXRlIgojZGVmaW5lIEFDVElWRV9TUkMgU1RBVEVfRElSICIvLmludGVybmFsX2NwdSIKI2RlZmluZSBEQVRBRElSICAgICIvZGF0YS9hZGIveGlubWFza3BsdXMiCiNkZWZpbmUgTE9HRElSICAgICBEQVRBRElSICIvbG9nIgojZGVmaW5lIExPR0ZJTEUgICAgTE9HRElSICIvY3B1X3p5Z2lzay5sb2ciCiNkZWZpbmUgSElERV9HQU1FU19GIE1PRERSICIvcGlkL2hpZGVfZ2FtZXMudHh0IgojZGVmaW5lIEFOVElNQVJLX0YgICBNT0RESVIgIi9waWQvYW50aV9tYXJrX29mZiIKI2RlZmluZSBQRVJTSVNUX0RJUiAgIi9tbnQvdmVuZG9yL3BlcnNpc3QiCiNkZWZpbmUgU1RPUkFHRV9ESVIgICIvc3RvcmFnZS9lbXVsYXRlZC8wIgojZGVmaW5lIERPV05MT0FEX0RJUiAiL3N0b3JhZ2UvZW11bGF0ZWQvMC9Eb3dubG9hZCIKI2RlZmluZSBFTVBUWV9ESVIgICAgIi9kYXRhL2xvY2FsL3RtcC94bXBfZW1wdHlfZGlyIgojZGVmaW5lIEVNUFRZX0ZJTEUgICAiL2RhdGEvbG9jYWwvdG1wL3htcF9lbXB0eV9maWxlIgoKc3RhdGljIGJvb2wgeHdyaXRlKGludCBmZCxjb25zdCB2b2lkKmIsc2l6ZV90IG4pe2NvbnN0IGNoYXIqcD0oY29uc3QgY2hhciopYjt3aGlsZShuKXtzc2l6ZV90IGs9d3JpdGUoZmQscCxuKTtpZihrPD0wKXtpZihrPDAmJmVycm5vPT1FSU5UUiljb250aW51ZTtyZXR1cm4gZmFsc2U7fXArPWs7bi09KHNpemVfdClrO31yZXR1cm4gdHJ1ZTt9CnN0YXRpYyBib29sIHhyZWFkKGludCBmZCx2b2lkKmIsc2l6ZV90IG4pe2NoYXIqcD0oY2hhciopYjt3aGlsZShuKXtzc2l6ZV90IGs9cmVhZChmZCxwLG4pO2lmKGs8PTApe2lmKGs8MCYmZXJybm89PUVJTlRSKWNvbnRpbnVlO3JldHVybiBmYWxzZTt9cCs9aztuLT0oc2l6ZV90KWs7fXJldHVybiB0cnVlO30Kc3RhdGljIHZvaWQgZmxvZyhjb25zdCBjaGFyKmZtdCwuLi4pewogICAgbWtkaXIoREFUQURJUiwwNzU1KTsgbWtkaXIoTE9HRElSLDA3NTUpOwogICAgaW50IGZkPW9wZW4oTE9HRklMRSxPX1dST05MWXxPX0NSRUFUfE9fQVBQRU5ELDA2NDQpOyBpZihmZDwwKSByZXR1cm47CiAgICBjaGFyIHRzWzMyXTsgdGltZV90IHQ9dGltZSgwKTsgc3RydWN0IHRtIHRtOyBsb2NhbHRpbWVfcigmdCwmdG0pOyBzdHJmdGltZSh0cyxzaXplb2YodHMpLCIlbS0lZCAlSDolTTolUyIsJnRtKTsKICAgIGNoYXIgbGluZVs0MDBdOyBpbnQgbj1zbnByaW50ZihsaW5lLHNpemVvZihsaW5lKSwiWyVzXSAiLHRzKTsKICAgIHZhX2xpc3QgYXA7IHZhX3N0YXJ0KGFwLGZtdCk7IG4rPXZzbnByaW50ZihsaW5lK24sc2l6ZW9mKGxpbmUpLW4sZm10LGFwKTsgdmFfZW5kKGFwKTsKICAgIGlmKG4+MCYmbjwoaW50KXNpemVvZihsaW5lKS0xKXtsaW5lW24rK109J1xuJzsodm9pZCkhd3JpdGUoZmQsbGluZSwoc2l6ZV90KW4pO30gY2xvc2UoZmQpOwp9CnN0YXRpYyB2b2lkIHN0cl90cmltKGNoYXIqcyl7Y2hhciplPXMrc3RybGVuKHMpO3doaWxlKGU+cyYmKGVbLTFdPT0nXG4nfHxlWy0xXT09J1xyJ3x8ZVstMV09PScgJ3x8ZVstMV09PSdcdCcpKSotLWU9MDt9CnN0YXRpYyBib29sIG5hbWVfaW5fZmlsZShjb25zdCBjaGFyKnBhdGgsY29uc3QgY2hhcipuaWNlKXsKICAgIEZJTEUqZj1mb3BlbihwYXRoLCJyIik7IGlmKCFmKXJldHVybiBmYWxzZTsgY2hhciBsaW5lWzI1Nl07IGJvb2wgaGl0PWZhbHNlOwogICAgd2hpbGUoZmdldHMobGluZSxzaXplb2YobGluZSxmKSl7Y2hhcipwPWxpbmU7d2hpbGUoKnA9PScgJ3x8KnA9PSdcdCcpcCsrO3N0cl90cmltKHApO2lmKCEqcCljb250aW51ZTtzaXplX3QgTD1zdHJsZW4ocCk7CiAgICAgICAgaWYoc3RyY21wKG5pY2UscCk9PTApe2hpdD10cnVlO2JyZWFrO30gaWYoc3RybmNtcChuaWNlLHAsTCk9PTAmJm5pY2VbTF09PSc6Jyl7aGl0PXRydWU7YnJlYWs7fX0KICAgIGZjbG9zZShmKTsgcmV0dXJuIGhpdDsKfQpzdGF0aWMgYm9vbCBuYW1lX2luX2dhbWVzKGNvbnN0IGNoYXIqTmljZSl7IHJldHVybiBuYW1lX2luX2ZpbGUoR0FNRVNfRixuaWNlKTsgfQpzdGF0aWMgYm9vbCBkZWNpZGVfdGFyZ2V0KGNvbnN0IGNoYXIqTmljZSl7CiAgICBpZihhY2Nlc3MoTU9ERElSIi9waWQvY3B1X3Nwb29mIixGX09LKT09MClyZXR1cm4gbmFtZV9pbl9nYW1lcyhuaWNlKTsKICAgIHJldHVybiBmYWxzZTsKfQpzdGF0aWMgaW50IHBpY2tfcHJlc2V0KHZvaWQpewogICAgY2hhciBwcm9mWzY0XT0iOTAwMHMiOyBpbnQgZmQ9b3BlbihQUk9GSUxFX0YsT19SRE9OTFkpOwogICAgaWYoZmQ+PTApe2NoYXIgYls2NF09ezB9O3NzaXplX3Qgcj1yZWFkKGZkLGIsc2l6ZW9mKGIpLTEpO2Nsb3NlKGZkKTsKICAgICAgICBpZihyPjApe2Jbcl09MDtjaGFyKnM9Yjt3aGlsZSgqcz09JyAnfHwqcz09J1xuJ3x8KnM9PSdcdCd8fCpzPT0nXHInKXMrKztzdHJfdHJpbShzKTtpZigqcyl7c3RybmNweShwcm9mLHMsdGVyb3ImcHJvZiktMTspfX19CiAgICBmb3IoaW50IGk9MDtpPENQVV9QUkVTRVRfQ09VTlQ7aSsrKWlmKHN0cmNtcChwcm9mLENQVV9QUkVTRVRTW2ldLm5hbWUpPT0wKXJldHVybiBpOwogICAgZm9yKGludCBpPTA7aTxDUFVfUFJFU0VUX0NPVU5UO2krKylpZihzdHJjbXAoIjkwMDBzIixDUFVfUFJFU0VUU1tpXS5uYW1lKT09MClyZXR1cm4gaTsKICAgIHJldHVybiAwOwp9CnN0YXRpYyBib29sIG1hdGVyaWFsaXplX3ByZXNldChpbnQgaWR4KXsKICAgIG1rZGlyKFNUQVRFX0RJUiwwNzU1KTsgaW50IGZkPW9wZW4oQUNUSVZFX1NSQyxPX1dST05MWXxPX0NSRUFUfE9fVFJVTkMsMDY0NCk7IGlmKGZkPDApcmV0dXJuIGZhbHNlOwogICAgYm9vbCBvaz14d3JpdGUoZmQsQ1BVX1BSRVNFVFNbaWR4XS5kYXRhLENQVV9QUkVTRVRTW2lkeF0ubGVuKTsgY2xvc2UoZmQpOyByZXR1cm4gb2s7Cn0KLy8g5ZyoIGNvbXBhbmlvbiDoh7Tlt7LnmoTmg4XovbDlkI3lkI3nqbrml6Xph4/kg4Dlj7AgYmluZApzdGF0aWMgYm9vbCBkb19nbG9iYWxfbW91bnQodm9pZCl7CiAgICBpbnQgaWR4PXBpY2tfcHJlc2V0KCk7IGNoYXIgc3JjWzI1Nl07CiAgICBpZihtYXRlcmlhbGl6ZV9wcmVzZXQoaWR4KSl7c3RybmNweShzcmMsQUNUSVZFX1NSQyxzaXplb2Yoc3JjKS0xKTtzcmNbc2l6ZW9mKHNyYyktMV09MDt9CiAgICBlbHNle3NucHJpbnRmKHNyYyxzaXplb2Yoc3JjKSxNT0RESVIgIi9jcHVpbmZvXyVzIixDUFVfUFJFU0VUU1tpZHhdLm5hbWUpOwogICAgICAgICBpZihhY2Nlc3Moc3JjLFJfT0spIT0wKXtmbG9nKCJGQUlMIOaXoOWJjeWJh+Wutua5luawtSBlcnJubz0lZCIsZXJybm8pO3JldHVybiBmYWxzZTt9fQogICAgdW1vdW50MigiL3Byb2MvY3B1aW5mbyIsTU5UX0RFVEFDSCk7CiAgICBpbnQgcj1tb3VudChzcmMsIi9wcm9jL2NwdWluZm8iLG51bGxwdHIsTVNfQklORCxudWxscHRyKTsKICAgIGZsb2coIiVzIHByb2ZpbGU9JXMiLHI9PTA/Ik1PVU5ULU9LIjoiTU9VTlQtRkFJTCIsQ1BVX1BSRVNFVFNbaWR4XS5uYW1lKTsKICAgIHJldHVybiByPT0wOwp9CnN0YXRpYyB2b2lkIGRvX2dsb2JhbF91bW91bnQodm9pZCl7CiAgICB1bW91bnQyKCIvcHJvYy9jcHVpbmZvIixNTlRfREVUQUNIKTsKICAgIGZsb2coIlVNT1VOVCDnm67moIflhajlj5/lh7rnmoQsIOW3sui/mOWOniAvcHJvYy9jcHVpbmZvIik7Cn0KCi8vID09PT0g5byV55So6K6h5pWwOiBjb21wYW5pb24g5piv5Y2V6L+b56iL5aSa57qg57yT77yM55So6L+b56iL5YaF6K6h5pWwK+i3s+i/hQo9PT09PQpzdGF0aWMgcHRocmVhZF9tdXRleF90IGdfbG9jayA9IFBUSFJFQURfTVVURVhfSU5JVElBTElaRVI7CnN0YXRpYyBpbnQgIGdfY291bnQgICA9IDA7CnN0YXRpYyBib29sIGdfbW91bnRlZCA9IGZhbHNlOwoKLy8gPT09PT0g6Ziy5q2i6YKj5rKh56m6KHBlcnNpc3QgKyBQcm8pLCDnvJblhoXpobkuYiwg6Kej5YevPWhpZGVfZ2FtZXMudHh0IOS4puaXoCBhbnRpX21hcmtfb2ZmID09PT09PQpzdGF0aWMgY29uc3QgY2hhciogUEVSU0lTVF9LRUVQW10gPSB7CiAgInJmcyIsImhsb3NfcmZzIiwic2Vuc29ycyIsIndsYW5fbWFjLmJpbiIsIldDTlNTX3Fjb21fd2xhbl9udi5iaW4iLCJtYWMudHh0IiwKICAid2lmaSIsIndsYW4iLCJibHVldG9vdGgiLCJidF9maXJtd2FyZSIsImJkYWRkciIsIm1vZGVtIiwibWRtIiwiZHBtIiwiYXVkaW8iLAogICJmYWN0b3J5IiwibnZkYXRhIiwibnZyYW0iLCJudmNmZyIsIm1kX3VkYyIsIG51bGxwdHIgfTsKc3RhdGljIGNvbnN0IGNoYXIqIFBST19LRUVQW10gPSB7ICAvLyDmoLnmja4gL3N0b3JhZ2UvZW11bGF0ZWQvMCDkv53lkI3lkI3ljZXvvIjlhYgyMOmhiu+8iQogICJSaW5ndG9uZXMiLCJSZWNvcmRpbmdzIiwiUG9kY2FzdHMiLCJQaWN0dXJlcyIsIk5vdGlmaWNhdGlvbnMiLCJNeSBEb2N1bWVudHMiLAogICJNdXNpYyIsIk1vdmllcyIsIkRvY3VtZW50cyIsIkRvd25sb2FkIiwiRENJTSIsIkNvbG9yT1MiLCJCcm93c2VyIiwiYmFja3VwcyIsCiAgIkF1ZGlvYm9va3MiLCJBbmRyb2lkIiwiQWxhcm1zIiwiNzM5OSIsIi5TTE9HQU4iLCIubHV0VGh1bWJuYWlsIiwgbnVsbHB0ciB9OwpzdGF0aWMgY29uc3QgY2hhciogRE9XTkxPQURfS0VFUFtdID0geyAgLy8gL3N0b3JhZ2UvZW11bGF0ZWQvMC9Eb3dubG9hZCDkv53lkI3lkI3ljZXvvIjlj7DnlZnor6TpnaLvvIzlh7rmjaTlhajnqbTlj4jkuI3lnKjnu4Tlrproh6rlt7Hlj7DnqbTvvIkKICAiLjc5MzQwMzlhIiwiLmNzaiIsImFwcHNoYXJlIiwiY29tLnRlbmNlbnQuZ2FtZSIsIm5ldGVhc2UiLCJPcGVyaXQiLCJRUSIsCiAgIlVDRG93bmxvYWRzIiwidXBkYXRlIiwiLmV4bXUtY2ZnMS5kYXRhIiwgbnVsbHB0ciB9OwpzdGF0aWMgYm9vbCBpbl9rZWVwKGNvbnN0IGNoYXIqKmxzdCxjb25zdCBjaGFyKm5hbWUpeyBmb3IoaW50IGk9MDtsc3RbaV07aSsrKSBpZihzdHJjbXAobHN0W2ldLG5hbWUpPT0wKSByZXR1cm4gdHJ1ZTsgcmV0dXJuIGZhbHNlOyB9CnN0YXRpYyBib29sIGhpZGVfZGVjaWRlKGNvbnN0IGNoYXIqTmljZSl7CiAgICBpZihhY2Nlc3MoQU5USU1BUktfRixGX09LKT09MCkgcmV0dXJuIGZhbHNlOyAgICAgLy8g6Zeo5o6nOiDmnIlIGFudGlfbWFya19vZmYg5r2z5YWz6Ziy5q2i6YKj5rKhCiAgICByZXR1cm4gbmFtZV9pbl9maWxlKEhJREVfR0FNRVNfRixuaWNlKTsKfQpzdGF0aWMgdm9pZCBlbnN1cmVfZW1wdHkodm9pZCl7IG1rZGlyKEVNUFRZX0RJUiwwNzU1KTsgaW50IGZkPW9wZW4oRU1QVFlfRklMRSxPX1dST05MWXxPX0NSRUFULDA2NDQpOyBpZihmZD49MCljbG9zZShmZCk7IH0KLy8g5by55Ye65b2T6Lev5LiK5omA5pyJ5oqE5Yqg55qE5oOF5ZC95bGC77yM55u05Yiw5LiG5YyG5piv5oOF6L295bqPCnN0YXRpYyB2b2lkIGZvcmNlX3Vtb3VudChjb25zdCBjaGFyKnBhdGgpewogICAgZm9yKGludCBpPTA7aTwxNjtpKyspeyBpZih1bW91bnQyKHBhdGgsTU5UX0RFVEFDSCkhPTApIGJyZWFrOyB9Cn0KLy8gbW91bnRpbmZvIOmHjOeahOeJueautuWtl+acrOaYr+WFrOi/memHjOWIsCjnqbrmoLpcXFwwNDAg562JKe+8jOWNs+i9tOWJjeeUqOWJjeaIkOWHuuS6huWIqeehruW+quoJcnV0ZSBfcGFyc2UoY2hhcipzdHIpewogICAgY2hhcipvPXN0cjsKICAgIGZvcihjaGFyKnE9c3RyOypxOyl7CiAgICAgICAgaWYocVswXT09J1xcJyYmcVsxXT49JzAnJiZxWzFdPD0nMycmJnFbMl0+PScwJyYmcVsyXTw9JzcnJiZxWzNdPj0nMCcmJnFbM108PSc3Jyl7CiAgICAgICAgICAgICpvKys9KGNoYXIpKCgocVsxXS0nMCcpPDw2KXwoKHFbMl0tJzAnKTw8Myl8KHFbM10tJzAnKSk7IHErPTQ7CiAgICAgICAgfSBlbHNlICpvKys9KnErKzsKICAgIH0KICAgICpvPTA7Cn0KLy8g5YW25bqP5Y2z6L295qC8OiDmiJDlhbPnmoQgcmVhZGRpcihGVVNFIOS4i+avlC9zdG9yYWdlL2VtdWxhdGVkLzAg55qEIHJlYWRkaXIg5YG25Y+R6ZyB5Y+R5YiX5bey57u05Lit6aG577yM5pivIuWAnOWHuuS4jeino+mVvyLnmoQmoOaOkuaVsO+8jOWPr+mAieafpeeci+WPluS6huepuuWAvuW5tuW6j+ajgOafpe+8gQpzdGF0aWMgdm9pZCB1bW91bnRfdW5kZXIoY29uc3QgY2hhcipiYXNlLGNvbnN0IGNoYXIqKmtlZXApewogICAgc2l6ZV90IGJsZW49c3RybGVuKGJhc2UpOwogICAgZm9yKGludCBwYXNzPTA7cGFzczw4O3Bhc3MrKyl7CiAgICAgICAgaW50IGZkPW9wZW4oIi9wcm9jL3NlbGYvbW91bnRpbmZvIixPX1JET05MWSk7IGlmKGZkPDApIHJldHVybjsKICAgICAgICBzdGF0aWMgY2hhciBidWZbMjYyMTQ0XTsgc2l6ZV90IHRvdD0wOyBzc2l6ZV90IGs7CiAgICAgICAgd2hpbGUodG90PHNpemVvZihidWYpLTEmJihrPXJlYWQoZmQsYnVmK3RvdCxzaXplb2YoYnVmKS0xLXRvdCkpPjApIHRvdCs9KHNpemVfdClrOwogICAgICAgIGNsb3NlKGZkKTsgYnVmW3RvdF09MDsKICAgICAgICBzdGF0aWMgY2hhciBmb3VuZFsyNTZdWzUxMl07IGludCBuZj0wOyBjaGFyKmxpbmU9YnVmOwogICAgICAgIHdoaWxlKGxpbmUmJippbmUmJm5mPDI1Nil7CiAgICAgICAgICAgIGNoYXIqbmw9c3RyY2hyKGxpbmUsJ1xuJyk7IGlmKG5sKSpubD0wOwogICAgICAgICAgICBjaGFyKnBwPWxpbmU7IGludCBmaWVsZD0wOyBjaGFyKm1wPW51bGxwdHI7CiAgICAgICAgICAgIGZvcig7Oyl7IGlmKGZpZWxkPT00KXttcD1wcDticmVhazt9IGNoYXIqc3A9c3RyY2hyKHBwLCcgJyk7IGlmKCFzcClicmVhazsgcHA9c3ArMTsgZmllbGQrKzsgfQogICAgICAgICAgICBpZihtcCl7IGNoYXIqc3A9c3RyY2hyKG1wLCcgJyk7IGlmKHNwKSpzcD0wOyBtbnRfdW5lc2NhcGUobXApOyB9CiAgICAgICAgICAgIGlmKG1wJiZzdHJuY21wKG1wLGJhc2UsYmxlbik9PTAmJm1wW2JsZW5dPT0nLycpewogICAgICAgICAgICAgICAgY29uc3QgY2hhcipjaGlsZD1tcCtibGVuKzE7IGNoYXIgY25hbWVbMjU2XTsgc2l6ZV90IGk9MDsKICAgICAgICAgICAgICAgIHdoaWxlKGNoaWxkW2ldJiZjaGlsZFtpXSE9Jy8nJiZpPHNpemVvZihjbmFtZSktMSl7Y25hbWVbaV09Y2hpbGRbaV07aSsrO30gY25hbWVbaV09MDsKICAgICAgICAgICAgICAgIGlmKCFpbl9rZWVwKGtlZXAsY25hbWUpKXsgc3RybmNweShmb3VuZFtuZl0sbXAsc2l6ZW9mKGZvdW5kW25mXSktMSk7IGZvdW5kW25mXVtzaXplb2YoZm91bmRbbmZdKS0xXT0wOyBuZisrOyB9CiAgICAgICAgICAgIH0KICAgICAgICAgICAgaWYoIW5sKWJyZWFrOyBsaW5lPW5sKzE7CiAgICAgICAgfQogICAgICAgIGlmKG5mPT0wKSBicmVhazsKICAgICAgICBmb3IoaW50IGk9bmYtMTtpPj0wO2ktLSkgZm9yY2VfdW1vdW50KGZvdW5kW2ldKTsKICAgIH0KfQpzdGF0aWMgdm9pZCBoaWRlX2JpbmRfZGlyKGNvbnN0IGNoYXIqYmFzZSxjb25zdCBjaGFyKiprZWVwKXsKICAgIERJUipkPW9wZW5kaXIoYmFzZSk7IGlmKCFkKXJldHVybjsgc3RydWN0IGRpcmVudCplOwogICAgd2hpbGUoKGU9cmVhZGRpcihkKSkpewogICAgICAgIGlmKCFzdHJjbXAoZS0+ZF9uYW1lLCIuIil8fCFzdHJjbXAoZS0+ZF9uYW1lLCIuLiIpKWNvbnRpbnVlOwogICAgICAgIGlmKGluX2tlZXAoa2VlcCxlLT5kX25hbWUpKWNvbnRpbnVlOwogICAgICAgIGNoYXIgcGF0aFs2MDBdOyBzbnByaW50ZihwYXRoLHNpemVvZihwYXRoKSwiJXMvJXMiLGJhc2UsZS0+ZF9uYW1lKTsKICAgICAgICBmb3JjZV91bW91bnQocGF0aCk7CiAgICAgICAgc3RydWN0IHN0YXQgc3Q7IGlmKGxzdGF0KHBhdGgsJnN0KSE9MCljb250aW51ZTsKICAgICAgICBpZihTX19JU0RJUihzdC5zdF9tb2RlKSkgbW91bnQoRU1QVFlfRElSLHBhdGgsbnVsbHB0cixNU19CSU5ELG51bGxwdHIpOwogICAgICAgIGVsc2UgICAgICAgICAgICAgICAgICAgIG1vdW50KEVNUFRZX0ZJTEUscGF0aCxudWxscHRyLE1TX0JJTkQsbnVsbHB0cik7CiAgICB9CiAgICBjbG9zZWRpcihkKTsKfQpzdGF0aWMgdm9pZCBoaWRlX3VuYmluZF9kaXIoY29uc3QgY2hhcipiYXNlLGNvbnN0IGNoYXIqKmtlZXApewogICAgRElSKmQ9b3BlbmRpcihiYXNlKTsgaWYoIWQpcmV0dXJuOyBzdHJ1Y3QgZGlyZW50KmU7CiAgICB3aGlsZSgoZT1yZWFkZGlyKGQpKSl7CiAgICAgICAgaWYoIXN0cmNtcChlLT5kX25hbWUsIi4iKXx8IXN0cmNtcChlLT5kX25hbWUsIi4uIikpY29udGludWU7CiAgICAgICAgaWYoaW5fa2VlcChrZWVwLGUtPmRfbmFtZSkpY29udGludWU7CiAgICAgICAgY2hhciBwYXRoWzYwMF07IHNucHJpbnRmKHBhdGgsc2l6ZW9mKHBhdGgpLCIlcy8lcyIsYmFzZSxlLT5kX25hbWUpOwogICAgICAgIGZvcmNlX3Vtb3VudChwYXRoKTsKICAgIH0KICAgIGNsb3NlZGlyKGQpOwp9CnN0YXRpYyBib29sIGRvX2hpZGVfbW91bnQodm9pZCl7CiAgICBlbnN1cmVfZW1wdHkoKTsKICAgIGlmKGFjY2VzcyhQRVJTSVNUX0RJUixGX09LKT09MCkgaGlkZV9iaW5kX2RpcihQRVJTSVNUX0RJUixQRVJTSVNUX0tFRVApOwogICAgaWYoYWNjZXNzKFNUT1JBR0VfRElSLEZfT0spPT0wKSBoaWRlX2JpbmRfZGlyKFNUT1JBR0VfRElSLFBST19LRUVQKTsKICAgIGlmKGFjY2VzcyhET1dOTE9BRF9ESVIsRl9PSyk9PTApIGhpZGVfYmluZF9kaXIoRE9XTkxPQURfRElSLERPV05MT0FEX0tFRVApOwogICAgZmxvZygiSElERS1NT1VOVCBwZXJzaXN0K1BybytEb3dubG9hZCDlrozmiJAiKTsKICAgIHJldHVybiB0cnVlOwp9CnN0YXRpYyB2b2lkIGRvX2hpZGVfdW1vdW50KHZvaWQpewogICAgaWYoYWNjZXNzKFBFUlNJU1RfRElSLEZfT0spPT0wKXsgaGlkZV91bmJpbmRfZGlyKFBFUlNJU1RfRElSLFBFUlNJU1RfS0VFUCk7ICAgdW1vdW50X3VuZGVyKFBFUlNJU1RfRElSLFBFUlNJU1RfS0VFUCk7IH0KICAgIGlmKGFjY2VzcyhTVE9SQUdFX0RJUixGX09LKT09MCl7IGhpZGVfdW5iaW5kX2RpcihTVE9SQUdFX0RJUixQUk9fS0VFUCk7ICAgICAgIHVtb3VudF91bmRlcihTVE9SQUdFX0RJUixQUk9fS0VFUCk7IH0KICAgIGlmKGFjY2VzcyhET1dOTE9BRF9ESVIsRl9PSyk9PTApeyBoaWRlX3VuYmluZF9kaXIoRE9XTkxPQURfRElSLERPV05MT0FEX0tFRVApOyB1bW91bnRfdW5kZXIoRE9XTkxPQURfRElSLERPV05MT0FEX0tFRVApOyB9CiAgICBmbG9nKCJISURFLVVNT1VOVCBwZXJzaXN0K1BybytEb3dubG9hZCDlt7Lov5jlj5cocmVhZGRpUitib3VudGluZm/lhbbvp5UpIik7Cn0Kc3RhdGljIGludCAgZ19oaWRlX2NvdW50ID0gMDsKc3RhdGljIGJvb2wgZ19oaWRlX29uICAgID0gZmFsc2U7CgovLyA9PT09PSB2Mi42OiBpbm90aWZ5ICsgcG9sbCDlj4Pov5vot6/lr5LljYfluZPmtYvmr43nuqflk4Hnm64gPT09PT0KLy8gc29ja2V0IEVPRiDmmK/lv6vmv4Dot6/lr5IsIGlub3RpZnkg55uW5o6nIC9wcm9jLzxwaWQ+IOaYr+WPr+S7peivh+S4gOiqjeWfuuWKoQovLyDlvZPlhaUgYXBwIOi/m+eoieS4jeS6hu+8jCAvcHJvYy88cGlkPiDoo4HlhoXlkI7liqDliLDml6DpnIDliKDpmaQgLT4gaW5vdGlmeSDoppblj5MgLT4g56uL5Y2z6L+Y5Y6fCi8vIOS4jeWOn+W3tCBaeWdpc2tOZXh0IERMQ0xPU0VfTU9EVUxFX0xJQlJBUlkg5b2T5ZedCnN0YXRpYyB2b2lkIGNvbXBhbmlvbl9oYW5kbGVyKGludCBjbGllbnQpewogICAgaW50IG5sZW49MDsgaWYoIXhyZWFkKGNsaWVudCwmbm1lbixzaXplb2Yobm1lbikpfHxubGVuPD0wfHxubGVuPjI0MClyZXR1cm47CiAgICBjaGFyIG5pY2VbMjU2XT17MH07IGlmKCF4cmVhZChjbGllbnQsbmljZSwoc2l6ZV90KW5sZW4pKXJldHVybjsgbmljZVtubGVuXT0wOwogICAgaW50IGFwcF9waWQ9MDsgeHJlYWQoY2xpZW50LCZhcHBfcGlkLHNpemVvZihhcHBfcGlkKSk7CiAgICBmbG9nKCJDT01QQU5JT04gbmljZT0lcyBwaWQ9JWQiLG5pY2UsYXBwX3BpZCk7CiAgICBib29sIGNwdV90ICA9IGRlY2lkZV90YXJnZXQobmljZSk7ICAgLy8gQ1BV5Lyq6KOFICBib29sIGhpZGVfdCA9IGhpZGVfZGVjaWRlKG5pY2UpOyAgICAgLy8g6Ziy5q2i6YKj5rKhCiAgICBpZighY3B1X3QgJiYgIWhpZGVfdCk7eyB1bnNpZ25lZCBjaGFyIHo9MDsgeHdyaXRlKGNsaWVudCwmeiwxKTsgcmV0dXJuOyB9CiAgICBib29sIGNwdV9pbmM9ZmFsc2UsIGhpZGVfaW5jPWZhbHNlOwogICAgcHRocmVhZF9tdXRleF9sb2NrKCZnX2xvY2spOwogICAgaWYoY3B1X3QpeyAgaWYoZ19jb3VudD09MCkgICAgICBnX21vdW50ZWQ9ZG9fZ2xvYmFsX21vdW50KCk7IGdfY291bnQrKzsgICAgICBjZmxvZygiSElERS1VTU9VTlQgcGVyc2lzdCtQcm8rRG93bmxvYWQg5bey6L+Y5Y+XKHJlYWRkaXIrYm91bnRpbmZv5YW276eVKSIpOyB9CnN0YXRpYyBpbnQgIGdfaGlkZV9jb3VudCA9IDA7CnN0YXRpYyBib29sIGdfaGlkZV9vbiAgICA9IGZhbHNlOwoKLy8gPT09PT0gdjIuNjogaW5vdGlmeSArIHBvbGwg5Y+D6L+b6Lev5a+S5Y2G5bmT5rWL5q+N57qn5ZOB55uuID09PT09Ci8vIHNvY2tldCBFT0Yg5piv5b+r5r+A6Lev5a+SLCBpbm90aWZ5IOebluaOpyAvcHJvYy88cGlkPiDmmK/lj6/ku6Xor4fkuoDoqo3ln7rliqEKLy8g5b2T5YWlIGFwcCDov5vnqInkuI3kuobvvIwgL3Byb2MvPHBpZD4g6KOB5YaF5ZCO5Yqg5Yiw5peg6ZyA5Yig6ZmkIC0+IGlub3RpZnkg6KaW5Y+TIC0+IOeri+WNo+i/mOWOnwovLyDkuI3ljp/lt7QgWnlnaXNrTmV4dCBERMhJU0VfTU9EVUxFX0xJQlJBUlkg5b2T5ZedCnN0YXRpYyB2b2lkIGNvbXBhbmlvbl9oYW5kbGVyKGludCBjbGllbnQpewogICAgaW50IG5sZW49MDsgaWYoIXhyZWFkKGNsaWVudCwmbm1lbixzaXplb2Yobm1lbikpfHxubGVuPD0wfHxubGVuPjI0MClyZXR1cm47CiAgICBjaGFyIG5pY2VbMjU2XT17MH07IGlmKCF4cmVhZChjbGllbnQsbmljZSwoc2l6ZV90KW5sZW4pKXJldHVybjsgbmljZVtubGVuXT0wOwogICAgaW50IGFwcF9waWQ9MDsgeHJlYWQoY2xpZW50LCZhcHBfcGlkLHNpemVvZihhcHBfcGlkKSk7CiAgICBmbG9nKCJDT01QQU5JT04gbmljZT0lcyBwaWQ9JWQiLG5pY2UsYXBwX3BpZCk7CiAgICBib29sIGNwdV90ICA9IGRlY2lkZV90YXJnZXQobmljZSk7ICAgLy8gQ1BV5Lyq6KOFICBib29sIGhpZGVfdCA9IGhpZGVfZGVjaWRlKG5pY2UpOyAgICAgLy8g6Ziy5q2i6YKj5rKhCiAgICBpZighY3B1X3QgJiYgIWhpZGVfdCk7eyB1bnNpZ25lZCBjaGFyIHo9MDsgeHdyaXRlKGNsaWVudCwmeiwxKTsgcmV0dXJuOyB9CiAgICBib29sIGNwdV9pbmM9ZmFsc2UsIGhpZGVfaW5jPWZhbHNlOwogICAgcHRocmVhZF9tdXRleF9sb2NrKCZnX2xvY2spOwogICAgaWYoY3B1X3QpeyAgaWYoZ19jb3VudD09MCkgICAgICBnX21vdW50ZWQ9ZG9fZ2xvYmFsX21vdW50KCk7IGdfY291bnQrKzsgICAgICBjXB90cnVlOyAgfQogICAgaWYoaGlkZV90KXsgaWYoZ19oaWRlX2NvdW50PT0wKSBnX2hpZGVfb249ZG9faGlkZV9tb3VudCgpOyAgIGdfaGlkZV9jb3VudCsrOyBoaWRlX2luYz10cnVlOyB9CiAgICBwdGhyZWFkX211dGV4X3VubG9jaygmZ19sb2NrKTsKICAgIHVuc2lnbmVkIGNoYXIgc3RhdHVzID0gMTsKICAgIGlmKCF4d3JpdGUoY2xpZW50LCZzdGF0dXMsMSkpewogICAgICAgIHB0aHJlYWRfbXV0ZXhfbG9jaygmZ19sb2NrKTsKICAgICAgICBpZihjcHVfaW5jICAmJiAtLWdfY291bnQ9PTAgICAgICAmJiBnX21vdW50ZWQpeyBkb19nbG9iYWxfdW1vdW50KCk7IGdfbW91bnRlZD1mYWxzZTsgfQogICAgICAgIGlmKGhpZGVfaW5jICYmIC0tZ19oaWRlX2NvdW50PT09MCAmJiBnX2hpZGVfb24peyBkb19oaWRlX3Vtb3VudCgpOyAgIGdfaGlkZV9vbj1mYWxzZTsgfQogICAgICAgIHB0aHJlYWRfbXV0ZXhfdW5sb2NrKCZnX2xvY2spOwogICAgICAgIHJldHVybjsKICAgIH0KCiAgICAvLyA9PT0g6K6+572uIGlub3RpZnkg55uW5o6nIC9wcm9jLzxwaWQ+ID09PQogICAgaW50IGlub3RpZnlfZmQgPSAtMTsKICAgIGludCB3ZCA9IC0xOwogICAgaWYgKGFwcF9waWQgPiAwKSB7CiAgICAgICAgaW5vdGlmeV9mZCA9IGlub3RpZnlfaW5pdCgpOwogICAgICAgIGlmIChpbm90aWZ5X2ZkID49IDApIHsKICAgICAgICAgICAgY2hhciBwcFs2NF07CiAgICAgICAgICAgIHNucHJpbnRmKHBwLCBzaXplb2YocHApLCAiL3Byb2MvJWQiLCBhcHBfcGlkKTsKICAgICAgICAgICAgd2QgPSBpbm90aWZ5X2FkZF93YXRjaChpbm90aWZ5X2ZkLCBwcCwgSU5fREVMRVRFX1NFTEYpOwogICAgICAgICAgICBpZiAod2QgPCAwKSB7CiAgICAgICAgICAgICAgICBmbG9nKCJJTk9USUZZIGFkZF93YXRjaCBmYWlsIHBpZD0lZCBlcnJubz0lZCIsIGFwcF9waWQsIGVycm5vKTsKICAgICAgICAgICAgICAgIGNsb3NlKGlub3RpZnlfZmQpOwogICAgICAgICAgICAgICAgaW5vdGlmeV9mZCA9IC0xOwogICAgICAgICAgICB9IGVsc2UgewogICAgICAgICAgICAgICAgZmxvZygiSU5PVElGWSB3YXRjaGluZyAvcHJvYy8lZCIsIGFwcF9waWQpOwogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQoKICAgIC8vID09PSBwb2xsKCkg5ZCM5pe26ZmQ55uW5ZKuIHNvY2tldCArIGlub3RpZnkgPT09CiAgICBib29sIGFwcF9kaWVkID0gZmFsc2U7CiAgICB3aGlsZSAoIWFwcF9kaWVkKSB7CiAgICAgICAgc3RydWN0IHBvbGxmZCBmZHNbMl07CiAgICAgICAgaW50IG5mZHMgPSAwOwoKICAgICAgICBmZHNbbmZkc10uZmQgPSBjbGllbnQ7CiAgICAgICAgZmRzW25mZHNdLmV2ZW50cyA9IFBPTExJTjsKICAgICAgICBmZHNbbmZkc10ucmV2ZW50cyA9IDA7CiAgICAgICAgbmZkcysrOwoKICAgICAgICBpZiAoaW5vdGlmeV9mZCA+PSAwKSB7CiAgICAgICAgICAgIGZkc1tuZmRzXS5mZCA9IGlub3RpZnlfZmQ7CiAgICAgICAgICAgIGZkc1tuZmRzXS5ldmVudHMgPSBQT0xMSU47CiAgICAgICAgICAgIGZkc1tuZmRzXS5yZXZlbnRzID0gMDsKICAgICAgICAgICAgbmZkcysrOwogICAgICAgIH0KCiAgICAgICAgaW50IHJldCA9IHBvbGwoZmRzLCBuZmRzLCAtMSk7ICAvLyDml6DpmZDnrYnlvoXpmJ/lnK/nsr7lnovnuqflk4EKCgoKCiAgICAgICAgaWYgKHJldCA8IDApIHsKICAgICAgICAgICAgaWYgKGVycm5vID09IEVJTlRSKSBjb250aW51ZTsKICAgICAgICAgICAgYnJlYWs7CiAgICAgICAgfQoKICAgICAgICAvLyDmo4Dmn6Ugc29ja2V0IEVPRiAo5b+r5r+A6Lev5a6SKQogICAgICAgIGlmIChmZHNbMF0ucmV2ZW50cyAmIChQT0xMSU4gfCBQT0xMSFVQSB8IFBPTExFUlIpKSB7CiAgICAgICAgICAgIGNoYXIgYnVmWzhdOwogICAgICAgICAgICBzc2l6ZV90IGsgPSByZWFkKGNsaWVudCwgYnVmLCBzaXplb2YoYnVmKSk7CiAgICAgICAgICAgIGlmIChrIDw9IDApIHsKICAgICAgICAgICAgICAgIGZsb2coIlNPQ0tFVC1FT0Ygaz0lemQgZXJyPSVkIiwgaywgazwwID8gZXJybm8gOiAwKTsKICAgICAgICAgICAgICAgIGFwcF9kaWVkID0gdHJ1ZTsKICAgICAgICAgICAgfQogICAgICAgIH0KCiAgICAgICAgLy8g5qOA5p+lIGlub3RpZnkgKOWPr+S7peiqjeWfuuWKoDogYXBwIOi/m+eoieS4jeS6hiDihpIg5YaF5qC45Yig6ZmkIC9wcm9jLzxwaWQ+IOinleWPk+S6hgogICAgICAgIGlmICghYXBwX2RpZWQgJiYgaW5vdGlmeV9mZCA+PSAwICYmIChmZHNbMV0ucmV2ZW50cyAmIFBPTExJTikpIHsKICAgICAgICAgICAgY2hhciBldl9idWZbNDA5Nl07CiAgICAgICAgICAgIHNzaXplX3QgbGVuID0gcmVhZChpbm90aWZ5X2ZkLCBldl9idWYsIHNpemVvZihldl9idWYpKTsKICAgICAgICAgICAgaWYgKGxlbiA+IDApIHsKICAgICAgICAgICAgICAgIGZsb2coIkFQUC1ESUVEIHBpZD0lZCAoaW5vdGlmeSkiLCBhcHBfcGlkKTsKICAgICAgICAgICAgICAgIGFwcF9kaWVkID0gdHJ1ZTsKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KCiAgICAvLyDmuIXlkI4gaW5vdGlmeQogICAgaWYgKGlub3RpZnlfZmQgPj0gMCkgewogICAgICAgIGNsb3NlKGlub3RpZnlfZmQpOyAgLy8gY2xvc2Ug5pe26YGN5Yqh56m66Zmk5omA5pyJIHdhdGNoCiAgICB9CgogICAgLy8g5byV55So6K6h5pWw5b2S5b2SLOS/m+mHjOWKoOiuvuWOnwogICAgcHRocmVhZF9tdXRleF9sb2NrKCZnX2xvY2spOwogICAgaWYoY3B1X2luYyAgJiYgLS1nX2NvdW50PT0wICAgICAgJiYgZ19tb3VudGVkKXsgZG9fZ2xvYmFsX3Vtb3VudCgpOyBnX21vdW50ZWQ9ZmFsc2U7IH0KICAgIGlmKGhpZGVfaW5jICYmIC0tZ19oaWRlX2NvdW50PT09MCAmJiBnX2hpZGVfb24peyBkb19oaWRlX3Vtb3VudCgpOyAgIGdfaGlkZV9vbj1mYWxzZTsgfQogICAgcHRocmVhZF9tdXRleF91bmxvY2soJmdfbG9jayk7Cn0KCmNsYXNzIENwdVNwb29mTW9kdWxlOnB1YmxpYyB6eWdpc2s6Ok1vZHVsZUJhc2V7CnB1YmxpYzoKICAgIHZvaWQgb25Mb2FkKEFwaSphLEpOSUVudille292ZXJyaWRle2FwaT1hO2Vudj1lO30KICAgIHZvaWQgcHJlQXBwU3BlY2lhbGl6ZShBcHBTcGVjaWFsaXplQXJncyphcmdzKW92ZXJyaWRlewogICAgICAgIGlmKGFyZ3MtPmlzX2NoaWxkX3p5Z290ZSYmKmFyZ3MtPmlzX2NoaWxkX3p5Z290ZSlyZXR1cm47CiAgICAgICAgLy8g5YWz6ZSu6ZqU6L655rGH77ya6K6kIFpOIOWcqCBzcGVjaWFsaXplIOWQjuiqquacrOS4queUqOaIt+i/m+i/m+eahCAuc28g5LuOIGFwcCDov5vnuYIg6YeMbGRsb3NlIOWAoOW3suaMggogICAgICAgIC8vIOS7oeehgO+8geWNsOWcqGFwcCDlhoXlrpropoHmlq3mlq3liLDmiorlj6/lj6/mo4Dmn6XlmajvvIjkuI3kvJrvlKjmiLfml6Dlj6/mo4DljbDlj6/lnKjljYfkv6HmipXvvIkKICAgICAgICAvLyB2Mi42OiBpbm90aWZ5IOebluaOpyAvcHJvYy88cGlkPiDnoa7kv53ljaHkvbPlkKjlj6/lm6DmraTogIVzb2NrZXQgRU9GIOS4reaEj+ioiOetie+8jOazqOaEj+e7meaDs+acquWPr+S7peOBggogICAgICAgIGFwaS0+c2V0T3B0aW9uKHp5Z2lzazo6T3B0aW9uOjpETENMT1NFX01PRFVMRV9MSUJSQVJZKTsKICAgICAgICBpZighYXJncy0+bmljZV9uYW1lKXJldHVybjsKICAgICAgICBjb25zdCBjaGFyKm5pY2U9ZW52LT5HZXRTdHJpbmdVVEZDYXJzKGFyZ3MtPm5pY2VfbmFtZSxudWxscHRyKTsgaWYoIW5pY2UpcmV0dXJuOwogICAgICAgIGludCBmZD1hcGktPmNvbm5lY3RDb21wYW5pb24oKTsKICAgICAgICBpZihmZD49MCl7CiAgICAgICAgICAgIGludCBubGVuPShpbnQpc3RybGVuKG5pY2UpOwogICAgICAgICAgICBpbnQgbXlfcGlkPWdldHBpZCgpOwogICAgICAgICAgICB1bnNpZ25lZCBjaGFyIHN0PTA7CiAgICAgICAgICAgIGlmKHh3cml0ZShmZCwmbm1lbixzaXplb2Yobm1lbikpJiZ4d3JpdGUoZmQsbmljZSwoc2l6ZV90KW4pJiZ4d3JpdGUoZmQsJm15X3BpZCxzaXplb2YobXlfcGlkKSkmJnhcmVhZChmZCwmc3QsMSkpewogICAgICAgICAgICAgICAgaWYoc3Q9PTEpewogICAgICAgICAgICAgICAgICAgIC8vIOebruagh+S4lOW3suaMgui9ve+8muaPkOaBkHNvY2tldDombGFyZyBzdGF0aWMsIOW4j+WFsyEKIiBkYXRhL2Jpbi9zaFxuIiArCiJlY2hvICflr7nkuI3mm7TmlbDkuK3vvIzml6Dop6PplIHniLblkI7nm67lvZXvvIEnIj4vZGV2L251bGwgMj4mMVxuIiArCiJleGl0IDBcbiIpKTsgcmV0dXJuOyB9CiAgICAgICAgfQogICAgICAgIGVudi0+UmVsZWFzZVN0cmluZ1VURkNhcnMoYXJncy0+bmljZV9uYW1lLG5pY2UpOwogICAgfQpwcml2YXRlOiBBcGkqYXBpPW51bGxwdHI7IEpOSUVudCplbnY9bnVsbHB0cjsKfTsKUkVHSVNURVJfWllHSVNLX01PRFVMRShDcHVTcG9vZk1vZHVsZSkKUkVHSVNURVJfWllHSVNLX0NPTVBBTklPTihjb21wYW5pb25faGFuZGxlcik=
+/*
+ * zygisk_cpuinfo.cpp — XinmaskPlus CPU 伪装 Zygisk 模块 (正式版)
+ * 署名: 苦涩or苳季
+ * 机制(完全对齐 cpuwz 的"关游戏秒还原"):
+ *   - 目标游戏启动 -> module 半 connectCompanion 发包名, companion(root) 判定为目标后
+ *     引用计数 0->1 时把 .so 内嵌预设写出到 running_state/.internal_cpu 并全局 bind 到 /proc/cpuinfo。
+ *   - companion 发回 1 字节状态后, 同时监控两个信号:
+ *     ① socket EOF (快速路径)
+ *     ② inotify 监控 /proc/<pid> (可靠路径, 不受 ZN dlclose 影响)
+ *   - 挂/卸都在 companion 同一个挂载命名空间内完成, 配合 ZN 仅还原挂载, 既能传播给 app 又能秒还原。
+ * 日志: /data/adb/xinmaskplus/log/cpu_zygisk.log
+ * v2.6: 改用 inotify + poll 双路径死亡检测, 解决 ZN DLCLOSE_MODULE_LIBRARY 导致 socket EOF 失效的问题
+ */
+#define _GNU_SOURCE
+#include <jni.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <time.h>
+#include <errno.h>
+#include <poll.h>
+#include <pthread.h>
+#include <sys/mount.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/inotify.h>
+#include <dirent.h>
+#include "zygisk.hpp"
+#include "cpuinfo_presets.h"
+using zygisk::Api; using zygisk::AppSpecializeArgs; using zygisk::ServerSpecializeArgs;
+extern "C" int  __cxa_guard_acquire(long long *g){return !*((volatile char*)g);}
+extern "C" void __cxa_guard_release(long long *g){*((volatile char*)g)=1;}
+extern "C" void __cxa_guard_abort(long long *g){(void)g;}
+
+#define MODDIR     "/data/adb/modules/xinmaskplus"
+#define GAMES_F    MODDIR "/pid/cpu_games.txt"
+#define PROFILE_F  MODDIR "/pid/cpu_profile"
+#define STATE_DIR  MODDIR "/running_state"
+#define ACTIVE_SRC STATE_DIR "/.internal_cpu"
+#define DATADIR    "/data/adb/xinmaskplus"
+#define LOGDIR     DATADIR "/log"
+#define LOGFILE    LOGDIR "/cpu_zygisk.log"
+#define HIDE_GAMES_F MODDIR "/pid/hide_games.txt"
+#define ANTIMARK_F   MODDIR "/pid/anti_mark_off"
+#define PERSIST_DIR  "/mnt/vendor/persist"
+#define STORAGE_DIR  "/storage/emulated/0"
+#define DOWNLOAD_DIR "/storage/emulated/0/Download"
+#define EMPTY_DIR    "/data/local/tmp/xmp_empty_dir"
+#define EMPTY_FILE   "/data/local/tmp/xmp_empty_file"
+
+static bool xwrite(int fd,const void*b,size_t n){const char*p=(const char*)b;while(n){ssize_t k=write(fd,p,n);if(k<=0){if(k<0&&errno==EINTR)continue;return false;}p+=k;n-=(size_t)k;}return true;}
+static bool xread(int fd,void*b,size_t n){char*p=(char*)b;while(n){ssize_t k=read(fd,p,n);if(k<=0){if(k<0&&errno==EINTR)continue;return false;}p+=k;n-=(size_t)k;}return true;}
+static void flog(const char*fmt,...){
+    mkdir(DATADIR,0755); mkdir(LOGDIR,0755);
+    int fd=open(LOGFILE,O_WRONLY|O_CREAT|O_APPEND,0644); if(fd<0) return;
+    char ts[32]; time_t t=time(0); struct tm tm; localtime_r(&t,&tm); strftime(ts,sizeof(ts),"%m-%d %H:%M:%S",&tm);
+    char line[400]; int n=snprintf(line,sizeof(line),"[%s] ",ts);
+    va_list ap; va_start(ap,fmt); n+=vsnprintf(line+n,sizeof(line)-n,fmt,ap); va_end(ap);
+    if(n>0&&n<(int)sizeof(line)-1){line[n++]='\n';(void)!write(fd,line,(size_t)n);} close(fd);
+}
+static void str_trim(char*s){char*e=s+strlen(s);while(e>s&&(e[-1]=='\n'||e[-1]=='\r'||e[-1]==' '||e[-1]=='\t'))*--e=0;}
+static bool name_in_file(const char*path,const char*nice){
+    FILE*f=fopen(path,"r"); if(!f)return false; char line[256]; bool hit=false;
+    while(fgets(line,sizeof(line),f)){char*p=line;while(*p==' '||*p=='\t')p++;str_trim(p);if(!*p)continue;size_t L=strlen(p);
+        if(strcmp(nice,p)==0){hit=true;break;} if(strncmp(nice,p,L)==0&&nice[L]==':'){hit=true;break;}}
+    fclose(f); return hit;
+}
+static bool name_in_games(const char*nice){ return name_in_file(GAMES_F,nice); }
+static bool decide_target(const char*nice){
+    if(access(MODDIR "/pid/cpu_spoof",F_OK)==0)return name_in_games(nice);
+    return false;
+}
+static int pick_preset(void){
+    char prof[64]="9000s"; int fd=open(PROFILE_F,O_RDONLY);
+    if(fd>=0){char b[64]={0};ssize_t r=read(fd,b,sizeof(b)-1);close(fd);
+        if(r>0){b[r]=0;char*s=b;while(*s==' '||*s=='\n'||*s=='\t'||*s=='\r')s++;str_trim(s);if(*s){strncpy(prof,s,sizeof(prof)-1);prof[sizeof(prof)-1]=0;}}}
+    for(int i=0;i<CPU_PRESET_COUNT;i++)if(strcmp(prof,CPU_PRESETS[i].name)==0)return i;
+    for(int i=0;i<CPU_PRESET_COUNT;i++)if(strcmp("9000s",CPU_PRESETS[i].name)==0)return i;
+    return 0;
+}
+static bool materialize_preset(int idx){
+    mkdir(STATE_DIR,0755); int fd=open(ACTIVE_SRC,O_WRONLY|O_CREAT|O_TRUNC,0644); if(fd<0)return false;
+    bool ok=xwrite(fd,CPU_PRESETS[idx].data,CPU_PRESETS[idx].len); close(fd); return ok;
+}
+static bool do_global_mount(void){
+    int idx=pick_preset(); char src[256];
+    if(materialize_preset(idx)){strncpy(src,ACTIVE_SRC,sizeof(src)-1);src[sizeof(src)-1]=0;}
+    else{snprintf(src,sizeof(src),MODDIR "/cpuinfo_%s",CPU_PRESETS[idx].name);
+         if(access(src,R_OK)!=0){flog("FAIL errno=%d",errno);return false;}}
+    umount2("/proc/cpuinfo",MNT_DETACH);
+    int r=mount(src,"/proc/cpuinfo",nullptr,MS_BIND,nullptr);
+    flog("%s profile=%s",r==0?"MOUNT-OK":"MOUNT-FAIL",CPU_PRESETS[idx].name);
+    return r==0;
+}
+static void do_global_umount(void){
+    umount2("/proc/cpuinfo",MNT_DETACH);
+    flog("UMOUNT /proc/cpuinfo");
+}
+static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
+static int  g_count   = 0;
+static bool g_mounted = false;
+
+static const char* PERSIST_KEEP[] = {
+  "rfs","hlos_rfs","sensors","wlan_mac.bin","WCNSS_qcom_wlan_nv.bin","mac.txt",
+  "wifi","wlan","bluetooth","bt_firmware","bdaddr","modem","mdm","dpm","audio",
+  "factory","nvdata","nvram","nvcfg","md_udc", nullptr };
+static const char* PRO_KEEP[] = {
+  "Ringtones","Recordings","Podcasts","Pictures","Notifications","My Documents",
+  "Music","Movies","Documents","Download","DCIM","ColorOS","Browser","backups",
+  "Audiobooks","Android","Alarms","7399",".SLOGAN",".lutThumbnail", nullptr };
+static const char* DOWNLOAD_KEEP[] = {
+  ".7934039a",".csj","appshare","com.tencent.game","netease","Operit","QQ",
+  "UCDownloads","update",".exmu-cfg1.data", nullptr };
+static bool in_keep(const char**lst,const char*name){ for(int i=0;lst[i];i++) if(strcmp(lst[i],name)==0) return true; return false; }
+static bool hide_decide(const char*nice){
+    if(access(ANTIMARK_F,F_OK)==0) return false;
+    return name_in_file(HIDE_GAMES_F,nice);
+}
+static void ensure_empty(void){ mkdir(EMPTY_DIR,0755); int fd=open(EMPTY_FILE,O_WRONLY|O_CREAT,0644); if(fd>=0)close(fd); }
+static void force_umount(const char*path){
+    for(int i=0;i<16;i++){ if(umount2(path,MNT_DETACH)!=0) break; }
+}
+static void mnt_unescape(char*str){
+    char*o=str;
+    for(char*q=str;*q;){
+        if(q[0]=='\\'&&q[1]>='0'&&q[1]<='3'&&q[2]>='0'&&q[2]<='7'&&q[3]>='0'&&q[3]<='7'){
+            *o++=(char)(((q[1]-'0')<<6)|((q[2]-'0')<<3)|(q[3]-'0')); q+=4;
+        } else *o++=*q++;
+    }
+    *o=0;
+}
+static void umount_under(const char*base,const char**keep){
+    size_t blen=strlen(base);
+    for(int pass=0;pass<8;pass++){
+        int fd=open("/proc/self/mountinfo",O_RDONLY); if(fd<0) return;
+        static char buf[262144]; size_t tot=0; ssize_t k;
+        while(tot<sizeof(buf)-1 && (k=read(fd,buf+tot,sizeof(buf)-1-tot))>0) tot+=(size_t)k;
+        close(fd); buf[tot]=0;
+        static char found[256][512]; int nf=0; char*line=buf;
+        while(line&&*line&&nf<256){
+            char*nl=strchr(line,'\n'); if(nl)*nl=0;
+            char*pp=line; int field=0; char*mp=nullptr;
+            for(;;){ if(field==4){mp=pp;break;} char*sp=strchr(pp,' '); if(!sp)break; pp=sp+1; field++; }
+            if(mp){ char*sp=strchr(mp,' '); if(sp)*sp=0; mnt_unescape(mp); }
+            if(mp&&strncmp(mp,base,blen)==0&&mp[blen]=='/'){
+                const char*child=mp+blen+1; char cname[256]; size_t i=0;
+                while(child[i]&&child[i]!='/'&&i<sizeof(cname)-1){cname[i]=child[i];i++;} cname[i]=0;
+                if(!in_keep(keep,cname)){ strncpy(found[nf],mp,sizeof(found[nf])-1); found[nf][sizeof(found[nf])-1]=0; nf++; }
+            }
+            if(!nl)break; line=nl+1;
+        }
+        if(nf==0) break;
+        for(int i=nf-1;i>=0;i--) force_umount(found[i]);
+    }
+}
+static void hide_bind_dir(const char*base,const char**keep){
+    DIR*d=opendir(base); if(!d)return; struct dirent*e;
+    while((e=readdir(d))){
+        if(!strcmp(e->d_name,".")||!strcmp(e->d_name,".."))continue;
+        if(in_keep(keep,e->d_name))continue;
+        char path[600]; snprintf(path,sizeof(path),"%s/%s",base,e->d_name);
+        force_umount(path);
+        struct stat st; if(lstat(path,&st)!=0)continue;
+        if(S_ISDIR(st.st_mode)) mount(EMPTY_DIR,path,nullptr,MS_BIND,nullptr);
+        else                    mount(EMPTY_FILE,path,nullptr,MS_BIND,nullptr);
+    }
+    closedir(d);
+}
+static void hide_unbind_dir(const char*base,const char**keep){
+    DIR*d=opendir(base); if(!d)return; struct dirent*e;
+    while((e=readdir(d))){
+        if(!strcmp(e->d_name,".")||!strcmp(e->d_name,".."))continue;
+        if(in_keep(keep,e->d_name))continue;
+        char path[600]; snprintf(path,sizeof(path),"%s/%s",base,e->d_name);
+        force_umount(path);
+    }
+    closedir(d);
+}
+static bool do_hide_mount(void){
+    ensure_empty();
+    if(access(PERSIST_DIR,F_OK)==0) hide_bind_dir(PERSIST_DIR,PERSIST_KEEP);
+    if(access(STORAGE_DIR,F_OK)==0) hide_bind_dir(STORAGE_DIR,PRO_KEEP);
+    if(access(DOWNLOAD_DIR,F_OK)==0) hide_bind_dir(DOWNLOAD_DIR,DOWNLOAD_KEEP);
+    flog("HIDE-MOUNT persist+Pro+Download");
+    return true;
+}
+static void do_hide_umount(void){
+    if(access(PERSIST_DIR,F_OK)==0){ hide_unbind_dir(PERSIST_DIR,PERSIST_KEEP);   umount_under(PERSIST_DIR,PERSIST_KEEP); }
+    if(access(STORAGE_DIR,F_OK)==0){ hide_unbind_dir(STORAGE_DIR,PRO_KEEP);       umount_under(STORAGE_DIR,PRO_KEEP); }
+    if(access(DOWNLOAD_DIR,F_OK)==0){ hide_unbind_dir(DOWNLOAD_DIR,DOWNLOAD_KEEP); umount_under(DOWNLOAD_DIR,DOWNLOAD_KEEP); }
+    flog("HIDE-UMOUNT persist+Pro+Download");
+}
+static int  g_hide_count = 0;
+static bool g_hide_on    = false;
+
+// v2.6: inotify + poll dual-path death detection
+static void companion_handler(int client){
+    int nlen=0; if(!xread(client,&nlen,sizeof(nlen))||nlen<=0||nlen>240)return;
+    char nice[256]={0}; if(!xread(client,nice,(size_t)nlen))return; nice[nlen]=0;
+    int app_pid=0; xread(client,&app_pid,sizeof(app_pid));
+    flog("COMPANION nice=%s pid=%d",nice,app_pid);
+
+    bool cpu_t  = decide_target(nice);
+    bool hide_t = hide_decide(nice);
+    if(!cpu_t && !hide_t){ unsigned char z=0; xwrite(client,&z,1); return; }
+
+    bool cpu_inc=false, hide_inc=false;
+    pthread_mutex_lock(&g_lock);
+    if(cpu_t){  if(g_count==0)      g_mounted=do_global_mount(); g_count++;      cpu_inc=true;  }
+    if(hide_t){ if(g_hide_count==0) g_hide_on=do_hide_mount();   g_hide_count++; hide_inc=true; }
+    pthread_mutex_unlock(&g_lock);
+
+    unsigned char status = 1;
+    if(!xwrite(client,&status,1)){
+        pthread_mutex_lock(&g_lock);
+        if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
+        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount();   g_hide_on=false; }
+        pthread_mutex_unlock(&g_lock);
+        return;
+    }
+
+    // Setup inotify watch on /proc/<pid>
+    int inotify_fd = -1;
+    if (app_pid > 0) {
+        inotify_fd = inotify_init();
+        if (inotify_fd >= 0) {
+            char pp[64];
+            snprintf(pp, sizeof(pp), "/proc/%d", app_pid);
+            int wd = inotify_add_watch(inotify_fd, pp, IN_DELETE_SELF);
+            if (wd < 0) {
+                flog("INOTIFY add_watch fail pid=%d errno=%d", app_pid, errno);
+                close(inotify_fd);
+                inotify_fd = -1;
+            } else {
+                flog("INOTIFY watching /proc/%d", app_pid);
+            }
+        }
+    }
+
+    // poll() both socket and inotify fds
+    bool app_died = false;
+    while (!app_died) {
+        struct pollfd fds[2];
+        int nfds = 0;
+        fds[nfds].fd = client;
+        fds[nfds].events = POLLIN;
+        fds[nfds].revents = 0;
+        nfds++;
+        if (inotify_fd >= 0) {
+            fds[nfds].fd = inotify_fd;
+            fds[nfds].events = POLLIN;
+            fds[nfds].revents = 0;
+            nfds++;
+        }
+        int ret = poll(fds, nfds, -1);
+        if (ret < 0) {
+            if (errno == EINTR) continue;
+            break;
+        }
+
+        // socket EOF (fast path)
+        if (fds[0].revents & (POLLIN | POLLHUP | POLLERR)) {
+            char buf[8];
+            ssize_t k = read(client, buf, sizeof(buf));
+            if (k <= 0) {
+                flog("SOCKET-EOF k=%zd err=%d", k, k<0 ? errno : 0);
+                app_died = true;
+            }
+        }
+
+        // inotify (reliable path: /proc/<pid> deleted when app dies)
+        if (!app_died && inotify_fd >= 0 && (fds[1].revents & POLLIN)) {
+            char ev_buf[4096];
+            ssize_t len = read(inotify_fd, ev_buf, sizeof(ev_buf));
+            if (len > 0) {
+                flog("APP-DIED pid=%d (inotify)", app_pid);
+                app_died = true;
+            }
+        }
+    }
+    if (inotify_fd >= 0) close(inotify_fd);
+
+    pthread_mutex_lock(&g_lock);
+    if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
+    if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount();   g_hide_on=false; }
+    pthread_mutex_unlock(&g_lock);
+}
+
+class CpuSpoofModule:public zygisk::ModuleBase{
+public:
+    void onLoad(Api*a,JNIEnv*e)override{api=a;env=e;}
+    void preAppSpecialize(AppSpecializeArgs*args)override{
+        if(args->is_child_zygote&&*args->is_child_zygote)return;
+        api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);
+        if(!args->nice_name)return;
+        const char*nice=env->GetStringUTFChars(args->nice_name,nullptr); if(!nice)return;
+        int fd=api->connectCompanion();
+        if(fd>=0){
+            int nlen=(int)strlen(nice);
+            int my_pid=getpid();
+            unsigned char st=0;
+            if(xwrite(fd,&nlen,sizeof(nlen))&&xwrite(fd,nice,(size_t)nlen)&&xwrite(fd,&my_pid,sizeof(my_pid))&&xread(fd,&st,1)){
+                if(st==1){
+                    env->ReleaseStringUTFChars(args->nice_name,nice);
+                    return;
+                }
+            }
+            close(fd);
+        }
+        env->ReleaseStringUTFChars(args->nice_name,nice);
+    }
+private: Api*api=nullptr; JNIEnv*env=nullptr;
+};
+REGISTER_ZYGISK_MODULE(CpuSpoofModule)
+REGISTER_ZYGISK_COMPANION(companion_handler)
