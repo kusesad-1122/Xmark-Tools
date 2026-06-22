@@ -1,7 +1,7 @@
 /*
  * zygisk_cpuinfo.cpp — XinmaskPlus CPU 伪装 Zygisk 模块
  * 署名: 苦涩or苳季
- * v2.9: 进程存活6s后才挂载, 过滤后台短暂拉起进程
+ * v2.9.2: inotify-only死亡检测, socket EOF不算死亡, 过滤后台短暂拉起进程
  */
 #define _GNU_SOURCE
 #include <jni.h>
@@ -225,7 +225,13 @@ static void companion_handler(int client){
         if(ret<0){if(errno==EINTR)continue;break;}
         if(fds[0].revents&(POLLIN|POLLHUP|POLLERR)){
             char buf[8]; ssize_t k=read(client,buf,sizeof(buf));
-            if(k<=0){flog("SOCKET-EOF k=%zd err=%d nice=%s",k,k<0?errno:0,nice);app_died=true;}
+            if(k<=0){
+                // Socket EOF happens IMMEDIATELY due to ZygiskNext DLCLOSE
+                // This is NOT real death! Keep waiting for inotify.
+                // Only inotify IN_DELETE_SELF confirms real process death.
+                flog("SOCKET-EOF (dlclose, waiting for inotify) nice=%s",nice);
+                // Don't set app_died - wait for inotify
+            }
         }
         if(!app_died&&inotify_fd>=0&&(fds[1].revents&POLLIN)){
             char ev_buf[4096]; ssize_t len=read(inotify_fd,ev_buf,sizeof(ev_buf));
