@@ -107,8 +107,16 @@ static const char* DOWNLOAD_KEEP[] = {
   ".7934039a",".csj","appshare","com.tencent.game","netease","Operit","QQ",
   "UCDownloads","update",".exmu-cfg1.data", nullptr };
 static bool in_keep(const char**lst,const char*name){ for(int i=0;lst[i];i++) if(strcmp(lst[i],name)==0) return true; return false; }
-static bool hide_decide(const char*nice){
-    if(access(ANTIMARK_F,F_OK)==0) return false;
+// Separate feature control:
+//   /pid/anti_mark  exists -> basic persist hide ON
+//   /pid/hide_storage exists -> pro storage+download hide ON
+//   Default (no files): both OFF
+static bool hide_decide_basic(const char*nice){
+    if(access(MODDIR "/pid/anti_mark",F_OK)!=0) return false;
+    return name_in_file(HIDE_GAMES_F,nice);
+}
+static bool hide_decide_pro(const char*nice){
+    if(access(MODDIR "/pid/hide_storage",F_OK)!=0) return false;
     return name_in_file(HIDE_GAMES_F,nice);
 }
 static void ensure_empty(void){ mkdir(EMPTY_DIR,0755); int fd=open(EMPTY_FILE,O_WRONLY|O_CREAT,0644); if(fd>=0)close(fd); }
@@ -171,19 +179,28 @@ static void hide_unbind_dir(const char*base,const char**keep){
     }
     closedir(d);
 }
-static bool do_hide_mount(void){
+// Separate hide mount: basic=persist, pro=storage+download
+static bool do_hide_mount_basic(void){
     ensure_empty();
     if(access(PERSIST_DIR,F_OK)==0) hide_bind_dir(PERSIST_DIR,PERSIST_KEEP);
-    if(access(STORAGE_DIR,F_OK)==0) hide_bind_dir(STORAGE_DIR,PRO_KEEP);
-    if(access(DOWNLOAD_DIR,F_OK)==0) hide_bind_dir(DOWNLOAD_DIR,DOWNLOAD_KEEP);
-    flog("HIDE-MOUNT persist+Pro+Download");
+    flog("HIDE-MOUNT persist");
     return true;
 }
-static void do_hide_umount(void){
+static bool do_hide_mount_pro(void){
+    ensure_empty();
+    if(access(STORAGE_DIR,F_OK)==0) hide_bind_dir(STORAGE_DIR,PRO_KEEP);
+    if(access(DOWNLOAD_DIR,F_OK)==0) hide_bind_dir(DOWNLOAD_DIR,DOWNLOAD_KEEP);
+    flog("HIDE-MOUNT pro+download");
+    return true;
+}
+static void do_hide_umount_basic(void){
     if(access(PERSIST_DIR,F_OK)==0){ hide_unbind_dir(PERSIST_DIR,PERSIST_KEEP);   umount_under(PERSIST_DIR,PERSIST_KEEP); }
+    flog("HIDE-UMOUNT persist");
+}
+static void do_hide_umount_pro(void){
     if(access(STORAGE_DIR,F_OK)==0){ hide_unbind_dir(STORAGE_DIR,PRO_KEEP);       umount_under(STORAGE_DIR,PRO_KEEP); }
     if(access(DOWNLOAD_DIR,F_OK)==0){ hide_unbind_dir(DOWNLOAD_DIR,DOWNLOAD_KEEP); umount_under(DOWNLOAD_DIR,DOWNLOAD_KEEP); }
-    flog("HIDE-UMOUNT persist+Pro+Download");
+    flog("HIDE-UMOUNT pro+download");
 }
 static int  g_hide_count = 0;
 static bool g_hide_on    = false;
@@ -212,20 +229,26 @@ static void companion_handler(int client){
 
     bool cpu_t  = decide_target(nice);
     bool is_main = (strchr(nice,':')==nullptr);
-    bool hide_t = hide_decide(nice);
+    bool hide_basic = hide_decide_basic(nice);
+    bool hide_pro = hide_decide_pro(nice);
+    bool hide_t = hide_basic || hide_pro;
     if(!cpu_t && !hide_t){ unsigned char z=0; xwrite(client,&z,1); return; }
     if(!is_main){ unsigned char z=0; xwrite(client,&z,1); return; }
 
     // Mount immediately (no delay)
-    bool cpu_inc=false, hide_inc=false;
+    bool cpu_inc=false, hide_inc=false, hide_inc_pro=false;
     pthread_mutex_lock(&g_lock);
     if(cpu_t){
         if(!g_mounted) g_mounted=do_global_mount();
         if(g_mounted){g_count++;cpu_inc=true;}
     }
-    if(hide_t){
-        if(!g_hide_on) g_hide_on=do_hide_mount();
+    if(hide_basic){
+        if(!g_hide_on) g_hide_on=do_hide_mount_basic();
         if(g_hide_on){g_hide_count++;hide_inc=true;}
+    }
+    if(hide_pro){
+        if(!g_hide_on_pro) g_hide_on_pro=do_hide_mount_pro();
+        if(g_hide_on_pro){g_hide_count_pro++;hide_inc_pro=true;}
     }
     pthread_mutex_unlock(&g_lock);
     flog("MOUNTED cpu=%d hide=%d (pid=%d)",cpu_inc,hide_inc,app_pid);
@@ -246,7 +269,8 @@ static void companion_handler(int client){
     if(!xwrite(client,&st,1)){
         pthread_mutex_lock(&g_lock);
         if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
-        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
+        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount_basic(); g_hide_on=false; }
+    if(hide_inc_pro && --g_hide_count_pro==0 && g_hide_on_pro){ do_hide_umount_pro(); g_hide_on_pro=false; }
         pthread_mutex_unlock(&g_lock);
         if(inotify_fd>=0) close(inotify_fd);
         return;
