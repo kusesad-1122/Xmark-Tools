@@ -197,8 +197,9 @@ static void* monitor_thread(void* arg){
     int pid = (int)(long)arg;
     char path[64];
     snprintf(path,sizeof(path),"/proc/%d",pid);
-    // Poll /proc/<pid> every 500ms until it disappears (process died)
-    while(stat(path,nullptr)==0){
+    // Poll /proc/<pid> via access() every 500ms until the process dies
+    // stat() with NULL buffer causes EFAULT - use access(F_OK) instead
+    while(access(path,F_OK)==0){
         nanosleep((const struct timespec[]){{0,500000000}},nullptr);
     }
     return nullptr;
