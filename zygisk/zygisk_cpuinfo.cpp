@@ -1,7 +1,7 @@
 /*
  * zygisk_cpuinfo.cpp — XinmaskPlus CPU 伪装 Zygisk 模块 (正式版)
  * 署名: 苦涩or苳季
- * v2.7: 子进程(含:)只参与引用计数, 不触发CPU挂载, 防止后台服务自动拉起导致幽灵伪装
+ * v2.7fix: 基于v2.6稳定版, 仅加一行子进程判断阻止幽灵挂载
  */
 #define _GNU_SOURCE
 #include <jni.h>
@@ -61,15 +61,9 @@ static bool name_in_file(const char*path,const char*nice){
     fclose(f); return hit;
 }
 static bool name_in_games(const char*nice){ return name_in_file(GAMES_F,nice); }
-// v2.7: 只有主进程(不含:)能触发CPU伪装, 子进程只参与引用计数
-static bool decide_cpu_main(const char*nice){
-    if(access(MODDIR "/pid/cpu_spoof",F_OK)!=0)return false;
-    if(strchr(nice,':')!=nullptr)return false;  // 子进程不触发CPU挂载
-    return name_in_games(nice);
-}
-static bool decide_cpu_all(const char*nice){
-    if(access(MODDIR "/pid/cpu_spoof",F_OK)!=0)return false;
-    return name_in_games(nice);
+static bool decide_target(const char*nice){
+    if(access(MODDIR "/pid/cpu_spoof",F_OK)==0)return name_in_games(nice);
+    return false;
 }
 static int pick_preset(void){
     char prof[64]="9000s"; int fd=open(PROFILE_F,O_RDONLY);
@@ -194,70 +188,68 @@ static void do_hide_umount(void){
 static int  g_hide_count = 0;
 static bool g_hide_on    = false;
 
-// v2.7: 子进程只计数不触发CPU挂载, 防止后台服务幽灵启动
+// v2.7: 基于v2.6稳定版, 仅在CPU挂载条件加一行子进程判断, 其余逻辑完全不变
 static void companion_handler(int client){
     int nlen=0; if(!xread(client,&nlen,sizeof(nlen))||nlen<=0||nlen>240)return;
     char nice[256]={0}; if(!xread(client,nice,(size_t)nlen))return; nice[nlen]=0;
     int app_pid=0; xread(client,&app_pid,sizeof(app_pid));
     flog("COMPANION nice=%s pid=%d",nice,app_pid);
 
-    // v2.7: 分离"触发"和"计数"逻辑
-    bool cpu_trigger = decide_cpu_main(nice);  // 只有主进程能触发CPU挂载
-    bool cpu_count   = decide_cpu_all(nice);   // 主+子进程都参与计数
-    bool hide_t      = hide_decide(nice);
-    if(!cpu_trigger && !cpu_count && !hide_t){ unsigned char z=0; xwrite(client,&z,1); return; }
+    bool cpu_t  = decide_target(nice);
+    bool hide_t = hide_decide(nice);
+    if(!cpu_t && !hide_t){ unsigned char z=0; xwrite(client,&z,1); return; }
 
-    bool cpu_mounted=false, hide_inc=false;
+    bool cpu_inc=false, hide_inc=false;
     pthread_mutex_lock(&g_lock);
-    // CPU: 主进程才能触发挂载; 子进程只+1计数, 不触发
-    if(cpu_trigger && !g_mounted){ g_mounted=do_global_mount(); cpu_mounted=true; }
-    if(cpu_count){ g_count++; cpu_mounted=true; }
-    // 防标记挂空: 所有进程一视同仁
-    if(hide_t){ if(g_hide_count==0) g_hide_on=do_hide_mount(); g_hide_count++; hide_inc=true; }
+    if(cpu_t){
+        // v2.7fix: 只有主进程(不带:)能触发CPU挂载, 子进程只参与计数
+        if(!g_mounted && strchr(nice,':')==nullptr) g_mounted=do_global_mount();
+        g_count++;
+        cpu_inc=true;
+    }
+    if(hide_t){ if(g_hide_count==0) g_hide_on=do_hide_mount();   g_hide_count++; hide_inc=true; }
     pthread_mutex_unlock(&g_lock);
 
-    unsigned char status = (cpu_mounted || g_hide_on) ? 1 : 0;
+    unsigned char status = 1;
     if(!xwrite(client,&status,1)){
         pthread_mutex_lock(&g_lock);
-        if(cpu_count && --g_count==0 && g_mounted){ do_global_umount(); g_mounted=false; }
-        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
+        if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
+        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount();   g_hide_on=false; }
         pthread_mutex_unlock(&g_lock);
         return;
     }
 
-    // Setup inotify watch on /proc/<pid>
+    // inotify + poll death detection
     int inotify_fd = -1;
-    if (app_pid > 0) {
-        inotify_fd = inotify_init();
-        if (inotify_fd >= 0) {
-            char pp[64]; snprintf(pp, sizeof(pp), "/proc/%d", app_pid);
-            int wd = inotify_add_watch(inotify_fd, pp, IN_DELETE_SELF);
-            if (wd < 0) { close(inotify_fd); inotify_fd = -1; }
-            else { flog("INOTIFY watching /proc/%d", app_pid); }
+    if(app_pid>0){
+        inotify_fd=inotify_init();
+        if(inotify_fd>=0){
+            char pp[64]; snprintf(pp,sizeof(pp),"/proc/%d",app_pid);
+            if(inotify_add_watch(inotify_fd,pp,IN_DELETE_SELF)<0){close(inotify_fd);inotify_fd=-1;}
+            else flog("INOTIFY watching /proc/%d",app_pid);
         }
     }
-
-    bool app_died = false;
-    while (!app_died) {
-        struct pollfd fds[2]; int nfds = 0;
-        fds[nfds].fd = client; fds[nfds].events = POLLIN; fds[nfds].revents = 0; nfds++;
-        if (inotify_fd >= 0) { fds[nfds].fd = inotify_fd; fds[nfds].events = POLLIN; fds[nfds].revents = 0; nfds++; }
-        int ret = poll(fds, nfds, -1);
-        if (ret < 0) { if (errno == EINTR) continue; break; }
-        if (fds[0].revents & (POLLIN | POLLHUP | POLLERR)) {
-            char buf[8]; ssize_t k = read(client, buf, sizeof(buf));
-            if (k <= 0) { flog("SOCKET-EOF k=%zd err=%d", k, k<0?errno:0); app_died = true; }
+    bool app_died=false;
+    while(!app_died){
+        struct pollfd fds[2]; int nfds=0;
+        fds[nfds].fd=client; fds[nfds].events=POLLIN; fds[nfds].revents=0; nfds++;
+        if(inotify_fd>=0){fds[nfds].fd=inotify_fd;fds[nfds].events=POLLIN;fds[nfds].revents=0;nfds++;}
+        int ret=poll(fds,nfds,-1);
+        if(ret<0){if(errno==EINTR)continue;break;}
+        if(fds[0].revents&(POLLIN|POLLHUP|POLLERR)){
+            char buf[8]; ssize_t k=read(client,buf,sizeof(buf));
+            if(k<=0){flog("SOCKET-EOF k=%zd err=%d",k,k<0?errno:0);app_died=true;}
         }
-        if (!app_died && inotify_fd >= 0 && (fds[1].revents & POLLIN)) {
-            char ev_buf[4096]; ssize_t len = read(inotify_fd, ev_buf, sizeof(ev_buf));
-            if (len > 0) { flog("APP-DIED pid=%d (inotify)", app_pid); app_died = true; }
+        if(!app_died&&inotify_fd>=0&&(fds[1].revents&POLLIN)){
+            char ev_buf[4096]; ssize_t len=read(inotify_fd,ev_buf,sizeof(ev_buf));
+            if(len>0){flog("APP-DIED pid=%d (inotify)",app_pid);app_died=true;}
         }
     }
-    if (inotify_fd >= 0) close(inotify_fd);
+    if(inotify_fd>=0) close(inotify_fd);
 
     pthread_mutex_lock(&g_lock);
-    if(cpu_count && --g_count==0 && g_mounted){ do_global_umount(); g_mounted=false; }
-    if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
+    if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
+    if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount();   g_hide_on=false; }
     pthread_mutex_unlock(&g_lock);
 }
 
