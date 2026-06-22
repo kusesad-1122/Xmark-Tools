@@ -1,7 +1,7 @@
 /*
  * zygisk_cpuinfo.cpp — XinmaskPlus CPU 伪装 Zygisk 模块
  * 署名: 苦涩or苳季
- * v2.8: 子进程不计入CPU引用计数, 防止后台推送服务阻止还原
+ * v2.8.3: 前台进程检测(oom_score_adj), 防止后台推送服务阻止还原
  */
 #define _GNU_SOURCE
 #include <jni.h>
@@ -189,6 +189,19 @@ static int  g_hide_count = 0;
 static bool g_hide_on    = false;
 
 // v2.8: 子进程完全不计入CPU引用计数, 只有主进程(不带:)参与挂载+计数
+static bool is_foreground_process(pid_t pid){
+    char path[64];
+    snprintf(path,sizeof(path),"/proc/%d/oom_score_adj",pid);
+    int fd=open(path,O_RDONLY);
+    if(fd<0) return true;  // can't read, assume foreground (conservative)
+    char buf[16]={0};
+    read(fd,buf,sizeof(buf)-1);
+    close(fd);
+    int score=atoi(buf);
+    // foreground apps oom_score_adj<=200, background services>=800
+    return score <= 500;
+}
+
 static void companion_handler(int client){
     int nlen=0; if(!xread(client,&nlen,sizeof(nlen))||nlen<=0||nlen>240)return;
     char nice[256]={0}; if(!xread(client,nice,(size_t)nlen))return; nice[nlen]=0;
@@ -197,18 +210,19 @@ static void companion_handler(int client){
 
     bool cpu_t  = decide_target(nice);
     bool is_main = (strchr(nice,':')==nullptr);
+    bool is_fg = is_foreground_process(app_pid);
     bool hide_t = hide_decide(nice);
     if(!cpu_t && !hide_t){ unsigned char z=0; xwrite(client,&z,1); return; }
 
     bool cpu_inc=false, hide_inc=false;
     pthread_mutex_lock(&g_lock);
     // CPU: 只有主进程(不带:)才参与挂载+计数, 子进程完全忽略CPU
-    if(cpu_t && is_main){
+    if(cpu_t && is_main && is_fg){
         if(!g_mounted) g_mounted=do_global_mount();
         if(g_mounted) { g_count++; cpu_inc=true; }
     }
     // 防标记挂空: 只主进程参与挂载+计数(同CPU)
-    if(hide_t && is_main){ if(!g_hide_on) g_hide_on=do_hide_mount(); if(g_hide_on) { g_hide_count++; hide_inc=true; } }
+    if(hide_t && is_main && is_fg){ if(!g_hide_on) g_hide_on=do_hide_mount(); if(g_hide_on) { g_hide_count++; hide_inc=true; } }
     pthread_mutex_unlock(&g_lock);
 
     unsigned char status = (cpu_inc || g_hide_on) ?1:0;
