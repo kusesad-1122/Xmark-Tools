@@ -1,7 +1,7 @@
 /*
  * zygisk_cpuinfo.cpp — XinmaskPlus CPU 伪装 Zygisk 模块
  * 署名: 苦涩or苳季
- * v2.9.3: CPU伪装1.7架构 监控线程死亡检测, socket EOF不算死亡, 过滤后台短暂拉起进程
+ * v2.9.4: inotify-only死亡, socket EOF忽略 监控线程死亡检测, socket EOF不算死亡, 过滤后台短暂拉起进程
  */
 #define _GNU_SOURCE
 #include <jni.h>
@@ -230,25 +230,7 @@ static void companion_handler(int client){
     pthread_mutex_unlock(&g_lock);
     flog("MOUNTED cpu=%d hide=%d (pid=%d)",cpu_inc,hide_inc,app_pid);
 
-    // Send status=1 (client keeps connection, though we ignore socket EOF)
-    unsigned char st=(cpu_inc||hide_inc)?1:0;
-    if(!xwrite(client,&st,1)){
-        // Write fail, undo
-        pthread_mutex_lock(&g_lock);
-        if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
-        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
-        pthread_mutex_unlock(&g_lock);
-        return;
-    }
-
-    // Create monitoring thread to track true process death
-    // Socket EOF from DLCLOSE is NOT real death - thread confirms via /proc/<pid>
-    pthread_t monitor;
-    pthread_create(&monitor,nullptr,monitor_thread,(void*)(long)app_pid);
-
-    // Read loop: ignore socket EOF (dlclose), wait for inotify
-    // But also: if thread finishes (process died during inotify setup), handle it
-    bool app_died=false;
+    // Set up inotify BEFORE sending status
     int inotify_fd = -1;
     if(app_pid>0){
         inotify_fd=inotify_init();
@@ -258,28 +240,39 @@ static void companion_handler(int client){
             else flog("INOTIFY watching /proc/%d",app_pid);
         }
     }
+
+    // Send status=1 (client keeps connection, though we ignore socket EOF)
+    unsigned char st=1;
+    if(!xwrite(client,&st,1)){
+        pthread_mutex_lock(&g_lock);
+        if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
+        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
+        pthread_mutex_unlock(&g_lock);
+        if(inotify_fd>=0) close(inotify_fd);
+        return;
+    }
+
+    // Death detection: ONLY inotify IN_DELETE_SELF counts as death
+    // Socket EOF from ZygiskNext DLCLOSE is NOT real death - IGNORE it
+    bool app_died=false;
     while(!app_died){
         struct pollfd fds[2]; int nfds=0;
         fds[nfds].fd=client; fds[nfds].events=POLLIN; fds[nfds].revents=0; nfds++;
         if(inotify_fd>=0){fds[nfds].fd=inotify_fd;fds[nfds].events=POLLIN;fds[nfds].revents=0;nfds++;}
         int ret=poll(fds,nfds,-1);
         if(ret<0){if(errno==EINTR)continue;break;}
-        // Socket EOF from DLCLOSE: NOT real death, ignore
+        // Socket IGNORED: DLCLOSE causes immediate EOF, NOT death
         if(fds[0].revents&(POLLIN|POLLHUP|POLLERR)){
             char buf[8]; ssize_t k=read(client,buf,sizeof(buf));
-            if(k<=0){flog("SOCKET-EOF (dlclose, waiting for inotify) nice=%s",nice);}
+            if(k<=0){flog("SOCKET-EOF ignored (dlclose) nice=%s",nice);}
         }
-        // Inotify IN_DELETE_SELF: real death confirmed
+        // Inotify IN_DELETE_SELF: ONLY this confirms real death
         if(!app_died&&inotify_fd>=0&&(fds[1].revents&POLLIN)){
             char ev_buf[4096]; ssize_t len=read(inotify_fd,ev_buf,sizeof(ev_buf));
             if(len>0){flog("APP-DIED pid=%d (inotify)",app_pid);app_died=true;}
         }
     }
     if(inotify_fd>=0) close(inotify_fd);
-
-    // Wait for monitoring thread to also confirm death
-    pthread_join(monitor,nullptr);
-    flog("MONITOR confirmed death pid=%d",app_pid);
 
     // Decrement count, umount if zero
     pthread_mutex_lock(&g_lock);
