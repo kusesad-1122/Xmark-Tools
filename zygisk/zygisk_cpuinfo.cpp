@@ -1,7 +1,7 @@
 /*
  * zygisk_cpuinfo.cpp — XinmaskPlus CPU 伪装 Zygisk 模块
  * 署名: 苦涩or苳季
- * v2.9.2: inotify-only死亡检测, socket EOF不算死亡, 过滤后台短暂拉起进程
+ * v2.9.3: CPU伪装1.7架构 监控线程死亡检测, socket EOF不算死亡, 过滤后台短暂拉起进程
  */
 #define _GNU_SOURCE
 #include <jni.h>
@@ -189,6 +189,20 @@ static int  g_hide_count = 0;
 static bool g_hide_on    = false;
 
 // v2.8: 子进程完全不计入CPU引用计数, 只有主进程(不带:)参与挂载+计数
+// v2.9.3: file-based counting + monitoring thread (CPU伪装1.7 approach)
+// instance_count file tracks active processes
+// Monitoring thread polls /proc/<pid> via stat() for real death detection
+// Socket EOF from DLCLOSE is ignored - only thread-confirmed death counts
+static void* monitor_thread(void* arg){
+    int pid = (int)(long)arg;
+    char path[64];
+    snprintf(path,sizeof(path),"/proc/%d",pid);
+    // Poll /proc/<pid> every 500ms until it disappears (process died)
+    while(stat(path,nullptr)==0){
+        nanosleep((const struct timespec[]){{0,500000000}},nullptr);
+    }
+    return nullptr;
+}
 static void companion_handler(int client){
     int nlen=0; if(!xread(client,&nlen,sizeof(nlen))||nlen<=0||nlen>240)return;
     char nice[256]={0}; if(!xread(client,nice,(size_t)nlen))return; nice[nlen]=0;
@@ -200,17 +214,9 @@ static void companion_handler(int client){
     bool hide_t = hide_decide(nice);
     if(!cpu_t && !hide_t){ unsigned char z=0; xwrite(client,&z,1); return; }
     if(!is_main){ unsigned char z=0; xwrite(client,&z,1); return; }
-    // inotify
-    int inotify_fd = -1;
-    if(app_pid>0){
-        inotify_fd=inotify_init();
-        if(inotify_fd>=0){
-            char pp[64]; snprintf(pp,sizeof(pp),"/proc/%d",app_pid);
-            if(inotify_add_watch(inotify_fd,pp,IN_DELETE_SELF)<0){close(inotify_fd);inotify_fd=-1;}
-            else flog("INOTIFY watching /proc/%d",app_pid);
-        }
-    }
-    // v2.9.2: mount immediately, inotify-only death, socket EOF ignored
+
+    // Mount immediately (no delay)
+    bool cpu_inc=false, hide_inc=false;
     pthread_mutex_lock(&g_lock);
     if(cpu_t){
         if(!g_mounted) g_mounted=do_global_mount();
@@ -222,34 +228,65 @@ static void companion_handler(int client){
     }
     pthread_mutex_unlock(&g_lock);
     flog("MOUNTED cpu=%d hide=%d (pid=%d)",cpu_inc,hide_inc,app_pid);
-    unsigned char st=1; xwrite(client,&st,1);
+
+    // Send status=1 (client keeps connection, though we ignore socket EOF)
+    unsigned char st=(cpu_inc||hide_inc)?1:0;
+    if(!xwrite(client,&st,1)){
+        // Write fail, undo
+        pthread_mutex_lock(&g_lock);
+        if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
+        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
+        pthread_mutex_unlock(&g_lock);
+        return;
+    }
+
+    // Create monitoring thread to track true process death
+    // Socket EOF from DLCLOSE is NOT real death - thread confirms via /proc/<pid>
+    pthread_t monitor;
+    pthread_create(&monitor,nullptr,monitor_thread,(void*)(long)app_pid);
+
+    // Read loop: ignore socket EOF (dlclose), wait for inotify
+    // But also: if thread finishes (process died during inotify setup), handle it
     bool app_died=false;
+    int inotify_fd = -1;
+    if(app_pid>0){
+        inotify_fd=inotify_init();
+        if(inotify_fd>=0){
+            char pp[64]; snprintf(pp,sizeof(pp),"/proc/%d",app_pid);
+            if(inotify_add_watch(inotify_fd,pp,IN_DELETE_SELF)<0){close(inotify_fd);inotify_fd=-1;}
+            else flog("INOTIFY watching /proc/%d",app_pid);
+        }
+    }
     while(!app_died){
         struct pollfd fds[2]; int nfds=0;
         fds[nfds].fd=client; fds[nfds].events=POLLIN; fds[nfds].revents=0; nfds++;
         if(inotify_fd>=0){fds[nfds].fd=inotify_fd;fds[nfds].events=POLLIN;fds[nfds].revents=0;nfds++;}
         int ret=poll(fds,nfds,-1);
         if(ret<0){if(errno==EINTR)continue;break;}
+        // Socket EOF from DLCLOSE: NOT real death, ignore
         if(fds[0].revents&(POLLIN|POLLHUP|POLLERR)){
             char buf[8]; ssize_t k=read(client,buf,sizeof(buf));
-            if(k<=0){
-                // DLCLOSE causes immediate socket EOF, NOT real death
-                // Keep waiting for inotify IN_DELETE_SELF
-                flog("SOCKET-EOF (dlclose, waiting for inotify) nice=%s",nice);
-            }
+            if(k<=0){flog("SOCKET-EOF (dlclose, waiting for inotify) nice=%s",nice);}
         }
+        // Inotify IN_DELETE_SELF: real death confirmed
         if(!app_died&&inotify_fd>=0&&(fds[1].revents&POLLIN)){
             char ev_buf[4096]; ssize_t len=read(inotify_fd,ev_buf,sizeof(ev_buf));
             if(len>0){flog("APP-DIED pid=%d (inotify)",app_pid);app_died=true;}
         }
     }
     if(inotify_fd>=0) close(inotify_fd);
+
+    // Wait for monitoring thread to also confirm death
+    pthread_join(monitor,nullptr);
+    flog("MONITOR confirmed death pid=%d",app_pid);
+
+    // Decrement count, umount if zero
     pthread_mutex_lock(&g_lock);
     if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
     if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
     pthread_mutex_unlock(&g_lock);
     flog("UMOUNT on death cpu=%d hide=%d (nice=%s)",cpu_inc,hide_inc,nice);
-    }
+}
 class CpuSpoofModule:public zygisk::ModuleBase{
 public:
     void onLoad(Api*a,JNIEnv*e)override{api=a;env=e;}
