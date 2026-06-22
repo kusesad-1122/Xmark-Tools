@@ -1,7 +1,7 @@
 /*
- * zygisk_cpuinfo.cpp — XinmaskPlus CPU 伪装 Zygisk 模块 (正式版)
+ * zygisk_cpuinfo.cpp — XinmaskPlus CPU 伪装 Zygisk 模块
  * 署名: 苦涩or苳季
- * v2.7fix: 基于v2.6稳定版, 仅加一行子进程判断阻止幽灵挂载
+ * v2.8: 子进程不计入CPU引用计数, 防止后台推送服务阻止还原
  */
 #define _GNU_SOURCE
 #include <jni.h>
@@ -188,7 +188,7 @@ static void do_hide_umount(void){
 static int  g_hide_count = 0;
 static bool g_hide_on    = false;
 
-// v2.7: 基于v2.6稳定版, 仅在CPU挂载条件加一行子进程判断, 其余逻辑完全不变
+// v2.8: 子进程完全不计入CPU引用计数, 只有主进程(不带:)参与挂载+计数
 static void companion_handler(int client){
     int nlen=0; if(!xread(client,&nlen,sizeof(nlen))||nlen<=0||nlen>240)return;
     char nice[256]={0}; if(!xread(client,nice,(size_t)nlen))return; nice[nlen]=0;
@@ -196,21 +196,23 @@ static void companion_handler(int client){
     flog("COMPANION nice=%s pid=%d",nice,app_pid);
 
     bool cpu_t  = decide_target(nice);
+    bool is_main = (strchr(nice,':')==nullptr);
     bool hide_t = hide_decide(nice);
     if(!cpu_t && !hide_t){ unsigned char z=0; xwrite(client,&z,1); return; }
 
     bool cpu_inc=false, hide_inc=false;
     pthread_mutex_lock(&g_lock);
-    if(cpu_t){
-        // v2.7fix: 只有主进程(不带:)能触发CPU挂载, 子进程只参与计数
-        if(!g_mounted && strchr(nice,':')==nullptr) g_mounted=do_global_mount();
+    // CPU: 只有主进程(不带:)才参与挂载+计数, 子进程完全忽略CPU
+    if(cpu_t && is_main){
+        if(!g_mounted) g_mounted=do_global_mount();
         g_count++;
         cpu_inc=true;
     }
-    if(hide_t){ if(g_hide_count==0) g_hide_on=do_hide_mount();   g_hide_count++; hide_inc=true; }
+    // 防标记挂空: 所有进程一视同仁(包括子进程)
+    if(hide_t){ if(g_hide_count==0) g_hide_on=do_hide_mount(); g_hide_count++; hide_inc=true; }
     pthread_mutex_unlock(&g_lock);
 
-    unsigned char status = 1;
+    unsigned char status = (cpu_inc || g_hide_on) ?1:0;
     if(!xwrite(client,&status,1)){
         pthread_mutex_lock(&g_lock);
         if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
