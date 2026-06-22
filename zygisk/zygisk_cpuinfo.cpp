@@ -280,18 +280,32 @@ static void companion_handler(int client){
 
     // Death detection: ONLY inotify IN_DELETE_SELF counts as death
     // Socket EOF from ZygiskNext DLCLOSE is NOT real death - IGNORE it
+    bool socket_eof=false;
     bool app_died=false;
     while(!app_died){
         struct pollfd fds[2]; int nfds=0;
-        fds[nfds].fd=client; fds[nfds].events=POLLIN; fds[nfds].revents=0; nfds++;
-        if(inotify_fd>=0){fds[nfds].fd=inotify_fd;fds[nfds].events=POLLIN;fds[nfds].revents=0;nfds++;}
+        if(!socket_eof){
+            fds[nfds].fd=client; fds[nfds].events=POLLIN; fds[nfds].revents=0; nfds++;
+        }
+        if(inotify_fd>=0){
+            fds[nfds].fd=inotify_fd; fds[nfds].events=POLLIN; fds[nfds].revents=0; nfds++;
+        }
+        if(nfds==0){ app_died=true; break; }
         int ret=poll(fds,nfds,-1);
         if(ret<0){if(errno==EINTR)continue;break;}
-        // Socket IGNORED: DLCLOSE causes immediate EOF, NOT death
-        if(fds[0].revents&(POLLIN|POLLHUP|POLLERR)){
+        if(!socket_eof && (fds[0].revents&(POLLIN|POLLHUP|POLLERR))){
             char buf[8]; ssize_t k=read(client,buf,sizeof(buf));
-            if(k<=0){flog("SOCKET-EOF ignored (dlclose) nice=%s",nice);}
+            if(k<=0){
+                socket_eof=true;
+                flog("SOCKET-EOF (dlclose) nice=%s",nice);
+                if(inotify_fd<0){ app_died=true; }
+            }
         }
+        if(!app_died&&inotify_fd>=0&&(fds[socket_eof?0:1].revents&POLLIN)){
+            char ev_buf[4096]; ssize_t len=read(inotify_fd,ev_buf,sizeof(ev_buf));
+            if(len>0){flog("APP-DIED pid=%d (inotify)",app_pid);app_died=true;}
+        }
+    }
         // Inotify IN_DELETE_SELF: ONLY this confirms real death
         if(!app_died&&inotify_fd>=0&&(fds[1].revents&POLLIN)){
             char ev_buf[4096]; ssize_t len=read(inotify_fd,ev_buf,sizeof(ev_buf));
