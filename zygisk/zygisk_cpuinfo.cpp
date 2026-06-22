@@ -1,7 +1,7 @@
 /*
  * zygisk_cpuinfo.cpp — XinmaskPlus CPU 伪装 Zygisk 模块
  * 署名: 苦涩or苳季
- * v2.8.4: 前台检测+轮询等待AMS稳定oom_score, 防止后台推送服务阻止还原
+ * v2.9: 进程存活6s后才挂载, 过滤后台短暂拉起进程
  */
 #define _GNU_SOURCE
 #include <jni.h>
@@ -189,25 +189,6 @@ static int  g_hide_count = 0;
 static bool g_hide_on    = false;
 
 // v2.8: 子进程完全不计入CPU引用计数, 只有主进程(不带:)参与挂载+计数
-static bool is_foreground_process(pid_t pid){
-    char path[64];
-    snprintf(path,sizeof(path),"/proc/%d/oom_score_adj",pid);
-    // Zygote inherits -1000; AMS sets actual value (0 for FG, ~945 for BG)
-    // within ~50-200ms. Poll until value stabilizes != -1000.
-    for(int i=0; i<40; i++){  // up to 2 seconds
-        int fd=open(path,O_RDONLY);
-        if(fd<0) return true;  // process died, assume foreground
-        char buf[16]={0};
-        if(read(fd,buf,sizeof(buf)-1)<=0){close(fd);break;}
-        close(fd);
-        int score=atoi(buf);
-        // If AMS hasn't set it yet, value is still -1000 (zygote default)
-        if(score != -1000) return score <= 500;
-        usleep(50000);  // 50ms
-    }
-    return true;  // timeout, assume foreground
-}
-
 static void companion_handler(int client){
     int nlen=0; if(!xread(client,&nlen,sizeof(nlen))||nlen<=0||nlen>240)return;
     char nice[256]={0}; if(!xread(client,nice,(size_t)nlen))return; nice[nlen]=0;
@@ -216,31 +197,10 @@ static void companion_handler(int client){
 
     bool cpu_t  = decide_target(nice);
     bool is_main = (strchr(nice,':')==nullptr);
-    bool is_fg = is_foreground_process(app_pid);
     bool hide_t = hide_decide(nice);
     if(!cpu_t && !hide_t){ unsigned char z=0; xwrite(client,&z,1); return; }
-
-    bool cpu_inc=false, hide_inc=false;
-    pthread_mutex_lock(&g_lock);
-    // CPU: 只有主进程(不带:)才参与挂载+计数, 子进程完全忽略CPU
-    if(cpu_t && is_main && is_fg){
-        if(!g_mounted) g_mounted=do_global_mount();
-        if(g_mounted) { g_count++; cpu_inc=true; }
-    }
-    // 防标记挂空: 只主进程参与挂载+计数(同CPU)
-    if(hide_t && is_main && is_fg){ if(!g_hide_on) g_hide_on=do_hide_mount(); if(g_hide_on) { g_hide_count++; hide_inc=true; } }
-    pthread_mutex_unlock(&g_lock);
-
-    unsigned char status = (cpu_inc || g_hide_on) ?1:0;
-    if(!xwrite(client,&status,1)){
-        pthread_mutex_lock(&g_lock);
-        if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
-        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
-        pthread_mutex_unlock(&g_lock);
-        return;
-    }
-
-    // inotify + poll death detection
+    if(!is_main){ unsigned char z=0; xwrite(client,&z,1); return; }
+    // inotify
     int inotify_fd = -1;
     if(app_pid>0){
         inotify_fd=inotify_init();
@@ -250,30 +210,54 @@ static void companion_handler(int client){
             else flog("INOTIFY watching /proc/%d",app_pid);
         }
     }
+    // v2.9: live 6s before mount, filter background restarts
+    unsigned char st=1; xwrite(client,&st,1);
     bool app_died=false;
-    while(!app_died){
+    bool cpu_inc=false, hide_inc=false;
+    bool did_mount=false;
+    int stage=0;
+    while(stage<2 && !app_died){
         struct pollfd fds[2]; int nfds=0;
         fds[nfds].fd=client; fds[nfds].events=POLLIN; fds[nfds].revents=0; nfds++;
         if(inotify_fd>=0){fds[nfds].fd=inotify_fd;fds[nfds].events=POLLIN;fds[nfds].revents=0;nfds++;}
-        int ret=poll(fds,nfds,-1);
+        int timeout = (stage==0) ? 6000 : -1;
+        int ret=poll(fds,nfds,timeout);
         if(ret<0){if(errno==EINTR)continue;break;}
         if(fds[0].revents&(POLLIN|POLLHUP|POLLERR)){
             char buf[8]; ssize_t k=read(client,buf,sizeof(buf));
-            if(k<=0){flog("SOCKET-EOF k=%zd err=%d",k,k<0?errno:0);app_died=true;}
+            if(k<=0){flog("SOCKET-EOF k=%zd err=%d nice=%s",k,k<0?errno:0,nice);app_died=true;}
         }
         if(!app_died&&inotify_fd>=0&&(fds[1].revents&POLLIN)){
             char ev_buf[4096]; ssize_t len=read(inotify_fd,ev_buf,sizeof(ev_buf));
             if(len>0){flog("APP-DIED pid=%d (inotify)",app_pid);app_died=true;}
         }
+        if(ret==0 && stage==0 && !app_died){
+            stage=1;
+            pthread_mutex_lock(&g_lock);
+            if(cpu_t){
+                if(!g_mounted) g_mounted=do_global_mount();
+                if(g_mounted){g_count++;cpu_inc=true;did_mount=true;}
+            }
+            if(hide_t){
+                if(!g_hide_on) g_hide_on=do_hide_mount();
+                if(g_hide_on){g_hide_count++;hide_inc=true;did_mount=true;}
+            }
+            pthread_mutex_unlock(&g_lock);
+            flog("MOUNTED after 6s cpu=%d hide=%d (pid=%d)",cpu_inc,hide_inc,app_pid);
+        }
+        if(app_died && stage==0){
+            flog("SKIP mount (died early, pid=%d lived <6s)",app_pid);
+            stage=2;
+        }
     }
     if(inotify_fd>=0) close(inotify_fd);
-
-    pthread_mutex_lock(&g_lock);
-    if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
-    if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
-    pthread_mutex_unlock(&g_lock);
-}
-
+    if(did_mount && app_died){
+        pthread_mutex_lock(&g_lock);
+        if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
+        if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
+        pthread_mutex_unlock(&g_lock);
+        flog("UMOUNT on death cpu=%d hide=%d (nice=%s)",cpu_inc,hide_inc,nice);
+    }
 class CpuSpoofModule:public zygisk::ModuleBase{
 public:
     void onLoad(Api*a,JNIEnv*e)override{api=a;env=e;}
