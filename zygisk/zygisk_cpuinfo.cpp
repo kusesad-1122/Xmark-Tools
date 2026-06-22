@@ -306,18 +306,12 @@ static void companion_handler(int client){
             if(len>0){flog("APP-DIED pid=%d (inotify)",app_pid);app_died=true;}
         }
     }
-        // Inotify IN_DELETE_SELF: ONLY this confirms real death
-        if(!app_died&&inotify_fd>=0&&(fds[1].revents&POLLIN)){
-            char ev_buf[4096]; ssize_t len=read(inotify_fd,ev_buf,sizeof(ev_buf));
-            if(len>0){flog("APP-DIED pid=%d (inotify)",app_pid);app_died=true;}
-        }
-    }
     if(inotify_fd>=0) close(inotify_fd);
-
     // Decrement count, umount if zero
     pthread_mutex_lock(&g_lock);
     if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
     if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount_basic(); g_hide_on=false; }
+    if(hide_inc_pro && --g_hide_count_pro==0 && g_hide_on_pro){ do_hide_umount_pro(); g_hide_on_pro=false; }
     pthread_mutex_unlock(&g_lock);
     flog("UMOUNT on death cpu=%d hide=%d (nice=%s)",cpu_inc,hide_inc,nice);
 }
