@@ -258,6 +258,7 @@ static void companion_handler(int client){
         pthread_mutex_unlock(&g_lock);
         flog("UMOUNT on death cpu=%d hide=%d (nice=%s)",cpu_inc,hide_inc,nice);
     }
+}
 class CpuSpoofModule:public zygisk::ModuleBase{
 public:
     void onLoad(Api*a,JNIEnv*e)override{api=a;env=e;}
