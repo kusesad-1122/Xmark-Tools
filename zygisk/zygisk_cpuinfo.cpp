@@ -301,7 +301,7 @@ static void companion_handler(int client){
     // Decrement count, umount if zero
     pthread_mutex_lock(&g_lock);
     if(cpu_inc  && --g_count==0      && g_mounted){ do_global_umount(); g_mounted=false; }
-    if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount(); g_hide_on=false; }
+    if(hide_inc && --g_hide_count==0 && g_hide_on){ do_hide_umount_basic(); g_hide_on=false; }
     pthread_mutex_unlock(&g_lock);
     flog("UMOUNT on death cpu=%d hide=%d (nice=%s)",cpu_inc,hide_inc,nice);
 }
