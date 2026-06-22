@@ -1,0 +1,42 @@
+name: Compile zygisk arm64-v8a.so
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'zygisk/**'
+      - '.github/workflows/compile.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download NDK r27c
+        run: |
+          wget -q https://dl.google.com/android/repository/android-ndk-r27c-linux.zip
+          unzip -q android-ndk-r27c-linux.zip -d $HOME
+      - name: Compile
+        run: |
+          export NDK=$HOME/android-ndk-r27c
+          cd zygisk
+          bash build.sh
+      - name: Show result
+        run: |
+          ls -lh zygisk/arm64-v8a.so
+          sha256sum zygisk/arm64-v8a.so
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arm64-v8a
+          path: zygisk/arm64-v8a.so
+          retention-days: 90
+      - name: Upload .so to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v2.9.7-so
+          name: Xmark-Tools v2.9.7 compiled .so
+          files: zygisk/arm64-v8a.so
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
