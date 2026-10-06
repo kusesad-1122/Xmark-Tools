@@ -178,6 +178,30 @@ grep -q 'drm_hook=\${dh}' lib-src/monitor_app.sh.plain \
 
 echo
 echo "=============================================="
+echo " 5.5 random_ids.sh 的 resetprop 可达性（v2.9.1 回归）"
+echo "=============================================="
+# 事故背景：exec_daemon 给 WebUI 命令导出的 PATH 不含 /data/adb/ksu/bin、
+# /data/adb/ap/bin，random_ids.sh 裸调 resetprop 会 command not found 且被
+# 2>/dev/null 吞掉，"重置设备标识"完全无效。必须经 find_rp 定位 + rp_set 调用。
+# 另：v2.9.1 首次发布时批量替换的 assert 写在写文件之前，异常导致 6 处替换
+# 全部丢失而封装语法检查无法发现——这里固化断言防复发。
+RID=lib-src/random_ids.sh.plain
+decode scripts/random_ids.sh > "$RID" 2>/dev/null
+# 注意：grep -c 无匹配时输出 "0" 但退出码为 1，不能接 || echo 0（会叠成 "0\n0"）
+n_bare=$(grep -cE '^[[:space:]]*resetprop[[:space:]]' "$RID" 2>/dev/null)
+n_rpset=$(grep -cE '^[[:space:]]*rp_set[[:space:]]' "$RID" 2>/dev/null)
+[ "$n_bare" -eq 0 ] && ok "random_ids.sh 无裸调 resetprop" \
+    || bad "random_ids.sh 有 $n_bare 处裸调 resetprop（会静默失败）"
+[ "$n_rpset" -ge 7 ] && ok "random_ids.sh rp_set 调用 $n_rpset 处" \
+    || bad "random_ids.sh rp_set 调用仅 $n_rpset 处（应 >=7）"
+grep -q 'find_rp' "$RID" \
+    && ok "random_ids.sh 含 find_rp 兜底" || bad "random_ids.sh 缺 find_rp"
+grep -q '^echo "OK:' "$RID" \
+    && ok "random_ids.sh 输出 OK: 结果行（UI 反馈依赖）" \
+    || bad "random_ids.sh 缺 OK: 结果行"
+
+echo
+echo "=============================================="
 echo " 6. 持久化闭环（pid 标志 <-> persist）"
 echo "=============================================="
 grep -q 'drm_hook' lib-src/service.sh.plain && ok "PERSIST_FLAGS 含 drm_hook" || bad "PERSIST_FLAGS 缺 drm_hook"
