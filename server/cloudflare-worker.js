@@ -1,5 +1,5 @@
 /**
- * 苳季苦涩环境助手 - 安装统计 (Cloudflare Worker 版 · v2)
+ * 苦涩环境助手 - 安装统计 (Cloudflare Worker 版 · v2)
  *
  * 部署步骤：
  * 1. cloudflare.com 注册账号（免费）
@@ -136,7 +136,7 @@ export default {
         : '';
 
       const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>安装统计 · 苳季苦涩</title>
+<title>安装统计 · 苦涩</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 body{font-family:-apple-system,sans-serif;max-width:600px;margin:40px auto;padding:0 20px;background:#f2f2f7;color:#1c1c1e}
@@ -151,7 +151,7 @@ th{font-weight:600;color:#8e8e93}
 .err code{background:#fff;padding:1px 6px;border-radius:4px;font-family:monospace}
 .err a{color:#0a84ff}
 </style></head><body>
-<h2>苳季苦涩环境助手</h2>
+<h2>苦涩环境助手</h2>
 <div class="sub">安装统计数据</div>
 ${errorBanner}
 <div class="card"><div class="total">${total}</div><div class="label">累计安装次数</div></div>

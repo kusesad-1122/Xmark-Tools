@@ -50,6 +50,46 @@ jobs:
           test -s zygisk/arm64-v8a.so
           ls -la zygisk/
 
+      - name: Set up Android NDK
+        run: |
+          set -e
+          # lib-src/build.sh 需要 NDK。GitHub runner 上没有任何预装 NDK，
+          # 不装这一步 build.sh 会直接 exit 1。
+          NDK_VER=r27c
+          URL="https://dl.google.com/android/repository/android-ndk-${NDK_VER}-linux.zip"
+          echo "downloading $URL"
+          curl -fsSL --retry 3 -o /tmp/ndk.zip "$URL"
+          # 校验是完整 zip（防止 CDN 返回错误页被当成压缩包）
+          unzip -tq /tmp/ndk.zip > /dev/null
+          mkdir -p "$HOME/Android/Sdk/ndk"
+          unzip -q /tmp/ndk.zip -d "$HOME/Android/Sdk/ndk"
+          NDK_DIR="$(ls -d "$HOME"/Android/Sdk/ndk/*/ | head -1)"
+          echo "NDK at: $NDK_DIR"
+          # 供 build.sh 的 find_ndk 命中
+          echo "ANDROID_NDK=$NDK_DIR" >> "$GITHUB_ENV"
+          "$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang" --version
+
+      - name: Build libdrmid_hook.so (NDK)
+        run: |
+          set -e
+          # DRM 层防标记的 native 库。仓库不提交预编译产物(避免二进制进 git),
+          # 由本步骤产出后打进 ZIP 的 lib/ 目录。
+          bash lib-src/build.sh
+          test -s lib/drmid_hook.so
+          file lib/drmid_hook.so
+          ls -la lib/
+
+      - name: Self-check (static)
+        run: |
+          set -e
+          # 65 项静态自检（导出符号、classifier 掩码语义、sepolicy、CI 结构等）
+          bash lib-src/selfcheck.sh
+          # 机型表自洽性：48 个机型的 set_all/set_fp 参数数、fingerprint 6 段格式、
+          # brand/product/device 三者与 fp 的对应关系
+          python3 lib-src/check_model_table.py
+          # 冲突面：DRM 层与既有模块的属性交集、do_boot 是否含 stop
+          python3 lib-src/check_conflicts.py
+
       - name: Assemble module ZIP
         run: |
           set -e
@@ -57,12 +97,16 @@ jobs:
           rm -rf "$STAGE"
           mkdir -p "$STAGE"
           # 排除仓库自身元数据 / CI / 本地构建产物,其余按原样打包(customize.sh、metainstall.sh、service.sh 等都是 base64 封装,不需要额外处理)
+          # lib-src/ 是构建期源码,不进发布包(模块运行时只需要 lib/drmid_hook.so);
+          # *.plain 是我本地解 base64 用的中间文件,更不能进包。
           rsync -a \
             --exclude '.git' \
             --exclude '.github' \
             --exclude 'dist' \
             --exclude '.gitignore' \
             --exclude '.gitattributes' \
+            --exclude 'lib-src' \
+            --exclude '*.plain' \
             ./ "$STAGE/"
           cp zygisk/arm64-v8a.so "$STAGE/zygisk/arm64-v8a.so"
           cd "$STAGE"
@@ -116,8 +160,44 @@ jobs:
           d=base64.b64decode(re.sub(r'\s+','', m.group(1))).decode()
           for k in ['coloros_lock','coloros_signal','force_hide','notify_always','auto_clean','soter']:
               assert k in d, f'PERSIST_FLAGS missing {k}'
+          assert 'drm_hook' in d, 'PERSIST_FLAGS missing drm_hook'
           print('service.sh PERSIST_FLAGS verified')
           PY
+          # lib/drmid_hook.so 必须是非空 aarch64 ELF，且导出关键符号
+          unzip -p Xmark-Tools.zip lib/drmid_hook.so > /tmp/drmid.so
+          test -s /tmp/drmid.so
+          file /tmp/drmid.so | grep -Eq 'aarch64|ARM aarch64' || {
+            echo "ERROR: lib/drmid_hook.so is not aarch64"; exit 1; }
+          for sym in A64HookFunction zn_module JNI_OnLoad; do
+            readelf --dyn-syms /tmp/drmid.so | grep -q "$sym" || {
+              echo "ERROR: lib/drmid_hook.so missing export $sym"; exit 1; }
+          done
+          echo "libdrmid_hook.so verified (aarch64 + exports present)"
+          # drm_hook_ctl.sh 的 base64 载荷必须是完整可解析的脚本
+          unzip -p Xmark-Tools.zip scripts/drm_hook_ctl.sh > /tmp/dh.sh
+          python3 - <<'PY'
+          import re, base64
+          s=open('/tmp/dh.sh').read()
+          m=re.search(r"B64END\s*\n?(.*?)B64END", s, re.S)
+          assert m, 'drm_hook_ctl.sh: B64END wrapper malformed'
+          d=base64.b64decode(re.sub(r'\s+','', m.group(1))).decode()
+          for k in ['enable','disable','status','verify']:
+              assert k in d, f'drm_hook_ctl.sh missing action {k}'
+          assert d.startswith('#!/system/bin/sh'), 'drm_hook_ctl.sh missing shebang'
+          assert 'libdrmid_hook.so' in d, 'drm_hook_ctl.sh does not reference the so'
+          print('drm_hook_ctl.sh verified')
+          PY
+          # sepolicy.rule 存在且不含全开规则
+          # （先剥注释：文件注释里引用了 `allow hal_drm_widevine * * *` 作为反例）
+          unzip -p Xmark-Tools.zip sepolicy.rule > /tmp/se.rule
+          test -s /tmp/se.rule
+          if sed 's/#.*//' /tmp/se.rule | grep -Eq 'allow\s+\S+\s+\*\s+\*\s+\*'; then
+            echo "ERROR: sepolicy.rule contains a blanket allow rule"
+            exit 1
+          fi
+          grep -q execmem /tmp/se.rule || {
+            echo "ERROR: sepolicy.rule missing execmem (trampoline needs RWX)"; exit 1; }
+          echo "sepolicy.rule verified (no blanket allow, execmem present)"
 
       - name: Compose release notes
         run: |

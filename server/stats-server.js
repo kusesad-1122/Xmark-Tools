@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 苳季苦涩环境助手 - 安装统计服务器
+ * 苦涩环境助手 - 安装统计服务器
  * 用法: node stats-server.js [端口]
  */
 const http = require('http');
@@ -31,7 +31,7 @@ const server = http.createServer((req, res) => {
             .map(([v,c])=>`<tr><td>${v}</td><td>${c}</td><td>${(c/data.total*100).toFixed(1)}%</td></tr>`).join('');
         res.setHeader('Content-Type','text/html;charset=utf-8');
         res.end(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>安装统计 · 苳季苦涩</title>
+<title>安装统计 · 苦涩</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 body{font-family:-apple-system,sans-serif;max-width:600px;margin:40px auto;padding:0 20px;background:#f2f2f7;color:#1c1c1e}
@@ -44,7 +44,7 @@ table{width:100%;border-collapse:collapse}
 th,td{padding:10px 0;text-align:left;border-bottom:1px solid #f2f2f7;font-size:14px}
 th{font-weight:600;color:#8e8e93}
 </style></head><body>
-<h2>苳季苦涩环境助手</h2>
+<h2>苦涩环境助手</h2>
 <div class="sub">安装统计数据</div>
 <div class="card">
   <div class="total">${data.total}</div>

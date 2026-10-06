@@ -1,0 +1,7 @@
+# 构建产物：lib/drmid_hook.so 由 lib-src/build.sh 用 NDK 现场编译，
+# 不提交进仓库（避免二进制进 git，也让 clone 的人必须自己装 NDK 验证一遍）。
+# CI 的 "Build libdrmid_hook.so (NDK)" step 会在打包前生成它。
+lib/drmid_hook.so
+
+# 解 base64 用的明文中间文件，只在本地调试时存在
+*.plain

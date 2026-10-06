@@ -1,0 +1,39 @@
+# sepolicy.rule — DRM 层防标记 (libdrmid_hook.so) 所需的 SELinux 放行
+#
+# 背景：本模块用 LD_PRELOAD 把 libdrmid_hook.so 注入 Widevine HAL 进程。
+# 该 so 在构造函数里做两件需要额外权限的事：
+#   1) mmap 一块 PROT_EXEC 匿名内存当 trampoline，并在写完序言后
+#      立刻 mprotect 回 r-x —— 但 RWX 窗口期仍需 execmem。
+#   2) mprotect 目标 so（libcrypto.so）的代码页为可写，patch 完恢复 r-x。
+#
+# 说明：这里只放行"必需的最小集合"，刻意不写
+#       `allow hal_drm_widevine * * *` 这类全开规则。全开虽然能跑，
+#       但会给一个 vendor 域挂上几乎无限制的访问能力，检测面反而更大。
+#
+# 若策略缺失：mmap/mprotect 会返回 EPERM，库内部只打 logcat 并放弃 hook，
+# Widevine 仍然正常工作（只是这层防标记不生效）。所以这份规则是
+# "锦上添花"，不是"不做就黑屏"。
+
+# --- 1. 读取并执行本模块的 so ---
+# Magisk 模块目录在标准策略里通常已被映射为 magisk_file，
+# 这里显式放行，避免不同 ROM 上标签不一致导致 dlopen/LD_PRELOAD 失败。
+allow hal_drm_widevine magisk_file file { getattr open read execute map }
+
+# --- 2. trampoline 用的 RWX 匿名内存 ---
+allow hal_drm_widevine self process execmem
+allow hal_drm_widevine self process { mmap sigreturn }
+
+# --- 3. patch libcrypto.so 的代码页（只读+可写，不给 exec) ---
+# 目标 so 属于 vendor_file / system_file，这里对两者都放行，
+# 因为不同 ROM 的 libcrypto.so 落点不同（/apex/com.android.runtime 也可能）。
+allow hal_drm_widevine vendor_file file { getattr open read write map }
+allow hal_drm_widevine system_file file { getattr open read write map }
+
+# --- 4. 读 /proc/self/maps 与 /dev/urandom ---
+# 库靠扫 /proc/self/maps 定位 libcrypto 多实例，取盐走 getrandom()
+# （无文件访问），但兜底路径会 open /dev/urandom。
+allow hal_drm_widevine proc file { getattr open read }
+allow hal_drm_widevine devfile file { getattr open read }
+
+# --- 5. 向 logcat 写日志 ---
+allow hal_drm_widevine devlog device { getattr write append }

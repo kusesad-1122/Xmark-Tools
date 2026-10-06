@@ -1,3 +1,78 @@
+## Xmark-Tools v2.9.0
+
+### 本次更新
+
+**修复：伪装机型冷启动不生效（长期存在的必现问题）**
+
+此前开启「伪装机型」后必须额外软重启一次才生效，根因有两个：
+
+- `scripts/model_spoof.sh` 的 `boot` 动作全仓无调用者，是一段死代码
+- 唯一会跑逻辑的 `service.sh` 开头阻塞等 `sys.boot_completed=1`，
+  等到那时 zygote / system_server 早已缓存 `ro.product.*`，写了也不生效
+
+现在改为在 `post-fs-data.sh`（zygote 启动之前）应用伪装，
+开机后首次进入系统即为伪装后的机型，无需任何额外重启。
+
+**机型库扩充至 48 个机型**
+
+- 补齐全部机型的 `ro.build.fingerprint`，覆盖率从 8/48 提升到 48/48
+- 新增从 fingerprint 反解 `build.id` / `version.incremental` / `build.type` /
+  `build.tags`，并同步到 `ro.{system,vendor,odm,product,system_ext}.build.*`，
+  避免指纹与各分区 build 信息互相矛盾
+- 强制 `ro.build.tags=release-keys`、`ro.build.type=user`
+- 修正 resetprop 调用方式：去掉 `-n`（init 已写值会导致全部跳过）与
+  `-p`（会在 `/data/property` 留残留）
+- 刻意不改 `ro.build.version.release` / `sdk`：指纹里的版本号与本机真实
+  SDK 不一定相同，硬改反而制造「sdk=31 但 release=16」这类一眼假的矛盾
+- 全部 48 个 fingerprint 统一为标准 6 段格式，修正 iPhone 两处参数错位
+
+**新增：DRM 层防标记**
+
+- 新增 `lib/drmid_hook.so`：在进程内定位 libcrypto(BoringSSL) 的
+  `SHA256_Final`，在它执行前追加一次 32 字节随机盐（`getrandom()` 真随机，
+  hex 成 64 字符）
+- Widevine L1 的 device-unique-id 与设备签名都依赖 SHA256 链式计算，
+  派生 ID 因此每次开机都不同且彼此不关联，无法被服务端聚类成同一批设备，
+  交叉验证失效
+- 实现上只patch `SHA256_Final` 一个点，patch 面最小化；符号定位走
+  PT_DYNAMIC，不依赖可能被 strip 的 section header
+- trampoline 按指令类做重定位（B/BL 超界改绝对跳转序列，ADR 拆成
+  ADRP+ADD 扩范围到 ±4GB）；遇B.cond/CBZ/TBZ/LDR-literal/PRFM 等
+  无法安全搬移的指令，直接放弃整个 hook——宁少一层保护不可黑屏
+- 全链路静默失败：hook 失败仅使本层失效，Widevine 自身照常工作
+- 通过 `wrap.<service>` + LD_PRELOAD 注入 Widevine HAL，与项目内既有
+  native 库保持同一模式
+- 附带 `sepolicy.rule`：只放行必需的最小权限集合（不写
+  `allow hal_drm_widevine * * *` 这类全开规则，全开会给 vendor 域挂上
+  几乎无限制的访问能力，检测面反而更大）
+- WebUI 新增开关，开启前有确认弹窗并明示代价
+
+**其他**
+
+- 修复 `scripts/monitor_app.sh` 的封装损坏（收尾引号未闭合，
+  `sh`/`dash`/`bash` 全部报 unexpected EOF，脚本无法执行）
+- 多个动作失败时退出码撒谎（`apply` 失败仍 `exit 0`）已修正为 `exit 1`，
+  避免调用方误判成功
+- service 名解析改为三级兜底（svc 记录 → init rc 扫描 → 候选名），
+  适配不同 ROM 的 Widevine 服务名差异
+- DRM 层开机路径改为零 service 重启：`service.sh` 调用 `boot` 而非
+  `enable`，不再每次开机都 stop/start 打断正在恢复的 DRM 播放
+- 发布流水线：新增 NDK 安装与 `libdrmid_hook.so` 编译步骤、
+  4 项静态自检、机型表自洽性校验、冲突面校验
+
+### 说明
+
+- DRM 层防标记依赖 `getrandom()`；API 26 头文件下该符号为弱引用软依赖，
+  运行期若不可用会退化到 `/dev/urandom`
+- 部分机型 Widevine 不以独立 init service 运行，此时 DRM 层不生效，
+  UI 已就此说明
+- 开启 DRM 层会重启一次 Widevine 服务，此刻正在播放的 Netflix/YouTube
+  会短暂黑屏
+- `lib/drmid_hook.so` 不随源码入库，由发布流水线用 NDK r27c 现场编译
+- 终端二进制（goterm/tmux）仍需自行放入 bin/ 目录
+
+---
+
 ## Xmark-Tools v2.8.0
 
 ### 本次更新

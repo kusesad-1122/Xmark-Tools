@@ -786,7 +786,7 @@
 
     <div id="page-home" class="page active">
         <div class="global-header">
-            <div class="main-title">苦涩or苳季</div>
+            <div class="main-title">苦涩</div>
             <div class="sub-title mottoText">死寂的心 因你而燃</div>
         </div>
         <div class="st-hero">
@@ -825,7 +825,7 @@
 
     <div id="page-clean" class="page">
         <div class="global-header">
-            <div class="main-title">苦涩or苳季</div>
+            <div class="main-title">苦涩</div>
             <div class="sub-title mottoText">死寂的心 因你而燃</div>
         </div>
         <div class="card clean-section">
@@ -836,7 +836,7 @@
 
     <div id="page-func" class="page">
         <div class="global-header">
-            <div class="main-title">苦涩or苳季</div>
+            <div class="main-title">苦涩</div>
             <div class="sub-title mottoText">死寂的心 因你而燃</div>
         </div>
         <div class="card">
@@ -903,6 +903,14 @@
                 </div>
                 <div class="func-switch-desc">Yuki 引擎定时卸载多余挂载点</div>
                 <div class="led-container" id="led-autoUmount" style="display: none;"><span class="running-led"></span> 运行中</div>
+            </div>
+            <div class="func-switch-item">
+                <div class="func-switch-header">
+                    <span class="func-switch-title">DRM层防标记</span>
+                    <label class="toggle"><input type="checkbox" id="drmHookToggle" onchange="toggleDrmHook()"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="func-switch-desc">向 Widevine HAL 注入 libcrypto 随机盐，使设备派生 ID 每次开机都不同、无法被服务端聚类<br><span style='color:#f99'>代价：开启会重启一次 Widevine DRM 服务，此刻正在播放的 Netflix/YouTube 会短暂黑屏；部分机型 Widevine 不以独立服务运行，本功能不生效。</span></div>
+                <div class="led-container" id="led-drmHook" style="display: none;"><span class="running-led"></span> 运行中</div>
             </div>
             <div class="func-switch-item">
                 <div class="func-switch-header">
@@ -993,7 +1001,7 @@
 
 <div id="page-env" class="page">
         <div class="global-header">
-            <div class="main-title">苦涩or苳季</div>
+            <div class="main-title">苦涩</div>
             <div class="sub-title mottoText">死寂的心 因你而燃</div>
         </div>
         <div class="card">
@@ -1034,7 +1042,7 @@
 
 <div id="page-jailbreak" class="page">
 <div class="global-header">
-<div class="main-title">苦涩or苳季</div>
+<div class="main-title">苦涩</div>
 <div class="sub-title mottoText">KSU越狱工具</div>
 </div>
 <div style="margin-bottom:12px;">
@@ -1069,7 +1077,7 @@
 
 <div id="page-process" class="page">
         <div class="global-header">
-            <div class="main-title">苦涩or苳季</div>
+            <div class="main-title">苦涩</div>
             <div class="sub-title mottoText">死寂的心 因你而燃</div>
         </div>
         <div class="card">
@@ -1113,7 +1121,7 @@
 
     <div id="page-settings" class="page">
         <div class="global-header">
-            <div class="main-title">苦涩or苳季</div>
+            <div class="main-title">苦涩</div>
             <div class="sub-title mottoText">死寂的心 因你而燃</div>
         </div>
         <div style="padding-top: 30px;">
@@ -1191,7 +1199,7 @@
 
     <div id="page-about" class="page">
         <div class="global-header">
-            <div class="main-title">苦涩or苳季</div>
+            <div class="main-title">苦涩</div>
             <div class="sub-title mottoText">死寂的心 因你而燃</div>
         </div>
         <div class="gh-update-card" id="cloudUpdateCard">
@@ -1266,7 +1274,7 @@
 
     <div id="page-customicons" class="page">
         <div class="global-header">
-            <div class="main-title">苦涩or苳季</div>
+            <div class="main-title">苦涩</div>
             <div class="sub-title mottoText">死寂的心 因你而燃</div>
         </div>
         <div style="margin-bottom:12px;">
@@ -1281,7 +1289,7 @@
 
     <div id="page-log" class="page">
         <div class="global-header">
-            <div class="main-title">苦涩or苳季</div>
+            <div class="main-title">苦涩</div>
             <div class="sub-title mottoText">死寂的心 因你而燃</div>
         </div>
         <div style="margin-bottom:12px;">
@@ -1397,6 +1405,18 @@
             </div>
             <div class="model-grid" id="model-list">
                 <!-- 机型卡由 JS 渲染 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== DRM层防标记 开启确认弹窗（复用 fm-modal / fm-confirm 样式）===== -->
+    <div id="drmhook-confirm" class="fm-modal">
+        <div class="fm-confirm-card">
+            <div class="fm-confirm-title" id="drmhook-confirm-title">开启 DRM 层防标记？</div>
+            <div class="fm-confirm-sub" id="drmhook-confirm-sub"></div>
+            <div class="fm-confirm-foot">
+                <button class="btn fm-confirm-cancel" id="drmhook-confirm-cancel">取消</button>
+                <button class="btn fm-confirm-ok" style="background:var(--ac);" id="drmhook-confirm-ok">确认开启</button>
             </div>
         </div>
     </div>
@@ -1697,6 +1717,7 @@ jailbreak:$('page-jailbreak')
                 { id: 'hideStorageToggle', flag: 'hide_storage' },
                 { id: 'autoUmountToggle', flag: 'auto_umount' },
                 { id: 'cpuSpoofToggle', flag: 'cpu_spoof' },
+                { id: 'drmHookToggle', flag: 'drm_hook' },
                 { id: 'antiMarkToggle', flag: 'anti_mark' }
             ];
             for (const sw of switches) {
@@ -1725,7 +1746,8 @@ jailbreak:$('page-jailbreak')
             soterToggle: 'led-soter',
             hideStorageToggle: 'led-hide-storage',
             autoUmountToggle: 'led-autoUmount',
-            cpuSpoofToggle: 'led-cpuSpoof'
+            cpuSpoofToggle: 'led-cpuSpoof',
+            drmHookToggle: 'led-drmHook'
         };
         for (const [toggleId, ledId] of Object.entries(ledMap)) {
             const toggle = document.getElementById(toggleId);
@@ -1837,6 +1859,92 @@ jailbreak:$('page-jailbreak')
         } else {
             await T('rm -f /data/adb/modules/xinmaskplus/pid/auto_umount');
             await T('sh /data/adb/modules/xinmaskplus/scripts/yuki_control.sh stop');
+        }
+        updateRunningLeds();
+        refreshLogFull();
+    }
+
+    const DRM_CTL = '/data/adb/modules/xinmaskplus/scripts/drm_hook_ctl.sh';
+    const DRM_LOG = '/data/local/tmp/xinmaskplus.log';
+
+    // 开启前的破坏性操作确认。复用改机型那套 fm-modal / fm-confirm 弹窗，
+    // 返回 Promise<boolean>，调用方 await 它即可。
+    function confirmDrmHookEnable() {
+        return new Promise(resolve => {
+            const m = document.getElementById('drmhook-confirm');
+            const ok = document.getElementById('drmhook-confirm-ok');
+            const cancel = document.getElementById('drmhook-confirm-cancel');
+            if (!m || !ok || !cancel) { resolve(true); return; }
+            document.getElementById('drmhook-confirm-sub').textContent =
+                '开启会重启 Widevine DRM 服务，正在播放的 Netflix/YouTube 会短暂黑屏。重启后开机自动生效。';
+            const done = v => {
+                m.classList.remove('open');
+                ok.removeEventListener('click', onOk);
+                cancel.removeEventListener('click', onCancel);
+                m.removeEventListener('click', onMask);
+                resolve(v);
+            };
+            const onOk = () => done(true);
+            const onCancel = () => done(false);
+            const onMask = e => { if (e.target.id === 'drmhook-confirm') done(false); };
+            ok.addEventListener('click', onOk);
+            cancel.addEventListener('click', onCancel);
+            m.addEventListener('click', onMask);
+            m.classList.add('open');
+        });
+    }
+
+    // 开启失败时，从脚本日志里抓 [DrmHook] 关键行给用户看根因，
+    // 而不是干巴巴一句"失败"。先埋一个标记行，只取本次调用之后的日志，
+    // 免得把上次开机的旧记录当成这次的错误。
+    async function drmHookFailureReason(mark) {
+        const r = await T(
+            `awk '/${mark}/ {f=1; next} f' ${DRM_LOG} | grep '\\[DrmHook\\]' | tail -n 4`,
+            8000
+        );
+        const raw = (r.stdout || '').trim();
+        if (!raw) return '未知原因（脚本无日志，可能 so 未安装）';
+        const lines = raw.split('\n')
+            .map(l => l.replace(/^\[[^\]]*\]\s*\[DrmHook\]\s*/, '').trim())
+            .filter(Boolean);
+        return lines.slice(0, 3).join('；') || '未知原因';
+    }
+
+    async function toggleDrmHook() {
+        const box = document.getElementById('drmHookToggle');
+        const tag = "[$(date +'%m-%d %H:%M:%S')] [DrmHook]";
+        if (box.checked) {
+            // 破坏性操作（会 stop/start Widevine HAL）→ 先确认，别当普通开关
+            if (!await confirmDrmHookEnable()) {
+                box.checked = false;
+                toast('已取消开启');
+                return;
+            }
+            const mark = 'DRMHOOK_MARK_' + Date.now();
+            await T(`echo "=== ${mark} ===" >> ${DRM_LOG}`);
+            // 开关只写标志文件；实际注入由脚本负责（需要 setprop + 重启 HAL service，
+            // 放在前端做会阻塞终端，交给脚本串行处理更稳）
+            await T('mkdir -p /data/adb/modules/xinmaskplus/pid && touch /data/adb/modules/xinmaskplus/pid/drm_hook');
+            await T(`sh ${DRM_CTL} enable`, 30000);
+            const st = await T(`sh ${DRM_CTL} status`);
+            const txt = (st.stdout || '') + (st.stderr || '');
+            if (/已开启/.test(txt)) {
+                await T(`echo "${tag} 用户开启 DRM 层防标记" >> /data/adb/xinmaskplus/log/xinmaskplus.log`);
+                toast('DRM防标记已开启 — Widevine HAL 已重启，验证请运行 verify');
+            } else {
+                // 脚本自己会回滚，这里把真实状态同步回 UI，避免开关显示"已开"但实际没生效
+                await T('rm -f /data/adb/modules/xinmaskplus/pid/drm_hook');
+                box.checked = false;
+                await T(`echo "${tag} 开启失败，已自动关闭" >> /data/adb/xinmaskplus/log/xinmaskplus.log`);
+                const why = await drmHookFailureReason(mark);
+                toast('开启失败并已回滚：' + why, true);
+            }
+        } else {
+            // 关闭是恢复性操作，不需要确认
+            await T('rm -f /data/adb/modules/xinmaskplus/pid/drm_hook');
+            await T(`sh ${DRM_CTL} disable`, 30000);
+            await T(`echo "${tag} 用户关闭 DRM 层防标记" >> /data/adb/xinmaskplus/log/xinmaskplus.log`);
+            toast('DRM防标记已关闭');
         }
         updateRunningLeds();
         refreshLogFull();
@@ -2967,7 +3075,7 @@ lines.push(selinuxStatus.includes("强制") ? "✅ SELinux状态: 强制模式 (
             try{ if(term.textarea){ term.textarea.readOnly=true; term.textarea.setAttribute('inputmode','none'); term.textarea.tabIndex=-1; } }catch(e){}
             termReady=true;
             termBuf='';
-            tw('\x1b[32m苦涩or苳季环境助手 · 网页终端\x1b[0m\r\n');
+            tw('\x1b[32m苦涩环境助手 · 网页终端\x1b[0m\r\n');
             tw('\x1b[90m以 root 身份运行 · 当前: '+curDir+'\x1b[0m\r\n');
             tw(prompt());
         }
