@@ -110,8 +110,10 @@ for mid, ln, body in cases:
     if len(dev_rel) != 2 or dev_rel[0] != device:
         problems.append((mid, ln,
                          f'fp[2]={parts[2]!r} 应为 "{device}:<release>"'))
-    if not dev_rel[1].isdigit():
-        problems.append((mid, ln, f'fp release={dev_rel[1]!r} 非数字'))
+    # release：AOSP 纯数字（15）或华为 HarmonyOS NEXT 的 OpenHarmony-x.x.x.x
+    rel = dev_rel[1]
+    if not (rel.isdigit() or rel.startswith('OpenHarmony-')):
+        problems.append((mid, ln, f'fp release={rel!r} 既非数字也非 OpenHarmony-*'))
 
     # parts[3] = build-id。华为/荣耀是 HUAWEI<model> 式，红魔含版本后缀，
     # 都是厂商真实格式，不做字符集限制，只要求非空且不含冒号/斜杠。

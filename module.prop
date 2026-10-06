@@ -1,7 +1,7 @@
 id=xinmaskplus
 name=Xmark-Tools
-version=v2.9.1
-versionCode=291
+version=v2.9.2
+versionCode=292
 author=苦涩
 description=集防标记/伪装CPU/改机型/游戏清理/进程管理/环境检测等为一体的多功能环境助手模块 | 需搭配 Zygisk使用|
 webui=webroot://index.html

@@ -1,3 +1,31 @@
+## Xmark-Tools v2.9.2
+
+### 本次更新
+
+**机型伪装字段补齐 + 华为指纹真实化**
+
+对齐市面机型模板类模块的字段覆盖面，修复三处与真机不一致：
+
+- **新增 `ro.build.product` 与 `ro.build.flavor`**（`<device>-<type>` 格式）：
+  老风控 SDK 与部分 ROM 工具链仍读这两个字段，此前完全未覆盖
+- **`ro.build.description` 改为经典 AOSP 空格五段格式**
+  （`HWSGT-user OpenHarmony-5.0.0.302 HUAWEISGT-AL10 15.0.0.302C00 release-keys`）。
+  此前是指纹后半段斜杠冒号拼接的格式，不存在于任何真机，
+  与 fingerprint 交叉比对一眼假
+- **华为系 7 条指纹的 release 段改为 `OpenHarmony-x.x.x` 真实格式**
+  （HarmonyOS NEXT 真机的指纹第三段是 OpenHarmony 前缀而非纯数字）：
+  Mate 60 RS / Mate 80 Pro Max / Pura 90 系列 / Pura X / Mate XT
+
+同步释放了 description 依赖：release 段含非数字不再导致
+build.id / description 跳过写入。
+
+### 说明
+
+- 新增字段随 48 个机型自动生效，无需重新选择机型
+- 开机同步段仅增加 3 次属性调用（15 → 18），不影响 v2.9.1 的开机速度优化
+
+---
+
 ## Xmark-Tools v2.9.1
 
 ### 本次更新
