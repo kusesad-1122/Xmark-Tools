@@ -2265,11 +2265,23 @@ jailbreak:$('page-jailbreak')
         reader.readAsDataURL(file); input.value = '';
     };
 
-    function applyFakeReset(el, name, param) {
-        if (el.checked) {
-            T(`sh /data/adb/modules/xinmaskplus/scripts/random_ids.sh ${param}`);
-            setTimeout(() => { el.checked = false; }, 500);
+    async function applyFakeReset(el, name, param) {
+        if (!el.checked) return;
+        try {
+            const r = await T(`sh /data/adb/modules/xinmaskplus/scripts/random_ids.sh ${param}`, 30000);
+            const out = (r.stdout || '').trim();
+            if (out.indexOf('OK:') === 0) {
+                toast(name + ' 设备标识已重置，部分项需重启生效');
+            } else if (out.indexOf('PARTIAL:') === 0) {
+                toast(out.replace('PARTIAL:', '').trim(), true);
+            } else {
+                const err = (r.stderr || out || '未知错误').slice(0, 120);
+                toast(name + ' 重置失败: ' + err, true);
+            }
+        } catch (e) {
+            toast(name + ' 重置失败: ' + (e && e.message ? e.message : '执行通道异常'), true);
         }
+        el.checked = false;
     }
 
     async function runDetection() {
