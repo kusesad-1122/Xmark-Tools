@@ -833,11 +833,7 @@
 <span class="func-switch-title">进程隐藏（实验）</span>
 <label class="toggle"><input type="checkbox" id="procHideToggle" onchange="procHideToggle(this)"><span class="toggle-slider"></span></label>
 </div>
-<<<<<<< HEAD
 <div class="func-switch-desc">游戏运行时把模块守护进程从 /proc 隐藏（检测到 APatch KPM 内核模块时走内核通道零痕迹，否则叠挂系统参数 tmpfs）；游戏退出自动恢复。</div>
-=======
-<div class="func-switch-desc">游戏运行时把模块守护进程与游戏进程树（含 TP/ACE 子进程，两层跟随）从 /proc 隐藏：检测到 APatch KPM 内核模块走内核通道零痕迹，否则叠挂系统参数 tmpfs；游戏全部退出自动恢复，防 PID 复用误藏。</div>
->>>>>>> a6cf2ae (feat: v2.9.4 新增进程隐藏（实验）)
 <div class="proc-hide-row" style="display:flex;gap:8px;margin-top:10px;">
 <button class="btn btn-act" style="flex:1;padding:10px 0;" onclick="procHideStatus()">查看状态</button>
 <button class="btn btn-act-ok" style="flex:1;padding:10px 0;" onclick="procHideNow()">立即隐藏</button>
