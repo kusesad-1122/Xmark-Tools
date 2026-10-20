@@ -7,7 +7,9 @@ ZIP="/data/adb/xinmaskplus/run/update.zip"
 EXDIR="/data/adb/xinmaskplus/run/update_ex"
 GH_USER="kusesad-1122"; GH_REPO="Xmark-Tools"; ZIP_NAME="Xmark-Tools.zip"
 TARGET="https://github.com/$GH_USER/$GH_REPO/releases/latest/download/$ZIP_NAME"
-PROXIES="https://ghfast.top/ https://gh-proxy.com/ EMPTY"
+# v2.9.3: 多通道下载池 —— 每条 60s 独立超时，失败原因写进 update.status；直连垫底
+# （国内移动网络直连 github 必挂，第三方代理限流/失效是"老是失败"的主因，靠通道轮换兜底）
+CHANNELS="https://ghfast.top/ https://gh-proxy.com/ https://ghproxy.net/ https://gh-proxy.net/ EMPTY"
 UA="Mozilla/5.0 (Linux; Android 13; K) Mobile Safari/537.36"
 
 : > "$LOCK"
@@ -16,14 +18,19 @@ finish(){ echo "$1" > "$STATUS"; rm -f "$LOCK"; exit 0; }
 ping -c 1 -W 2 223.5.5.5 >/dev/null 2>&1 || finish "FAILED:网络无法连接"
 
 echo "DOWNLOADING" > "$STATUS"
-rm -f "$ZIP"; OK=""
-for P in $PROXIES; do
+rm -f "$ZIP"; OK=""; LASTERR=""
+for P in $CHANNELS; do
   [ "$P" = "EMPTY" ] && URL="$TARGET" || URL="$P$TARGET"
-  curl -4 -L -k -s -A "$UA" --connect-timeout 15 --max-time 300 --retry 2 -o "$ZIP" "$URL?t=$(date +%s)"
-  if [ -s "$ZIP" ] && [ "$(head -c 2 "$ZIP")" = "PK" ]; then OK=1; break; fi
+  echo "DOWNLOADING:尝试 ${P:-直连github}" > "$STATUS"
+  ERR=$(curl -4 -L -k -sS -A "$UA" --connect-timeout 10 --max-time 60 --retry 1 --retry-all-errors         -o "$ZIP" -w "%{http_code}" "$URL?t=$(date +%s)" 2>&1 | tail -n 1)
+  if [ -s "$ZIP" ] && [ "$(head -c 2 "$ZIP")" = "PK" ] && unzip -tq "$ZIP" >/dev/null 2>&1; then
+    OK=1; break
+  fi
+  LASTERR="通道${P:-direct}失败(http=$ERR)"
+  echo "DOWNLOADING:$LASTERR" > "$STATUS"
   rm -f "$ZIP"
 done
-[ -z "$OK" ] && finish "FAILED:下载失败(代理可能失效)"
+[ -z "$OK" ] && finish "FAILED:全部通道失败 ${LASTERR:-未知}"
 
 echo "INSTALLING" > "$STATUS"
 rm -rf "$EXDIR"; mkdir -p "$EXDIR"

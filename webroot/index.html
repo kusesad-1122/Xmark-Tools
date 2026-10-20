@@ -3200,10 +3200,10 @@ if(document.readyState!=='loading') { bind(); bindModels(); } else document.addE
         if(__upPoll) clearInterval(__upPoll);
         __upPoll = setInterval(async ()=>{
           const s = (await T('cat /data/adb/xinmaskplus/run/update.status 2>/dev/null')).stdout.trim();
-          if(s.indexOf('DOWNLOADING')===0) set('正在下载最新版...');
+          if(s.indexOf('DOWNLOADING')===0) set(s.replace('DOWNLOADING:','下载中 ')||'正在下载最新版...');
           else if(s.indexOf('INSTALLING')===0) set('正在替换文件...');
           else if(s.indexOf('DONE')===0){ clearInterval(__upPoll); set('更新完成 '+(s.split(':')[1]||'')+'，退出重进生效'); }
-          else if(s.indexOf('FAILED')===0){ clearInterval(__upPoll); set('更新失败：'+(s.split(':')[1]||'未知')); }
+          else if(s.indexOf('FAILED')===0){ clearInterval(__upPoll); set('更新失败：'+s.slice(7)); }
         }, 1500);
       });
     }
