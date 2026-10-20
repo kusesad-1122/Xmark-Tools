@@ -829,6 +829,18 @@
                 </div>
             </div>
             <div class="func-switch-item">
+<div class="func-switch-header">
+<span class="func-switch-title">进程隐藏（实验）</span>
+<label class="toggle"><input type="checkbox" id="procHideToggle" onchange="procHideToggle(this)"><span class="toggle-slider"></span></label>
+</div>
+<div class="func-switch-desc">游戏运行时把模块守护进程从 /proc 隐藏（检测到 APatch KPM 内核模块时走内核通道零痕迹，否则叠挂系统参数 tmpfs）；游戏退出自动恢复。</div>
+<div class="proc-hide-row" style="display:flex;gap:8px;margin-top:10px;">
+<button class="btn btn-act" style="flex:1;padding:10px 0;" onclick="procHideStatus()">查看状态</button>
+<button class="btn btn-act-ok" style="flex:1;padding:10px 0;" onclick="procHideNow()">立即隐藏</button>
+</div>
+<div id="procHideOut" style="display:none;margin-top:8px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.5);border-radius:10px;padding:10px 12px;font-family:monospace;font-size:11px;color:var(--tx2);white-space:pre-wrap;word-break:break-all;"></div>
+</div>
+<div class="func-switch-item">
                 <div class="func-switch-header">
                     <span class="func-switch-title">重置防火墙</span>
                 </div>
@@ -3008,7 +3020,32 @@ lines.push(selinuxStatus.includes("强制") ? "✅ SELinux状态: 强制模式 (
             if(p==='models'){ loadModels(); }
             if(p==='freeze'){ frzLoad(); }
         };
-        // ===== KSU越狱工具函数 =====
+        // ===== 进程隐藏（v2.9.4）=====
+async function procHideInit(){
+    const on = await T('[ -f /data/adb/modules/xinmaskplus/pid/proc_hide ] && echo Y || echo N',3000);
+    const el=document.getElementById('procHideToggle');
+    if(el) el.checked=(on.stdout||'').trim()==='Y';
+}
+async function procHideToggle(cb){
+    if(cb.checked){ await T('touch /data/adb/modules/xinmaskplus/pid/proc_hide',3000); toast('已开启：游戏运行时自动隐藏守护进程'); }
+    else{ await T('rm -f /data/adb/modules/xinmaskplus/pid/proc_hide; sh /data/adb/modules/xinmaskplus/scripts/proc_hide.sh unhide_all',4000); toast('已关闭并恢复'); }
+}
+async function procHideStatus(){
+    const r=await T('sh /data/adb/modules/xinmaskplus/scripts/proc_hide.sh status',4000);
+    const el=document.getElementById('procHideOut');
+    if(el){ el.style.display='block'; el.textContent=(r.stdout||'无输出').trim(); }
+}
+async function procHideNow(){
+    const r=await T('sh /data/adb/modules/xinmaskplus/scripts/proc_hide.sh daemon',6000);
+    const el=document.getElementById('procHideOut');
+    if(el){ el.style.display='block'; el.textContent='隐藏完成: '+(r.stdout||'').trim(); }
+    toast('守护进程已隐藏');
+}
+window.__fmOnEnter=(function(orig){
+    return function(p){ if(p==='func'){ procHideInit(); } if(orig) orig(p); };
+})(window.__fmOnEnter);
+
+// ===== KSU越狱工具函数 =====
 const SCRIPT_BASE = '/data/adb/modules/xinmaskplus/bin/';
 
 function showJailbreakTip(text) {
