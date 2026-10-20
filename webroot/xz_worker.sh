@@ -1,9 +1,10 @@
 #!/system/bin/sh
 MOD="/data/adb/modules/xinmaskplus"
-STATUS="/data/local/tmp/xmark_up.status"
-LOCK="/data/local/tmp/xmark_up.lock"
-ZIP="/data/local/tmp/xmark_up.zip"
-EXDIR="/data/local/tmp/xmark_up_ex"
+mkdir -p /data/adb/xinmaskplus/run 2>/dev/null
+STATUS="/data/adb/xinmaskplus/run/update.status"
+LOCK="/data/adb/xinmaskplus/run/update.lock"
+ZIP="/data/adb/xinmaskplus/run/update.zip"
+EXDIR="/data/adb/xinmaskplus/run/update_ex"
 GH_USER="kusesad-1122"; GH_REPO="Xmark-Tools"; ZIP_NAME="Xmark-Tools.zip"
 TARGET="https://github.com/$GH_USER/$GH_REPO/releases/latest/download/$ZIP_NAME"
 PROXIES="https://ghfast.top/ https://gh-proxy.com/ EMPTY"
@@ -37,6 +38,12 @@ rm -rf "$EXDIR/config" "$EXDIR/pid"
 rm -f "$EXDIR/webroot/background.jpg"
 
 # .so 先删后拷，避免 text busy
+# v2.9.9: 终端功能已移除 —— 清理旧版本的 goterm/tmux/xterm 组件
+rm -f "$MOD/bin/goterm" "$MOD/bin/tmux" "$MOD"/bin/*.so* 2>/dev/null
+rm -f "$MOD/webroot/xterm.css" "$MOD/webroot/xterm.js" "$MOD/webroot/xterm-addon-fit.js" 2>/dev/null
+rm -f "$MOD/scripts/ptyrun.sh" "$MOD/scripts/tmrun.sh" "$MOD/scripts/term_kill.sh" 2>/dev/null
+rm -f /data/adb/xinmaskplus/log/goterm.log 2>/dev/null
+rm -rf /data/adb/xinmaskplus/run/tmux_chk 2>/dev/null
 rm -f "$MOD/zygisk/arm64-v8a.so" 2>/dev/null
 cp -rf "$EXDIR/." "$MOD/" 2>/dev/null
 

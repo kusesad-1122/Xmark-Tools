@@ -208,6 +208,11 @@
             font-size:var(--fs-sm);font-weight:600;cursor:pointer;
             backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
             box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 0 0 .5px rgba(255,255,255,.28);
+            /* v2.9.9: 功能动作按钮 —— 归属整体 iOS 玻璃风格（体系色实底 + 同款内高光） */
+        }
+        .btn-act{background:var(--ac);color:#fff!important;}
+        .btn-act-ok{background:var(--ok);color:#fff!important;}
+        .btn-act-danger{background:var(--er);color:#fff!important;}
             transition:transform .22s var(--spring),background .15s;
         }
         .btn:active{transform:scale(.93);background:rgba(255,255,255,.28);}
@@ -230,10 +235,11 @@
 
         .log-page-container{padding:0 0 20px;}
         .log-window{
-            background:#1e1e1e;color:#0f0;font-family:monospace;font-size:11px;
-            padding:14px;border-radius:8px;max-height:60vh;overflow-y:auto;
+            background:rgba(255,255,255,.55);color:var(--tx);font-family:monospace;font-size:11px;
+            padding:14px;border-radius:var(--r-sm);max-height:60vh;overflow-y:auto;
             white-space:pre-wrap;word-break:break-all;
-            border:1px solid rgba(255,255,255,.2);margin:16px 0;
+            border:1px solid rgba(255,255,255,.5);margin:16px 0;
+            backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
         }
 
         .floating-dock{
@@ -289,7 +295,7 @@
             transition:transform .2s var(--spring),opacity .15s;
         }
         .clean-btn.danger{background:rgba(255,59,48,.15);color:#dc2626;}
-        .clean-btn.ssaid {background:rgba(155,89,182,.15);color:#9b59b6;}
+        .clean-btn.ssaid {background:rgba(0,122,255,.15);color:var(--ac);}
         .clean-btn:active{opacity:.75;transform:scale(.91);}
         .custom-icon-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06);}
         .custom-icon-row:last-child{border-bottom:none;}
@@ -347,7 +353,7 @@
 
         .dev-badge{
             position:absolute;top:12px;left:12px;
-            background:rgba(100,150,255,.75);border:1.5px solid white;
+            background:rgba(0,122,255,.82);border:1.5px solid rgba(255,255,255,.85);
             backdrop-filter:blur(8px);padding:4px 10px;border-radius:20px;
             font-size:10px;font-weight:600;color:white;letter-spacing:.5px;z-index:5;
             animation:badgeBreath 2s ease-in-out infinite;
@@ -372,7 +378,7 @@
         .link-btn svg{width:14px;height:14px;flex:none;}
         .link-btn.qq{background:rgba(18,183,245,.18);}
         .link-btn.qq svg{fill:#12b7f5;}
-        .link-btn.gh{background:rgba(20,20,20,.22);color:#e6e6e6;animation:ghBreath 2.4s ease-in-out infinite;}
+        .link-btn.gh{background:rgba(20,20,20,.22);color:var(--tx);animation:ghBreath 2.4s ease-in-out infinite;}
         .link-btn.gh svg{fill:#e6e6e6;}
         @keyframes ghBreath{0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,0);background:rgba(20,20,20,.18);}50%{box-shadow:0 0 10px 1px rgba(0,0,0,.55);background:rgba(20,20,20,.42);}}
         /* 捐赠按钮 link-btn变体 呼吸灯 + 弹窗 */
@@ -418,7 +424,7 @@
         .process-window-header h4{font-size:var(--fs-sm);font-weight:600;color:var(--tx);}
         .process-window-buttons{display:flex;gap:8px;}
         .process-window-buttons .btn-sm{background:rgba(255,255,255,.18);border:none;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;color:var(--tx);cursor:pointer;backdrop-filter:blur(4px);}
-        .process-window{background:rgba(0,0,0,.2);border-radius:var(--r-sm);padding:12px;max-height:300px;overflow-y:auto;font-family:monospace;font-size:11px;color:var(--tx2);white-space:pre-wrap;word-break:break-all;}
+        .process-window{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:var(--r-sm);padding:12px;max-height:300px;overflow-y:auto;font-family:monospace;font-size:11px;color:var(--tx2);white-space:pre-wrap;word-break:break-all;}
         .monitor-led{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--tx3);}
 
         .settings-appearance-card{padding:16px!important;}
@@ -444,71 +450,6 @@
             100%{transform:scale(1.3);opacity:0;}
         }
     
-        /* ===== Web Terminal 样式 (匹配模块毛玻璃风格) ===== */
-        .term-fm-card,.term-card{padding:14px;}
-        .fm-pathbar{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-        .fm-icon-btn{
-            flex:none;width:34px;height:34px;border:none;border-radius:10px;
-            background:rgba(255,255,255,.18);color:var(--tx);font-size:16px;font-weight:700;
-            cursor:pointer;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
-            transition:transform .2s var(--spring),background .15s;
-        }
-        .fm-icon-btn:active{transform:scale(.9);background:rgba(255,255,255,.3);}
-        .fm-path{
-            flex:1;min-width:0;background:rgba(0,0,0,.18);border-radius:10px;
-            padding:8px 12px;font-family:monospace;font-size:12px;color:var(--tx);
-            white-space:nowrap;overflow-x:auto;direction:rtl;text-align:left;
-        }
-        .fm-quicknav{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;}
-        .fm-chip{
-            flex:none;border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:600;
-            background:rgba(255,255,255,.15);color:var(--tx2);cursor:pointer;
-            backdrop-filter:blur(4px);transition:background .15s,transform .2s var(--spring);
-        }
-        .fm-chip:active{transform:scale(.92);background:rgba(255,255,255,.3);}
-        .fm-list{max-height:300px;overflow-y:auto;border-radius:12px;background:rgba(0,0,0,.12);padding:4px;}
-        .fm-empty{padding:20px;text-align:center;color:var(--tx3);font-size:13px;}
-        .fm-row{
-            display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
-            cursor:pointer;transition:background .12s;
-        }
-        .fm-row:active{background:rgba(255,255,255,.14);}
-        .fm-row .fm-ico{flex:none;font-size:18px;width:22px;text-align:center;}
-        .fm-row .fm-meta{flex:1;min-width:0;}
-        .fm-row .fm-name{font-size:13px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .fm-row .fm-detail{font-size:10px;color:var(--tx3);font-family:monospace;margin-top:1px;}
-        .fm-row .fm-perm-tag{
-            flex:none;font-size:9px;font-family:monospace;color:var(--tx2);
-            background:rgba(255,255,255,.14);border-radius:6px;padding:2px 6px;
-        }
-        .fm-row .fm-prop-open{
-            flex:none;font-size:14px;color:var(--tx3);padding:4px 6px;border-radius:8px;
-        }
-        .fm-row .fm-prop-open:active{background:rgba(255,255,255,.2);}
-        .fm-ico.dir{color:#ffd166;} .fm-ico.exe{color:var(--ok);} .fm-ico.lnk{color:var(--ac);}
-
-        /* 终端 */
-        .term-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-        .term-toolbar-title{font-size:12px;font-weight:600;color:var(--tx2);display:flex;align-items:center;gap:6px;}
-        .term-toolbar-btns{display:flex;gap:6px;}
-        .term-card .btn-sm{
-            background:rgba(255,255,255,.18);border:none;border-radius:20px;padding:4px 10px;
-            font-size:11px;font-weight:600;color:var(--tx);cursor:pointer;backdrop-filter:blur(4px);
-        }
-        .term-card .btn-sm:active{transform:scale(.93);background:rgba(255,255,255,.3);}
-        #term-host{
-            background:#0c0c10;border-radius:12px;padding:8px;height:300px;overflow:hidden;
-            box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
-        }
-        #term-host .xterm{height:100%;}
-        .term-inputbar{display:flex;align-items:center;gap:8px;margin-top:10px;}
-        .term-prompt{font-family:monospace;font-weight:700;color:var(--ok);font-size:15px;}
-        .term-cmd-input{
-            flex:1;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);border-radius:10px;
-            padding:10px 12px;font-family:monospace;font-size:13px;color:#eaeaea;outline:none;
-        }
-        .term-cmd-input:focus{border-color:var(--ac);}
-        .term-run{background:var(--ok)!important;color:#fff!important;}
 
         /* 弹窗 (编辑器 + 属性) */
         .fm-modal{
@@ -518,44 +459,44 @@
         .fm-modal.open{display:flex;}
         .fm-modal-card{
             width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;
-            background:rgba(30,30,38,.78);backdrop-filter:blur(20px) saturate(160%);
+            background:rgba(255,255,255,.62);backdrop-filter:blur(20px) saturate(160%);
             -webkit-backdrop-filter:blur(20px) saturate(160%);border-radius:18px;padding:16px;
-            box-shadow:0 0 0 1.5px rgba(255,255,255,.18),0 20px 60px rgba(0,0,0,.5);color:#f0f0f3;
+            box-shadow:0 0 0 1.5px rgba(255,255,255,.5),0 20px 60px rgba(31,45,61,.18);color:var(--tx);
         }
         .fm-modal-head{display:flex;align-items:center;justify-content:space-between;}
         .fm-modal-title{font-size:16px;font-weight:700;}
-        .fm-modal-sub{font-size:11px;font-family:monospace;color:#a8a8b0;margin:4px 0 10px;word-break:break-all;}
+        .fm-modal-sub{font-size:11px;font-family:monospace;color:var(--tx3);margin:4px 0 10px;word-break:break-all;}
         .fm-editor{
-            flex:1;min-height:240px;background:#0c0c10;border:1px solid rgba(255,255,255,.12);border-radius:10px;
-            padding:12px;font-family:monospace;font-size:13px;line-height:1.5;color:#e6e6e6;
+            flex:1;min-height:240px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.5);border-radius:10px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+            padding:12px;font-family:monospace;font-size:13px;line-height:1.5;color:var(--tx);
             outline:none;resize:none;white-space:pre;overflow:auto;
         }
         .fm-modal-foot{display:flex;gap:10px;margin-top:12px;}
         .fm-modal-foot .btn{flex:1;padding:11px 0;border-radius:12px;font-size:14px;font-weight:600;
-            background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.2);cursor:pointer;}
+            background:rgba(255,255,255,.14);color:var(--tx);border:1px solid rgba(255,255,255,.2);cursor:pointer;}
         .fm-modal-foot .btn:active{transform:scale(.97);}
         .fm-modal-save{background:var(--ok)!important;}
 
         /* 属性弹窗 */
         .fm-prop-card{max-width:440px;}
         .fm-prop-info{
-            background:rgba(0,0,0,.25);border-radius:10px;padding:10px 12px;font-family:monospace;
-            font-size:11px;line-height:1.7;color:#c8c8d0;white-space:pre-wrap;word-break:break-all;margin-bottom:12px;
+            background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.5);border-radius:10px;padding:10px 12px;font-family:monospace;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+            font-size:11px;line-height:1.7;color:var(--tx2);white-space:pre-wrap;word-break:break-all;margin-bottom:12px;
         }
-        .fm-prop-section-title{font-size:12px;font-weight:600;color:#b8b8c0;margin-bottom:8px;}
+        .fm-prop-section-title{font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;}
         .fm-perm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
-        .fm-perm-col{background:rgba(0,0,0,.2);border-radius:10px;padding:8px;}
-        .fm-perm-col h5{font-size:11px;text-align:center;color:#a8a8b0;margin-bottom:6px;font-weight:600;}
-        .fm-perm-check{display:flex;align-items:center;gap:6px;font-size:12px;color:#d0d0d8;margin:3px 0;cursor:pointer;}
+        .fm-perm-col{background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.45);border-radius:10px;padding:8px;}
+        .fm-perm-col h5{font-size:11px;text-align:center;color:var(--tx3);margin-bottom:6px;font-weight:600;}
+        .fm-perm-check{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx);margin:3px 0;cursor:pointer;}
         .fm-perm-check input{width:15px;height:15px;accent-color:var(--ok);}
-        .fm-perm-octal{display:flex;align-items:center;gap:8px;font-size:12px;color:#b8b8c0;margin-bottom:14px;}
+        .fm-perm-octal{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--tx2);margin-bottom:14px;}
         .fm-octal-input{
-            width:70px;background:#0c0c10;border:1px solid rgba(255,255,255,.18);border-radius:8px;
-            padding:7px 10px;font-family:monospace;font-size:14px;color:#fff;text-align:center;outline:none;
+            width:70px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.5);border-radius:8px;
+            padding:7px 10px;font-family:monospace;font-size:14px;color:var(--tx);text-align:center;outline:none;
         }
         .fm-perm-octal .btn-sm{background:var(--ac);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;}
         .fm-prop-actions{display:flex;flex-direction:column;gap:8px;}
-        .fm-prop-actions .btn{padding:11px 0;border-radius:12px;font-size:14px;font-weight:600;border:none;cursor:pointer;color:#fff;}
+        .fm-prop-actions .btn{padding:11px 0;border-radius:12px;font-size:14px;font-weight:600;border:none;cursor:pointer;color:var(--tx);}
         .fm-prop-actions .btn:active{transform:scale(.97);}
         .fm-prop-exec{background:var(--ok);}
         .fm-prop-rename{background:rgba(255,255,255,.16);}
@@ -567,10 +508,7 @@
         .fm-topbar .back-btn{flex:none;padding:8px 16px;border-radius:999px;font-size:13px;font-weight:600;background:rgba(255,255,255,.18);color:var(--tx);border:none;cursor:pointer;backdrop-filter:blur(4px);}
         .fm-topbar .back-btn:active{transform:scale(.95);background:rgba(255,255,255,.3);}
         .fm-topbar-title{font-size:16px;font-weight:700;color:var(--tx);}
-        .fm-term-entry{margin-left:auto;display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.16);border:none;border-radius:20px;padding:5px 11px;font-size:11px;font-weight:700;color:var(--tx);cursor:pointer;backdrop-filter:blur(6px);}
-        .fm-term-entry:active{transform:scale(.93);background:rgba(255,255,255,.3);}
-        .fm-term-entry .px-cat{width:15px;height:13px;display:block;}
-        #page-files.active,#page-fileprop.active,#page-fileedit.active,#page-fileterm.active{display:flex;flex-direction:column;gap:16px;margin-top:-42px;}
+        #page-files.active,#page-fileprop.active,#page-fileedit.active{display:flex;flex-direction:column;gap:16px;margin-top:-42px;}
         #page-models.active{display:flex;flex-direction:column;gap:16px;margin-top:-42px;}
         /* 机型卡 (2列网格, 窗口内滑动) */
         .model-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-height:62vh;overflow-y:auto;padding:2px;}
@@ -599,7 +537,7 @@
         .fm-octal-input{width:72px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:7px 10px;font-family:monospace;font-size:15px;color:var(--tx);text-align:center;outline:none;}
         .fm-perm-octal .btn-sm{background:var(--ac);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;}
         .fm-prop-actions{display:flex;flex-direction:column;gap:10px;}
-        .fm-prop-actions .btn{padding:13px 0;border-radius:12px;font-size:15px;font-weight:600;border:none;cursor:pointer;color:#fff;}
+        .fm-prop-actions .btn{padding:13px 0;border-radius:12px;font-size:15px;font-weight:600;border:none;cursor:pointer;color:var(--tx);}
         .fm-prop-actions .btn:active{transform:scale(.97);}
         .fm-prop-edit{background:var(--ac);}
         .fm-prop-exec{background:var(--ok);}
@@ -614,58 +552,11 @@
         .fm-modal-save{background:var(--ok)!important;color:#fff!important;border:none!important;}
         .fm-modal-sub{font-size:11px;font-family:monospace;color:var(--tx2);margin-bottom:10px;word-break:break-all;}
 
-        /* 文件管理器卡片 */
-        .term-fm-card{padding:14px;}
-        .fm-pathbar{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-        .fm-icon-btn{flex:none;width:36px;height:36px;border:none;border-radius:10px;background:rgba(255,255,255,.2);color:var(--tx);font-size:16px;font-weight:700;cursor:pointer;backdrop-filter:blur(4px);transition:transform .2s var(--spring);}
-        .fm-icon-btn:active{transform:scale(.9);background:rgba(255,255,255,.32);}
-        .fm-path{flex:1;min-width:0;background:rgba(0,0,0,.22);border-radius:10px;padding:9px 12px;font-family:monospace;font-size:12px;color:var(--tx);white-space:nowrap;overflow-x:auto;direction:rtl;text-align:left;}
-        .fm-quicknav{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;}
-        .fm-chip{flex:none;border:none;border-radius:999px;padding:6px 13px;font-size:11px;font-weight:600;background:rgba(255,255,255,.18);color:var(--tx2);cursor:pointer;backdrop-filter:blur(4px);transition:transform .2s var(--spring);}
-        .fm-chip:active{transform:scale(.92);background:rgba(255,255,255,.32);}
-        .fm-searchbar{display:flex;gap:8px;margin-bottom:10px;}
-        .fm-search-input{flex:1;min-width:0;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--tx);outline:none;}
-        .fm-search-input:focus{border-color:var(--ac);}
-        .fm-search-btn{flex:none;background:var(--ac)!important;color:#fff!important;border:none;border-radius:10px;padding:0 16px;font-size:12px;font-weight:600;cursor:pointer;}
-        .fm-list{max-height:56vh;overflow-y:auto;border-radius:12px;background:rgba(0,0,0,.16);padding:4px;}
-        .fm-empty{padding:22px;text-align:center;color:var(--tx3);font-size:13px;}
-        .fm-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;cursor:pointer;transition:background .12s;}
-        .fm-row:active{background:rgba(255,255,255,.16);}
-        .fm-row .fm-ico{flex:none;font-size:18px;width:22px;text-align:center;}
-        .fm-row .fm-meta{flex:1;min-width:0;}
-        .fm-row .fm-name{font-size:13px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .fm-row .fm-detail{font-size:10px;color:var(--tx3);font-family:monospace;margin-top:1px;}
-        .fm-row .fm-perm-tag{flex:none;font-size:9px;font-family:monospace;color:var(--tx2);background:rgba(255,255,255,.16);border-radius:6px;padding:2px 6px;}
-        .fm-ico.dir{color:#ffd166;} .fm-ico.exe{color:var(--ok);} .fm-ico.lnk{color:var(--ac);}
-
-        /* 进程页：文件管理入口 */
-        .fm-entry-btn{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border:none;border-radius:14px;background:rgba(255,255,255,.16);color:var(--tx);cursor:pointer;text-align:left;backdrop-filter:blur(4px);transition:transform .2s var(--spring),background .15s;}
-        .fm-entry-btn:active{transform:scale(.97);background:rgba(255,255,255,.26);}
-        .fm-entry-ico{font-size:24px;}
-        .fm-entry-txt{flex:1;}
-        .fm-entry-txt b{display:block;font-size:15px;font-weight:600;}
-        .fm-entry-txt span{font-size:11px;color:var(--tx3);}
-        .fm-entry-arrow{font-size:18px;color:var(--tx3);}
-
-        /* 终端 */
-        .term-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-        .term-toolbar-title{font-size:12px;font-weight:600;color:var(--tx2);display:flex;align-items:center;gap:6px;}
-        .term-toolbar-btns{display:flex;gap:6px;}
-        .term-card .btn-sm,.fm-perm-octal .btn-sm,#fm-apply-perm{cursor:pointer;}
-        .term-card .btn-sm{background:rgba(255,255,255,.2);border:none;border-radius:20px;padding:5px 11px;font-size:11px;font-weight:600;color:var(--tx);backdrop-filter:blur(4px);}
-        .term-card .btn-sm:active{transform:scale(.93);background:rgba(255,255,255,.3);}
-        #term-host{background:#0c0c10;border-radius:12px;padding:8px;height:48vh;min-height:280px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);}
-        #term-host .xterm{height:100%;}
-        .term-inputbar{display:flex;align-items:center;gap:8px;margin-top:10px;}
-        .term-prompt{font-family:monospace;font-weight:700;color:var(--ok);font-size:15px;}
-        .term-cmd-input{flex:1;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 12px;font-family:monospace;font-size:13px;color:#eaeaea;outline:none;}
-        .term-cmd-input:focus{border-color:var(--ac);}
-        .term-run{background:var(--ok)!important;color:#fff!important;}
 
         /* 删除确认弹窗 */
         .fm-modal{position:fixed;inset:0;z-index:600;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:24px;}
         .fm-modal.open{display:flex;}
-        .fm-confirm-card{width:100%;max-width:340px;background:rgba(34,34,42,.92);border-radius:18px;padding:22px;box-shadow:0 0 0 1.5px rgba(255,255,255,.16),0 20px 60px rgba(0,0,0,.5);color:#f0f0f3;text-align:center;}
+        .fm-confirm-card{width:100%;max-width:340px;background:rgba(255,255,255,.78);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border-radius:18px;padding:22px;box-shadow:0 0 0 1.5px rgba(255,255,255,.55),0 20px 60px rgba(31,45,61,.18);color:var(--tx);text-align:center;}
         .fm-confirm-title{font-size:17px;font-weight:700;margin-bottom:8px;}
         .fm-confirm-sub{font-size:12px;font-family:monospace;color:#b0b0b8;word-break:break-all;margin-bottom:18px;line-height:1.5;}
         .fm-confirm-foot{display:flex;gap:10px;}
@@ -773,9 +664,6 @@
 
         </style>
 
-    <link rel="stylesheet" href="xterm.css">
-    <script src="xterm.js"></script>
-    <script src="xterm-addon-fit.js"></script>
 </head>
 <body>
 
@@ -930,7 +818,7 @@
                     <button class="cpuProfBtn" data-prof="exynos2600" onclick="setCpuProfile('exynos2600')" style="border:none;border-radius:20px;padding:4px 11px;font-size:10px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.14);color:var(--tx);">猎户座2600</button>
                     <button class="cpuProfBtn" data-prof="a17pro" onclick="setCpuProfile('a17pro')" style="border:none;border-radius:20px;padding:4px 11px;font-size:10px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.14);color:var(--tx);">A17 Pro</button>
                 </div>
-                <button onclick="openCpuGames()" style="margin-top:10px;width:100%;border:none;border-radius:12px;padding:9px;font-size:var(--fs-xs);font-weight:700;background:linear-gradient(135deg,rgba(120,170,255,.28),rgba(160,200,255,.18));color:var(--tx);cursor:pointer;">自定义游戏伪装</button>
+                <button class="btn" onclick="openCpuGames()" style="margin-top:10px;width:100%;padding:9px;font-size:var(--fs-xs);">自定义游戏伪装</button>
                 <div class="led-container" id="led-cpuSpoof" style="display:none;"><span class="running-led"></span> 运行中</div>
                 <div id="cpuSpoofWindow" style="display:none;margin-top:10px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -945,14 +833,14 @@
                     <span class="func-switch-title">重置防火墙</span>
                 </div>
                 <div class="func-switch-desc">清空 iptables 全表并恢复全放行，解决脚本型端口/拦截导致的网络异常。</div>
-                <button class="btn" onclick="runFirewallReset()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#fa709a,#fee140);color:#fff;font-weight:700;border:none;border-radius:12px;">一键重置</button>
+                <button class="btn btn-act" onclick="runFirewallReset()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">一键重置</button>
             </div>
             <div class="func-switch-item">
                 <div class="func-switch-header">
                     <span class="func-switch-title">恢复实时网络</span>
                 </div>
                 <div class="func-switch-desc">重置网络接口/缓存/统计/DNS 并重启网络服务，会短暂影响网络，不会掉驱动。</div>
-                <button class="btn" onclick="runNetRefresh()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#4facfe,#00f2fe);color:#fff;font-weight:700;border:none;border-radius:12px;">恢复网络</button>
+                <button class="btn btn-act" onclick="runNetRefresh()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">恢复网络</button>
             </div>
             <div class="func-switch-item">
                 <div class="func-switch-header">
@@ -961,8 +849,8 @@
                 </div>
                 <div class="func-switch-desc">即时生效，重启恢复。部分检测要求 Enforcing，改机操作常需 Permissive。</div>
                 <div style="display:flex;gap:8px;margin-top:10px;">
-                    <button class="btn" onclick="setSelinux('enforcing')" style="flex:1;padding:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:700;border:none;border-radius:12px;">设为严格</button>
-                    <button class="btn" onclick="setSelinux('permissive')" style="flex:1;padding:12px;background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff;font-weight:700;border:none;border-radius:12px;">设为宽容</button>
+                    <button class="btn btn-act" onclick="setSelinux('enforcing')" style="flex:1;padding:12px;font-weight:700;border:none;border-radius:12px">设为严格</button>
+                    <button class="btn btn-act-ok" onclick="setSelinux('permissive')" style="flex:1;padding:12px;font-weight:700;border:none;border-radius:12px">设为宽容</button>
                     <button class="btn" onclick="refreshSelinuxState()" style="padding:12px 14px;background:rgba(255,255,255,.14);color:var(--tx);font-weight:700;border:none;border-radius:12px;">刷新</button>
                 </div>
             </div>
@@ -971,7 +859,7 @@
                     <span class="func-switch-title">一键关闭USB调试</span>
                 </div>
                 <div class="func-switch-desc">关闭 USB 调试与无线调试（USB调试开启是部分游戏闪框原因之一）。</div>
-                <button class="btn" onclick="runAdbOff()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#43e97b,#38f9d7);color:#fff;font-weight:700;border:none;border-radius:12px;">关闭调试</button>
+                <button class="btn btn-act-ok" onclick="runAdbOff()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">关闭调试</button>
             </div>
             <div class="func-switch-item">
                 <div class="func-switch-header">
@@ -980,11 +868,11 @@
                 <div class="func-switch-desc">伪装电量百分比与充电状态，即时生效；一键恢复。</div>
                 <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
                     <input id="batteryLevel" type="number" min="1" max="100" placeholder="1-100" style="flex:1;padding:12px;border:none;border-radius:12px;background:rgba(255,255,255,.14);color:var(--tx);font-size:var(--fs-sm);">
-                    <button class="btn" onclick="batteryFakeLevel()" style="flex:1;padding:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:700;border:none;border-radius:12px;">伪装电量</button>
+                    <button class="btn btn-act" onclick="batteryFakeLevel()" style="flex:1;padding:12px;font-weight:700;border:none;border-radius:12px">伪装电量</button>
                 </div>
                 <div style="display:flex;gap:8px;margin-top:8px;">
-                    <button class="btn" onclick="batteryFakeCharge(1)" style="flex:1;padding:12px;background:linear-gradient(135deg,#4facfe,#00f2fe);color:#fff;font-weight:700;border:none;border-radius:12px;">充电中</button>
-                    <button class="btn" onclick="batteryFakeCharge(0)" style="flex:1;padding:12px;background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff;font-weight:700;border:none;border-radius:12px;">未充电</button>
+                    <button class="btn btn-act" onclick="batteryFakeCharge(1)" style="flex:1;padding:12px;font-weight:700;border:none;border-radius:12px">充电中</button>
+                    <button class="btn btn-act-ok" onclick="batteryFakeCharge(0)" style="flex:1;padding:12px;font-weight:700;border:none;border-radius:12px">未充电</button>
                     <button class="btn" onclick="batteryReset()" style="flex:1;padding:12px;background:rgba(255,255,255,.14);color:var(--tx);font-weight:700;border:none;border-radius:12px;">恢复</button>
                 </div>
             </div>
@@ -1020,22 +908,22 @@
             <div class="func-switch-item" style="border-top:none;padding-top:0;">
                 <div class="func-switch-header"><span class="func-switch-title">露娜相关</span></div>
                 <div class="func-switch-desc">清理QX/橘子驱动与外挂辅助残留（Bing/nh/jz/HPX 等），过 Luna 异常检测。</div>
-                <button class="btn" onclick="runLunaFix()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:700;border:none;border-radius:12px;">一键清理</button>
+                <button class="btn btn-act-ok" onclick="runLunaFix()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">一键清理</button>
             </div>
             <div class="func-switch-item">
                 <div class="func-switch-header"><span class="func-switch-title">牛头相关</span></div>
                 <div class="func-switch-desc">清理驱动与辅助残留，过牛头 32 位 Found Root/Hook 检测。</div>
-                <button class="btn" onclick="runNiutouFix()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff;font-weight:700;border:none;border-radius:12px;">一键清理</button>
+                <button class="btn btn-act-ok" onclick="runNiutouFix()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">一键清理</button>
             </div>
             <div class="func-switch-item">
                 <div class="func-switch-header"><span class="func-switch-title">春秋相关</span></div>
                 <div class="func-switch-desc">清西米露残留/数据隔离属性/刷机属性，删检测工具与外挂残留、GG 痕迹。</div>
-                <button class="btn" onclick="runChunqiuFix()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#4facfe,#00f2fe);color:#fff;font-weight:700;border:none;border-radius:12px;">一键对抗</button>
+                <button class="btn btn-act" onclick="runChunqiuFix()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">一键对抗</button>
             </div>
             <div class="func-switch-item">
                 <div class="func-switch-header"><span class="func-switch-title">Hunter 相关</span></div>
                 <div class="func-switch-desc">清除放宽的隐藏 API 策略（hidden_api_policy 等），防 Hunter 类检测。</div>
-                <button class="btn" onclick="runHunterFix()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#43e97b,#38f9d7);color:#fff;font-weight:700;border:none;border-radius:12px;">清除策略</button>
+                <button class="btn btn-act-ok" onclick="runHunterFix()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">清除策略</button>
             </div>
         </div>
     </div>
@@ -1055,22 +943,22 @@
 <div class="func-switch-item" style="border-top:none;padding-top:0;">
 <div class="func-switch-header"><span class="func-switch-title">重载KSU模块</span></div>
 <div class="func-switch-desc">执行ksud启动并覆盖安装KSU管理器触发模块重载。越狱重启后必须执行。</div>
-<button class="btn" onclick="runKsuReload()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-weight:700;border:none;border-radius:12px;">立即重载</button>
+<button class="btn btn-act" onclick="runKsuReload()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">立即重载</button>
 </div>
 <div class="func-switch-item">
 <div class="func-switch-header"><span class="func-switch-title">热重启 Zygote</span></div>
 <div class="func-switch-desc">耗尽PID后重启zygote，使模块配置立即生效。</div>
-<button class="btn" onclick="runRcqXt()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff;font-weight:700;border:none;border-radius:12px;">热重启</button>
+<button class="btn btn-act" onclick="runRcqXt()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">热重启</button>
 </div>
 <div class="func-switch-item">
 <div class="func-switch-header"><span class="func-switch-title">隐藏ROOT环境</span></div>
 <div class="func-switch-desc">重置系统属性，隐藏BL解锁/root痕迹。</div>
-<button class="btn" onclick="runHideEnv()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#4facfe,#00f2fe);color:#fff;font-weight:700;border:none;border-radius:12px;">隐藏环境</button>
+<button class="btn btn-act" onclick="runHideEnv()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">隐藏环境</button>
 </div>
 <div class="func-switch-item">
 <div class="func-switch-header"><span class="func-switch-title">清理 /data/local/tmp</span></div>
 <div class="func-switch-desc">清理临时目录残留文件。</div>
-<button class="btn" onclick="runCleanTmp()" style="margin-top:10px;width:100%;padding:14px;background:linear-gradient(135deg,#43e97b,#38f9d7);color:#fff;font-weight:700;border:none;border-radius:12px;">清理</button>
+<button class="btn btn-act-ok" onclick="runCleanTmp()" style="margin-top:10px;width:100%;padding:14px;font-weight:700;border:none;border-radius:12px">清理</button>
 </div>
 </div>
 </div>
@@ -1370,7 +1258,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                     <div style="font-weight:700;font-size:var(--fs-sm);">冻结状态</div>
                     <div style="display:flex;gap:6px;">
-                        <button onclick="frzForceUnfreeze()" style="background:rgba(255,100,100,.2);border:1px solid rgba(255,100,100,.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;color:#ff8080;cursor:pointer;">手动解冻</button>
+                        <button onclick="frzForceUnfreeze()" style="background:rgba(255,100,100,.2);border:1px solid rgba(255,100,100,.3);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;color:var(--er);cursor:pointer;">手动解冻</button>
                         <button class="btn-sm" onclick="frzRefreshStatus()" style="background:rgba(255,255,255,.18);border:none;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;color:var(--tx);cursor:pointer;">刷新</button>
                     </div>
                 </div>
@@ -1378,13 +1266,13 @@
             </div>
 
             <!-- 保存按钮 -->
-            <button class="btn" onclick="frzSave()" style="width:100%;padding:13px;font-size:var(--fs-sm);font-weight:700;background:linear-gradient(135deg,rgba(255,120,150,.3),rgba(255,180,200,.2));border:1px solid rgba(255,180,200,.3);">保存配置</button>
+            <button class="btn btn-act" onclick="frzSave()" style="width:100%;padding:13px;font-size:var(--fs-sm);font-weight:700;border:1px solid rgba(255,180,200,.3)">保存配置</button>
 
             <!-- 诊断卡片 -->
             <div class="card">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                     <div style="font-weight:700;font-size:var(--fs-sm);">系统诊断</div>
-                    <button onclick="frzRunDiag()" style="background:rgba(100,180,255,.2);border:1px solid rgba(100,180,255,.3);border-radius:20px;padding:3px 12px;font-size:10px;font-weight:600;color:#6cf;cursor:pointer;">运行诊断</button>
+                    <button onclick="frzRunDiag()" style="background:rgba(100,180,255,.2);border:1px solid rgba(100,180,255,.3);border-radius:20px;padding:3px 12px;font-size:10px;font-weight:600;color:var(--ac);cursor:pointer;">运行诊断</button>
                 </div>
                 <div style="font-size:9px;color:var(--tx3);margin-bottom:6px;line-height:1.5;">检测冻结/后台守护/CPU伪装三个系统的真实状态，复制结果发给开发者可精准定位问题</div>
                 <div id="frz-diag" class="process-window" style="max-height:260px;font-size:9px;line-height:1.6;white-space:pre-wrap;">点击「运行诊断」开始</div>
@@ -1436,9 +1324,9 @@
 
     <!-- ===== 自定义游戏伪装 (CPU) 弹窗 ===== -->
     <div id="cpuGamesModal" class="fm-modal">
-        <div class="fm-confirm-card" style="max-width:380px;text-align:left;background:rgba(225,240,255,0.78);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);border:1px solid rgba(255,255,255,0.65);color:#1b2436;">
-            <div style="font-size:16px;font-weight:800;color:#16213a;margin-bottom:2px;">自定义游戏伪装</div>
-            <div style="font-size:11px;color:#5a6b86;margin:6px 0 10px;line-height:1.5;">勾选的游戏在前台/后台运行时触发 CPU 伪装，未勾选的不监控。勾选即时生效。</div>
+        <div class="fm-confirm-card" style="max-width:380px;text-align:left;background:rgba(255,255,255,.7);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);border:1px solid rgba(255,255,255,0.65);color:var(--tx);">
+            <div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:2px;">自定义游戏伪装</div>
+            <div style="font-size:11px;color:var(--tx3);margin:6px 0 10px;line-height:1.5;">勾选的游戏在前台/后台运行时触发 CPU 伪装，未勾选的不监控。勾选即时生效。</div>
             <div id="cpuGamesList" style="max-height:52vh;overflow-y:auto;"></div>
             <div class="fm-confirm-foot" style="margin-top:14px;">
                 <button class="btn" style="background:rgba(80,140,235,0.92);color:#fff;border:none;" onclick="closeCpuGames()">完成</button>
@@ -1446,17 +1334,6 @@
         </div>
     </div>
 
-    <!-- ===== 删除确认 (轻量弹窗) ===== -->
-    <div id="fm-confirm" class="fm-modal">
-        <div class="fm-confirm-card">
-            <div class="fm-confirm-title" id="fm-confirm-title">确认删除？</div>
-            <div class="fm-confirm-sub" id="fm-confirm-sub"></div>
-            <div class="fm-confirm-foot">
-                <button class="btn fm-confirm-cancel" id="fm-confirm-cancel">取消</button>
-                <button class="btn fm-confirm-ok" id="fm-confirm-ok">删除</button>
-            </div>
-        </div>
-    </div>
 
 
 <div class="floating-dock" id="dockBar">
@@ -1536,7 +1413,7 @@ jailbreak:$('page-jailbreak')
             // 在可横向滚动元素/输入/终端内不触发翻页
             while(el && el!==document.body){
                 if(el.classList && (el.classList.contains('fm-list')||el.classList.contains('fm-quicknav')||
-                   el.classList.contains('fm-path')||el.id==='term-host'||el.classList.contains('fm-editor')||
+                   el.classList.contains('fm-path')||el.classList.contains('fm-editor')||
                    el.classList.contains('touch-rate-row')||el.tagName==='INPUT'||el.tagName==='TEXTAREA'||
                    el.classList.contains('process-window'))) return true;
                 el=el.parentElement;
@@ -1865,7 +1742,7 @@ jailbreak:$('page-jailbreak')
     }
 
     const DRM_CTL = '/data/adb/modules/xinmaskplus/scripts/drm_hook_ctl.sh';
-    const DRM_LOG = '/data/local/tmp/xinmaskplus.log';
+    const DRM_LOG = '/data/adb/xinmaskplus/log/xinmaskplus.log';
 
     // 开启前的破坏性操作确认。复用改机型那套 fm-modal / fm-confirm 弹窗，
     // 返回 Promise<boolean>，调用方 await 它即可。
@@ -2016,8 +1893,8 @@ jailbreak:$('page-jailbreak')
             const checked = sel.has(g.pkg) ? 'checked' : '';
             html += `<label style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid rgba(0,0,0,.08);cursor:pointer;">
                 <img src="${getGameIconSrc(g.pkg)}" onerror="this.style.visibility='hidden'" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex-shrink:0;background:rgba(0,0,0,.06);">
-                <span style="flex:1;font-size:13px;color:#1b2436;">${g.name}</span>
-                <input type="checkbox" class="cpuGameChk" data-pkg="${g.pkg}" ${checked} onchange="saveCpuGames()" style="width:18px;height:18px;accent-color:#3b82f6;">
+                <span style="flex:1;font-size:13px;color:var(--tx);">${g.name}</span>
+                <input type="checkbox" class="cpuGameChk" data-pkg="${g.pkg}" ${checked} onchange="saveCpuGames()" style="width:18px;height:18px;accent-color:var(--ac);">
             </label>`;
         });
         document.getElementById('cpuGamesList').innerHTML = html;
@@ -2842,491 +2719,16 @@ lines.push(selinuxStatus.includes("强制") ? "✅ SELinux状态: 强制模式 (
 </script>
 
 <script>
-    // ================= 文件管理 / 终端 模块 (独立页导航) =================
+    // ================= 工具函数 (q/escapeHtml/toast) — 终端与文件管理器已移除 =================
     (function(){
         const MOD = '/data/adb/modules/xinmaskplus';
-        // 优先用手动设的首页，其次上次路径，最后才是模块目录，杂鱼别嫌烦啦喵
-        let curDir = (() => {
-            try {
-                const home = localStorage.getItem('xinmask_fm_home');
-                if(home && home.startsWith('/')) return home;
-                const saved = localStorage.getItem('xinmask_fm_lastPath');
-                if(saved && saved.startsWith('/')) return saved;
-            } catch(e) {}
-            return MOD;
-        })();
-        let term = null, fitAddon = null, termReady = false;
-        const history = []; let histIdx = -1;
-        let propTarget = null;     // {path,name,isDir}
-        let editReturn = 'fileprop', termReturn = 'fileprop';
+
+
+
+        const MODDIR='/data/adb/modules/xinmaskplus';
 
         function q(s){ return "'" + String(s).replace(/'/g, "'\\''") + "'"; }
         function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-        // ---------- 路径工具 ----------
-        function joinPath(dir, name){
-            if(name==='..') return parentOf(dir);
-            if(dir==='/') return '/'+name;
-            return dir.replace(/\/$/,'') + '/' + name;
-        }
-        function parentOf(dir){
-            if(dir==='/'||!dir) return '/';
-            const p = dir.replace(/\/$/,'').split('/'); p.pop();
-            return p.join('/') || '/';
-        }
-        function goUp(){ listDir(parentOf(curDir)); }
-        function syncPath(){ const e=document.getElementById('fm-path'); if(e) e.textContent = curDir; }
-
-        // ---------- 搜索: 路径跳转 或 文件名查找 ----------
-        async function doSearch(){
-            const inp=document.getElementById('fm-search');
-            const kw=inp.value.trim();
-            if(!kw){ listDir(curDir); return; }
-            const list=document.getElementById('fm-list');
-            // 以 / 开头 → 当作路径直接跳转
-            if(kw.startsWith('/')){
-                const chk=await T('[ -d '+q(kw)+' ] && echo D || ([ -e '+q(kw)+' ] && echo F || echo N)');
-                const t=chk.stdout.trim();
-                if(t==='D'){ inp.value=''; listDir(kw); return; }
-                if(t==='F'){ inp.value=''; openProp(kw, kw.split('/').pop(), false); return; }
-                toast('路径不存在', true); return;
-            }
-            // 否则在当前目录递归查找文件名
-            list.innerHTML='<div class="fm-empty">搜索中…</div>';
-            const r=await T('find '+q(curDir)+' -iname '+q('*'+kw+'*')+' 2>/dev/null | head -200', 30000);
-            const paths=r.stdout.split('\n').map(s=>s.trim()).filter(s=>s && s!==curDir);
-            if(!paths.length){ list.innerHTML='<div class="fm-empty">未找到匹配项</div>'; return; }
-            list.innerHTML='';
-            const head=document.createElement('div');
-            head.className='fm-empty'; head.style.cssText='padding:8px;color:var(--tx2);font-size:11px;';
-            head.textContent='搜索结果 ('+paths.length+')，点击打开';
-            list.appendChild(head);
-            for(const full of paths){
-                const r2=await T('[ -d '+q(full)+' ] && echo D || echo F');
-                const isDir=r2.stdout.trim()==='D';
-                const row=document.createElement('div'); row.className='fm-row';
-                row.innerHTML='<span class="fm-ico '+(isDir?'dir':'')+'">'+(isDir?'📁':'📄')+'</span>'+
-                    '<div class="fm-meta"><div class="fm-name">'+escapeHtml(full.split('/').pop())+'</div>'+
-                    '<div class="fm-detail">'+escapeHtml(full)+'</div></div>';
-                row.addEventListener('click', ()=>{
-                    if(isDir){ document.getElementById('fm-search').value=''; listDir(full); }
-                    else openProp(full, full.split('/').pop(), false);
-                });
-                list.appendChild(row);
-            }
-        }
-
-        // ---------- 文件列表 ----------
-        async function listDir(dir){
-            curDir = dir; syncPath();
-            // 杂鱼，你的位置我给你记住了呢喵
-            try { localStorage.setItem('xinmask_fm_lastPath', dir); } catch(e) {}
-            const list = document.getElementById('fm-list');
-            list.innerHTML = '<div class="fm-empty">加载中...</div>';
-            const r = await T('ls -la ' + q(dir) + ' 2>&1');
-            if(r.errno!==0){ list.innerHTML = '<div class="fm-empty" style="color:#ff6b6b">无法访问: '+escapeHtml(r.stderr||r.stdout)+'</div>'; return; }
-            const rows = [];
-            for(const line of r.stdout.split('\n')){
-                if(!line.trim() || /^total/i.test(line)) continue;
-                const p = parseLsLine(line);
-                if(!p || p.name==='.') continue;
-                rows.push(p);
-            }
-            rows.sort((a,b)=>{
-                if(a.name==='..') return -1; if(b.name==='..') return 1;
-                if(a.isDir!==b.isDir) return a.isDir?-1:1;
-                return a.name.localeCompare(b.name);
-            });
-            if(!rows.length){ list.innerHTML = '<div class="fm-empty">空目录</div>'; return; }
-            list.innerHTML = '';
-            for(const f of rows){
-                const row = document.createElement('div');
-                row.className = 'fm-row';
-                let ico='📄', cls='';
-                if(f.isDir){ ico='📁'; cls='dir'; }
-                else if(f.isLink){ ico='🔗'; cls='lnk'; }
-                else if(f.exec){ ico='⚙️'; cls='exe'; }
-                const full = joinPath(dir, f.name);
-                row.innerHTML =
-                    '<span class="fm-ico '+cls+'">'+ico+'</span>'+
-                    '<div class="fm-meta"><div class="fm-name">'+escapeHtml(f.name)+'</div>'+
-                    '<div class="fm-detail">'+escapeHtml(f.size||'')+(f.size?'  ':'')+escapeHtml(f.date||'')+'</div></div>'+
-                    '<span class="fm-perm-tag">'+escapeHtml(f.perm)+'</span>';
-                row.addEventListener('click', ()=>{
-                    if(f.name==='..'){ goUp(); return; }
-                    if(f.isDir){ listDir(full); }
-                    else { openProp(full, f.name, false); }   // 点文件 → 属性页
-                });
-                list.appendChild(row);
-            }
-        }
-
-        function parseLsLine(line){
-            let m = line.match(/^([dlcbsp\-][rwxsStT\-]{9})\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\d{4}-\d{2}-\d{2}\s+[\d:]+|\w{3}\s+\d+\s+[\d:]{4,5}|\w{3}\s+\d+\s+\d{4})\s+(\S.*)$/);
-            if(m){
-                let name = m[4].replace(/ -> .*$/,'').trim();
-                return { perm:m[1], size:m[2], date:m[3].trim(), name,
-                    isDir:m[1][0]==='d', isLink:m[1][0]==='l', exec:/x/.test(m[1].slice(1)) };
-            }
-            let m2 = line.match(/^([dlcbsp\-][rwxsStT\-]{9})\s+(.+)$/);
-            if(!m2) return null;
-            let rest = m2[2].trim().split(/\s+/);
-            let name = rest.length>6 ? rest.slice(6).join(' ') : rest[rest.length-1];
-            name = name.replace(/ -> .*$/,'').trim();
-            return { perm:m2[1], name, size:rest[3]||'', date:'',
-                isDir:m2[1][0]==='d', isLink:m2[1][0]==='l', exec:/x/.test(m2[1].slice(1)) };
-        }
-
-        // ---------- 属性 / 权限 (独立页) ----------
-        const PERM_BITS = [['u','所有者'],['g','所属组'],['o','其他人']];
-        async function openProp(full, name, isDir){
-            propTarget = {path:full, name, isDir};
-            switchPage('fileprop');
-            document.getElementById('fm-prop-name').textContent = full;
-            document.getElementById('fm-prop-info').textContent = '加载中...';
-            buildPermGrid();
-            document.getElementById('fm-prop-exec').style.display = isDir ? 'none' : '';
-            document.getElementById('fm-prop-edit').style.display = isDir ? 'none' : '';
-            const r = await T('stat ' + q(full) + ' 2>/dev/null || ls -la ' + q(full));
-            document.getElementById('fm-prop-info').textContent = (r.stdout.trim() || r.stderr);
-            const oc = await T("stat -c '%a' " + q(full) + " 2>/dev/null");
-            let octal = oc.stdout.trim();
-            if(!/^[0-7]{3,4}$/.test(octal)){
-                const lr = await T('ls -ld ' + q(full));
-                const pm = (lr.stdout.match(/^([dlcbsp\-][rwxsStT\-]{9})/)||[])[1];
-                octal = pm ? permToOctal(pm) : '644';
-            }
-            document.getElementById('fm-octal').value = octal;
-            setGridFromOctal(octal);
-        }
-        function permToOctal(pm){
-            const s=pm.slice(1); let o='';
-            for(let i=0;i<9;i+=3){ let n=0; if(s[i]==='r')n+=4; if(s[i+1]==='w')n+=2; if(/[xsSt]/.test(s[i+2]))n+=1; o+=n; }
-            return o;
-        }
-        function buildPermGrid(){
-            const grid=document.getElementById('fm-perm-grid'); grid.innerHTML='';
-            PERM_BITS.forEach(([key,label])=>{
-                const col=document.createElement('div'); col.className='fm-perm-col';
-                col.innerHTML='<h5>'+label+'</h5>';
-                ['读 (r)','写 (w)','执行 (x)'].forEach((b,bi)=>{
-                    const lab=document.createElement('label'); lab.className='fm-perm-check';
-                    lab.innerHTML='<input type="checkbox" id="perm-'+key+'-'+bi+'">'+b;
-                    lab.querySelector('input').addEventListener('change', gridToOctal);
-                    col.appendChild(lab);
-                });
-                grid.appendChild(col);
-            });
-        }
-        function setGridFromOctal(octal){
-            const o = octal.length===4 ? octal.slice(1) : octal;
-            ['u','g','o'].forEach((k,i)=>{
-                const d=parseInt(o[i]||'0',8);
-                document.getElementById('perm-'+k+'-0').checked=!!(d&4);
-                document.getElementById('perm-'+k+'-1').checked=!!(d&2);
-                document.getElementById('perm-'+k+'-2').checked=!!(d&1);
-            });
-        }
-        function gridToOctal(){
-            let o='';
-            ['u','g','o'].forEach(k=>{ let n=0;
-                if(document.getElementById('perm-'+k+'-0').checked)n+=4;
-                if(document.getElementById('perm-'+k+'-1').checked)n+=2;
-                if(document.getElementById('perm-'+k+'-2').checked)n+=1; o+=n; });
-            document.getElementById('fm-octal').value=o;
-        }
-        async function applyPerm(){
-            if(!propTarget) return;
-            let oc=document.getElementById('fm-octal').value.trim();
-            if(!/^[0-7]{3,4}$/.test(oc)){ toast('八进制权限格式错误',true); return; }
-            const r=await T('chmod '+oc+' '+q(propTarget.path)+' 2>&1');
-            toast(r.errno===0 ? '权限已应用: '+oc : '失败: '+(r.stderr||r.stdout), r.errno!==0);
-        }
-
-        // ---------- 编辑 (独立页) ----------
-        async function openEditor(){
-            if(!propTarget) return;
-            editReturn = 'fileprop';
-            switchPage('fileedit');
-            document.getElementById('fm-edit-sub').textContent = propTarget.path;
-            const ed=document.getElementById('fm-editor');
-            ed.value='加载中...'; ed.dataset.path=propTarget.path;
-            const bin=await T('LC_ALL=C grep -qI . '+q(propTarget.path)+' 2>/dev/null; echo $?');
-            if(bin.stdout.trim()!=='0'){
-                ed.value='[二进制文件，不可文本编辑]\n\n返回属性页可直接执行或修改权限。';
-                ed.readOnly=true; document.getElementById('fm-edit-save').style.display='none'; return;
-            }
-            ed.readOnly=false; document.getElementById('fm-edit-save').style.display='';
-            const r=await T('cat '+q(propTarget.path)+' 2>&1', 30000);
-            ed.value = r.errno===0 ? r.stdout : ('读取失败:\n'+r.stderr);
-        }
-        async function saveEditor(){
-            const ed=document.getElementById('fm-editor');
-            const b64=btoa(unescape(encodeURIComponent(ed.value)));
-            const r=await T('echo '+q(b64)+' | base64 -d > '+q(ed.dataset.path)+' 2>&1');
-            if(r.errno===0){ toast('已保存'); switchPage('fileprop'); }
-            else toast('保存失败: '+(r.stderr||r.stdout), true);
-        }
-
-        // ---------- 终端 (独立页) ----------
-        let termBuf='';
-        function tw(s){ if(term){ term.write(s); try{ term.scrollToBottom(); }catch(e){} } termBuf += String(s).replace(/\x1b\[[0-9;]*m/g,'').replace(/\r/g,''); }
-        function twln(s){ tw((s||'')+'\r\n'); }
-        function initTerm(){
-            if(termReady){ if(fitAddon) try{fitAddon.fit();}catch(e){} return; }
-            if(typeof Terminal==='undefined'){
-                document.getElementById('term-host').innerHTML='<div style="color:#f66;font-family:monospace;font-size:12px;padding:8px">xterm.js 未加载</div>'; return;
-            }
-            term=new Terminal({ fontSize:12, fontFamily:'monospace', cursorBlink:true, convertEol:true, scrollback:8000,
-                disableStdin:true,           // 不抢输入，避免点一下就弹键盘；输入走下方输入框
-                theme:{ background:'#0c0c10', foreground:'#e6e6e6', cursor:'#34c759' } });
-            try{ if(typeof FitAddon!=='undefined'){ fitAddon=new (FitAddon.FitAddon||FitAddon)(); term.loadAddon(fitAddon); } }catch(e){}
-            term.open(document.getElementById('term-host'));
-            try{ if(fitAddon) fitAddon.fit(); }catch(e){}
-            // 移除隐藏 textarea 的可聚焦性，点击终端只选择文本不弹键盘
-            try{ if(term.textarea){ term.textarea.readOnly=true; term.textarea.setAttribute('inputmode','none'); term.textarea.tabIndex=-1; } }catch(e){}
-            termReady=true;
-            termBuf='';
-            tw('\x1b[32m苦涩环境助手 · 网页终端\x1b[0m\r\n');
-            tw('\x1b[90m以 root 身份运行 · 当前: '+curDir+'\x1b[0m\r\n');
-            tw(prompt());
-        }
-        function prompt(){ return '\x1b[32m# \x1b[0m'; }
-        // ===== 交互式执行状态 (FIFO 喂 stdin) =====
-        let execBusy=false;
-        let attach=null;   // {fifo,log,keeperPid,procPid,shown,timer,done}
-        const FIFO='/data/local/tmp/xmp_in';
-        const ELOG='/data/local/tmp/xmp_exec.log';
-        const DONE='___XMP_DONE___';
-        // 常驻守护协议文件
-        const TRIGGER='/data/local/tmp/xmp_exec_trigger';
-        const PROCPID='/data/local/tmp/xmp_proc.pid';
-        const KEEPERPID='/data/local/tmp/xmp_keeper.pid';
-        const HEARTBEAT='/data/local/tmp/xmp_daemon_alive';
-        const xmpSleep=(ms)=>new Promise(r=>setTimeout(r,ms));
-
-        async function runCmd(cmd){
-            cmd=cmd.trim();
-            // 若有进程正在等待输入 → 把内容喂给它，而不是当命令跑
-            if(attach && !attach.done){
-                tw('\x1b[36m'+cmd+'\x1b[0m\r\n');
-                await T('printf "%s\\n" '+q(cmd)+' > '+FIFO+' 2>/dev/null &', 8000);
-                return;
-            }
-            if(!cmd){ tw(prompt()); return; }
-            tw('\x1b[36m# '+cmd+'\x1b[0m\r\n');
-            history.push(cmd); histIdx=history.length;
-            if(cmd==='cd'||cmd.startsWith('cd ')){
-                const arg=cmd.length>2?cmd.slice(3).trim():MOD;
-                const r=await T('cd '+q(curDir)+' && cd '+q(arg)+' && pwd');
-                if(r.errno===0 && r.stdout.trim()){ curDir=r.stdout.trim(); syncPath(); }
-                else tw('\x1b[31m'+(r.stderr||'目录不存在')+'\x1b[0m\r\n');
-                tw(prompt()); return;
-            }
-            const r=await T('cd '+q(curDir)+' 2>/dev/null; timeout 30 sh -c '+q(cmd)+' </dev/null 2>&1', 35000);
-            if(r.stdout) tw(r.stdout.replace(/\n/g,'\r\n'));
-            if(r.stdout && !r.stdout.endsWith('\n')) tw('\r\n');
-            if(r.errno===-1 && r.stderr==='timeout') tw('\x1b[33m[命令超时已中断(30s)。常驻进程请在命令末尾加 & 后台运行]\x1b[0m\r\n');
-            else if(r.errno!==0 && !r.stdout) tw('\x1b[31m[退出码 '+r.errno+'] '+(r.stderr||'')+'\x1b[0m\r\n');
-            tw(prompt());
-        }
-
-        // 清理正在挂接的进程
-        async function detachProc(kill){
-            if(!attach) return;
-            if(attach.timer){ clearInterval(attach.timer); attach.timer=null; }
-            const a=attach; attach=null;
-            // v2.7.3: term_kill.sh 未随包发布时改用 pkill -P 兜底杀进程树
-            const tk=await T('[ -f /data/adb/modules/xinmaskplus/scripts/term_kill.sh ] && echo Y || echo N',3000);
-            const hasTk=(tk.stdout||'').trim()==='Y';
-            if(a.watcher){
-                // 常驻模式：PID 由守护写入文件，从文件读取后终止
-                if(kill){
-                    if(hasTk){
-                        await T('P=$(cat '+PROCPID+' 2>/dev/null); K=$(cat '+KEEPERPID+' 2>/dev/null); [ -n "$P" ] && sh /data/adb/modules/xinmaskplus/scripts/term_kill.sh tree "$P"; [ -n "$K" ] && kill $K 2>/dev/null', 10000);
-                    }else{
-                        await T('P=$(cat '+PROCPID+' 2>/dev/null); K=$(cat '+KEEPERPID+' 2>/dev/null); [ -n "$P" ] && pkill -P "$P" 2>/dev/null; [ -n "$P" ] && kill -9 "$P" 2>/dev/null; [ -n "$K" ] && kill $K 2>/dev/null', 10000);
-                    }
-                }else{
-                    await T('K=$(cat '+KEEPERPID+' 2>/dev/null); [ -n "$K" ] && kill $K 2>/dev/null', 8000);
-                }
-            }else{
-                // 直接模式：PID 在本地变量
-                if(kill){
-                    if(hasTk){
-                        await T('sh /data/adb/modules/xinmaskplus/scripts/term_kill.sh tree '+a.procPid+' 2>/dev/null; kill '+a.keeperPid+' 2>/dev/null', 10000);
-                    }else{
-                        await T('pkill -P '+a.procPid+' 2>/dev/null; kill -9 '+a.procPid+' 2>/dev/null; kill '+a.keeperPid+' 2>/dev/null', 10000);
-                    }
-                }else{
-                    await T('kill '+a.keeperPid+' 2>/dev/null', 8000);
-                }
-            }
-            setTermPlaceholder(false);
-        }
-        function setTermPlaceholder(interactive){
-            const ci=document.getElementById('term-cmd');
-            if(ci) ci.placeholder = interactive ? '程序运行中，输入内容回车发送给它…' : '输入命令后回车执行…';
-        }
-
-        const GOTERM_PORT=21119;
-        const MODDIR='/data/adb/modules/xinmaskplus';
-
-        async function launchGoterm(binPath){
-            const binName=binPath.split('/').pop();
-            await T('printf %s '+q(binPath)+' > /data/local/tmp/xmp_term_current 2>/dev/null',3000);
-            // v2.7.3: goterm 未随包发布时直接提示，避免无限超时
-            const hasGoterm=await T('[ -f '+MODDIR+'/bin/goterm ] && echo Y || echo N',3000);
-            if((hasGoterm.stdout||'').trim()!=='Y'){
-                toast('⚠ 终端组件缺失：未找到 '+MODDIR+'/bin/goterm（该二进制未随模块发布，请手动放入后重试）', true);
-                return;
-            }
-            const check=await T('curl -s --max-time 1 http://127.0.0.1:'+GOTERM_PORT+'/health 2>/dev/null || echo NOCONN',4000);
-            let alive=((check.stdout||'').trim()==='ok');
-            if(!alive){
-                toast(`✓ 准备启动《${binName}》终端环境…`, false);
-                await T('chmod 0755 '+MODDIR+'/bin/goterm 2>/dev/null; pkill -f "bin/goterm" 2>/dev/null; sleep 0.2; setsid '+MODDIR+'/bin/goterm '+GOTERM_PORT+' '+MODDIR+' </dev/null >/data/adb/xinmaskplus/log/goterm.log 2>&1 &',5000);
-                for(let i=0;i<8;i++){
-                    await new Promise(r=>setTimeout(r,350));
-                    const c=await T('curl -s --max-time 1 http://127.0.0.1:'+GOTERM_PORT+'/health 2>/dev/null',3000);
-                    if((c.stdout||'').trim()==='ok'){alive=true;break;}
-                }
-                if(!alive){toast('⚠ 终端启动超时，请重试或重启设备',true);return;}
-            }
-            // 检测tmux：先复制到/data/local/tmp(shell可执行处)再测试
-            const tmuxChk=await T('B=/data/local/tmp/xmptmux; mkdir -p $B; cp '+MODDIR+'/bin/tmux '+MODDIR+'/bin/*.so* $B/ 2>/dev/null; chmod 0755 $B/* 2>/dev/null; LD_LIBRARY_PATH=$B $B/tmux -V 2>/dev/null | head -1 || echo NO',6000);
-            const hasTmux=/tmux/i.test(tmuxChk.stdout||'');
-            let url;
-            if(hasTmux){
-                // v2.7.3: tmrun.sh 也缺失时退回直接启动
-                const hasTmrun=await T('[ -f '+MODDIR+'/scripts/tmrun.sh ] && echo Y || echo N',3000);
-                if((hasTmrun.stdout||'').trim()==='Y'){
-                    await T('printf %s '+q(binPath)+' > /data/local/tmp/xmp_tmux_target; chmod 0755 '+MODDIR+'/scripts/tmrun.sh '+MODDIR+'/bin/tmux 2>/dev/null',3000);
-                    url='http://127.0.0.1:'+GOTERM_PORT+'/?bin='+encodeURIComponent(MODDIR+'/scripts/tmrun.sh')+'#name='+encodeURIComponent(binName);
-                } else {
-                    url='http://127.0.0.1:'+GOTERM_PORT+'/?bin='+encodeURIComponent(binPath);
-                }
-            } else {
-                url='http://127.0.0.1:'+GOTERM_PORT+'/?bin='+encodeURIComponent(binPath);
-            }
-            await T('am start -a android.intent.action.VIEW -d '+q(url)+' 2>/dev/null',5000);
-            toast(hasTmux?`🚀 《${binName}》已在保活会话启动 — 关终端不会中断`:`🚀 《${binName}》已启动 — 切换到浏览器查看`);
-        }
-
-        async function execTargetBg(){
-            if(!propTarget) return;
-            const p=propTarget.path;
-            const binName=p.split('/').pop();
-            const logFile='/data/local/tmp/xinmask_bg_'+binName+'.log';
-            // 标记为后台目标：终端「结束」不会误杀它
-            await T('touch /data/local/tmp/xmp_bg_targets 2>/dev/null; grep -qxF '+q(p)+' /data/local/tmp/xmp_bg_targets 2>/dev/null || echo '+q(p)+' >> /data/local/tmp/xmp_bg_targets',5000);
-            // 赋权 + setsid后台执行，完全脱离PTY，进程在关闭终端后保活
-            await T('chmod 775 '+q(p)+' 2>/dev/null; setsid '+q(p)+' </dev/null >'+q(logFile)+' 2>&1 &',8000);
-            toast('《'+binName+'》已在后台启动，日志: '+logFile);
-        }
-
-        async function execTarget(){
-            if(!propTarget) return;
-            if(execBusy){ toast('已有任务在执行中', true); return; }
-            if(attach && !attach.done){ await detachProc(true); }
-            execBusy=true;
-            termReturn='fileprop';
-            const p=propTarget.path;
-            try{
-                // 检测是否为ELF二进制（读文件头魔数 \x7fELF）
-                const magic=await T('dd if='+q(p)+' bs=4 count=1 2>/dev/null | xxd -p 2>/dev/null || od -A n -N 4 -t x1 '+q(p)+' 2>/dev/null',5000);
-                const hex=(magic.stdout||'').replace(/\s/g,'').toLowerCase();
-                const isElf=hex.startsWith('7f454c46');
-                if(isElf){
-                    // ELF二进制 → 赋权 → 走goterm PTY终端
-                    await T('chmod 775 '+q(p)+' 2>/dev/null',5000);
-                    execBusy=false;
-                    await launchGoterm(p);
-                    return;
-                }
-                // 非ELF → 走原有逻辑
-                switchPage('fileterm'); initTerm();
-                if(term) term.clear(); termBuf='';
-                tw('\x1b[33m▶ 执行: '+p+'\x1b[0m\r\n');
-                await T('chmod +x '+q(p)+' 2>/dev/null', 8000);
-                // 检测常驻守护是否在运行（心跳文件 30s 内更新过）
-                const hb=await T('[ -f '+HEARTBEAT+' ] && [ $(( $(date +%s) - $(stat -c %Y '+HEARTBEAT+' 2>/dev/null || echo 0) )) -le 30 ] && echo Y || echo N', 8000);
-                const daemonAlive = (hb.stdout.trim()==='Y');
-                let useWatcher=false;
-                if(daemonAlive){
-                    // 投递给常驻守护执行：脚本进程归 ksud，划掉管理器不掉
-                    await T('rm -f '+ELOG+' '+PROCPID+' '+KEEPERPID+'; echo '+q(p)+' > '+TRIGGER, 8000);
-                    // 等守护接管（trigger 被消费即视为接管），最多 ~3s
-                    for(let i=0;i<6;i++){
-                        await xmpSleep(500);
-                        const c=await T('[ -f '+TRIGGER+' ] && echo Y || echo N', 5000);
-                        if(c.stdout.trim()==='N'){ useWatcher=true; break; }
-                    }
-                }
-                if(useWatcher){
-                    tw('\x1b[90m[常驻执行 · 已脱离管理器，划掉不影响]\x1b[0m\r\n');
-                    attach={ fifo:FIFO, log:ELOG, watcher:true, shown:0, done:false, timer:null };
-                }else{
-                    // 回退：守护未运行（通常是安装后未重启），用直接 fork
-                    tw('\x1b[90m[直接执行 · 重启后可常驻]\x1b[0m\r\n');
-                    await T('rm -f '+TRIGGER+' '+FIFO+' '+ELOG+'; mkfifo '+FIFO+' 2>/dev/null; : > '+ELOG, 8000);
-                    const kp=await T('setsid sh -c '+q('exec 3>'+FIFO+'; sleep 2147483647')+' </dev/null >/dev/null 2>&1 & echo $!', 8000);
-                    const keeperPid=(kp.stdout.trim().match(/\d+/)||['0'])[0];
-                    const scriptDir = p.substring(0, p.lastIndexOf('/')) || '/';
-                    const inner='export PATH=/system/bin:/system/xbin:/data/local/tmp:$PATH; cd '+q(scriptDir)+' && timeout 600 '+q(p)+' < '+FIFO+' >> '+ELOG+' 2>&1; echo "'+DONE+' $?" >> '+ELOG;
-                    const pp=await T('setsid sh -c '+q(inner)+' </dev/null >/dev/null 2>&1 & echo $!', 8000);
-                    const procPid=(pp.stdout.trim().match(/\d+/)||['0'])[0];
-                    attach={ fifo:FIFO, log:ELOG, watcher:false, keeperPid, procPid, shown:0, done:false, timer:null };
-                }
-                setTermPlaceholder(true);
-                // 轮询输出（两种模式共用，都读 ELOG）
-                attach.timer=setInterval(async ()=>{
-                    if(!attach) return;
-                    const r=await T('cat '+ELOG+' 2>/dev/null', 8000);
-                    let out=r.stdout||'';
-                    let end=out.indexOf(DONE);
-                    let finished=end!==-1;
-                    if(finished) out=out.slice(0,end);
-                    if(out.length>attach.shown){ tw(out.slice(attach.shown).replace(/\n/g,'\r\n')); attach.shown=out.length; }
-                    if(finished){
-                        attach.done=true;
-                        const m=(r.stdout.match(new RegExp(DONE+' (\\d+)'))||[])[1];
-                        twln('\x1b[90m[退出码 '+(m!==undefined?m:'?')+']\x1b[0m');
-                        tw(prompt());
-                        await detachProc(false);
-                    }
-                }, 600);
-            }catch(e){
-                twln('\x1b[31m[执行异常: '+e+']\x1b[0m'); tw(prompt());
-                await detachProc(true);
-            }finally{
-                execBusy=false;
-            }
-        }
-
-        // ---------- 重命名 / 删除 ----------
-        async function renameTarget(){
-            if(!propTarget) return;
-            const nn=window.prompt('新名称', propTarget.name);
-            if(!nn || nn===propTarget.name) return;
-            const np=joinPath(parentOf(propTarget.path), nn);
-            const r=await T('mv '+q(propTarget.path)+' '+q(np)+' 2>&1');
-            if(r.errno===0){ toast('已重命名'); listDir(parentOf(propTarget.path)); switchPage('files'); }
-            else toast('失败: '+(r.stderr||r.stdout), true);
-        }
-        function askDelete(){
-            if(!propTarget) return;
-            document.getElementById('fm-confirm-sub').textContent=propTarget.path;
-            document.getElementById('fm-confirm').classList.add('open');
-        }
-        async function doDelete(){
-            document.getElementById('fm-confirm').classList.remove('open');
-            if(!propTarget) return;
-            const parent=parentOf(propTarget.path);
-            const r=await T('rm -rf '+q(propTarget.path)+' 2>&1');
-            if(r.errno===0){ toast('已删除'); listDir(parent); switchPage('files'); }
-            else toast('失败: '+(r.stderr||r.stdout), true);
-        }
 
         // ---------- toast ----------
         let toastTimer=null;
@@ -3341,63 +2743,6 @@ lines.push(selinuxStatus.includes("强制") ? "✅ SELinux状态: 强制模式 (
             toastTimer=setTimeout(()=>{ el.style.transition='opacity .4s'; el.style.opacity='0'; }, 2200);
         }
 
-        // ---------- 绑定 ----------
-        function bind(){
-            const on=(id,fn)=>{ const e=document.getElementById(id); if(e) e.addEventListener('click',fn); };
-            on('fm-up', goUp);
-            on('fm-refresh', ()=>listDir(curDir));
-            on('fm-sethome', ()=>{
-                try {
-                    localStorage.setItem('xinmask_fm_home', curDir);
-                    toast('✓ 已将《'+curDir+'》设为首页啦喵');
-                } catch(e) { toast('设置失败了呢，杂鱼',true); }
-            });
-            on('fm-search-btn', doSearch);
-            const sb=document.getElementById('fm-search');
-            if(sb) sb.addEventListener('keydown',(e)=>{ if(e.key==='Enter') doSearch(); });
-            document.querySelectorAll('.fm-chip').forEach(c=>c.addEventListener('click', ()=>listDir(c.dataset.path)));
-            on('fm-apply-perm', applyPerm);
-            const oct=document.getElementById('fm-octal');
-            if(oct) oct.addEventListener('input', ()=>{ const v=oct.value.trim(); if(/^[0-7]{3,4}$/.test(v)) setGridFromOctal(v); });
-            on('fm-prop-edit', openEditor);
-            on('fm-prop-exec', execTarget);
-            on('fm-prop-exec-bg', execTargetBg);
-            on('fm-prop-rename', renameTarget);
-            on('fm-prop-del', askDelete);
-            on('fm-edit-save', saveEditor);
-            on('fm-edit-cancel', ()=>switchPage(editReturn));
-            on('fm-edit-back', ()=>switchPage(editReturn));
-            on('fm-term-back', ()=>{ detachProc(true); switchPage(termReturn); });
-            on('fm-open-term', ()=>{ termReturn='files'; switchPage('fileterm'); initTerm(); });
-            on('fm-confirm-cancel', ()=>document.getElementById('fm-confirm').classList.remove('open'));
-            on('fm-confirm-ok', doDelete);
-            on('term-copy', async ()=>{
-                const txt=termBuf||'';
-                try{ await navigator.clipboard.writeText(txt); toast('已复制全部输出'); }
-                catch(e){
-                    const ta=document.createElement('textarea'); ta.value=txt;
-                    ta.style.cssText='position:fixed;left:-9999px;top:0;'; document.body.appendChild(ta);
-                    ta.select(); try{ document.execCommand('copy'); toast('已复制全部输出'); }catch(_){ toast('复制失败',true); }
-                    document.body.removeChild(ta);
-                }
-            });
-            on('term-clear', ()=>{ if(term){ term.clear(); termBuf=''; tw(prompt()); } });
-            on('term-ctrlc', async ()=>{
-                if(attach && !attach.done){
-                    await T('kill -INT -'+attach.procPid+' 2>/dev/null; kill -INT '+attach.procPid+' 2>/dev/null', 8000);
-                    twln('^C'); await detachProc(true); tw(prompt());
-                } else if(term){ twln('^C'); tw(prompt()); }
-            });
-            const ci=document.getElementById('term-cmd');
-            on('term-run', ()=>{ const v=ci.value; ci.value=''; runCmd(v); });
-            if(ci) ci.addEventListener('keydown', (e)=>{
-                if(e.key==='Enter'){ const v=ci.value; ci.value=''; runCmd(v); }
-                else if(e.key==='ArrowUp'){ if(histIdx>0){histIdx--; ci.value=history[histIdx]||'';} e.preventDefault(); }
-                else if(e.key==='ArrowDown'){ if(histIdx<history.length-1){histIdx++; ci.value=history[histIdx]||'';} else {histIdx=history.length; ci.value='';} e.preventDefault(); }
-            });
-            const cm=document.getElementById('fm-confirm');
-            if(cm) cm.addEventListener('click',(e)=>{ if(e.target.id==='fm-confirm') cm.classList.remove('open'); });
-        }
 
         // switchPage 进入钩子
         // ===== 自定义冻结应用 =====
@@ -3440,7 +2785,7 @@ lines.push(selinuxStatus.includes("强制") ? "✅ SELinux状态: 强制模式 (
                 var safe = pkg.replace(/'/g, "\\'");
                 return '<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border-radius:10px;padding:8px 12px;">'
                     + '<span style="flex:1;font-size:11px;font-family:monospace;word-break:break-all;">' + pkg + '</span>'
-                    + '<button onclick="frzRemove(' + i + ')" style="background:rgba(255,60,60,.2);border:1px solid rgba(255,80,80,.3);border-radius:8px;padding:5px 14px;font-size:10px;color:#ff8080;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:rgba(255,100,100,.2);">删除</button>'
+                    + '<button onclick="frzRemove(' + i + ')" style="background:rgba(255,60,60,.2);border:1px solid rgba(255,80,80,.3);border-radius:8px;padding:5px 14px;font-size:10px;color:var(--er);cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:rgba(255,100,100,.2);">删除</button>'
                     + '</div>';
             }).join('');
         }
@@ -3660,16 +3005,6 @@ lines.push(selinuxStatus.includes("强制") ? "✅ SELinux状态: 强制模式 (
         }
 
         window.__fmOnEnter = function(p){
-            if(p==='files'){
-                // 进文件管理器时，优先跳到你设的首页，杂鱼别再迷路啦喵
-                let target = curDir;
-                try {
-                    const home = localStorage.getItem('xinmask_fm_home');
-                    if(home && home.startsWith('/')) target = home;
-                } catch(e) {}
-                listDir(target);
-            }
-            if(p==='fileterm'){ initTerm(); }
             if(p==='models'){ loadModels(); }
             if(p==='freeze'){ frzLoad(); }
         };
@@ -3864,7 +3199,7 @@ if(document.readyState!=='loading') { bind(); bindModels(); } else document.addE
         if((r.stdout||'').trim()==='RUNNING') set('已有更新任务进行中...');
         if(__upPoll) clearInterval(__upPoll);
         __upPoll = setInterval(async ()=>{
-          const s = (await T('cat /data/local/tmp/xmark_up.status 2>/dev/null')).stdout.trim();
+          const s = (await T('cat /data/adb/xinmaskplus/run/update.status 2>/dev/null')).stdout.trim();
           if(s.indexOf('DOWNLOADING')===0) set('正在下载最新版...');
           else if(s.indexOf('INSTALLING')===0) set('正在替换文件...');
           else if(s.indexOf('DONE')===0){ clearInterval(__upPoll); set('更新完成 '+(s.split(':')[1]||'')+'，退出重进生效'); }

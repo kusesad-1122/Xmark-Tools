@@ -16,8 +16,8 @@ R = os.path.dirname(_HERE) + os.sep
 
 def dec(p):
     d = open(p, encoding='utf-8', newline='').read()
-    m = re.search(r"<< 'B64END'\n(.*?)\nB64END\n", d, re.S)
-    return base64.b64decode(m.group(1)).decode('utf-8') if m else d
+    m = re.search(r"<< 'B64END'\r?\n(.*?)\r?\nB64END\r?\n", d, re.S)
+    return base64.b64decode(re.sub(r'\s+', '', m.group(1))).decode('utf-8') if m else d
 
 
 post = dec(R + 'post-fs-data.sh')

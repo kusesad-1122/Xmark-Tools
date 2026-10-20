@@ -22,8 +22,8 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
 SRC = os.path.join(_ROOT, 'scripts', 'model_spoof.sh')
 d = open(SRC, encoding='utf-8', newline='').read()
-m = re.search(r"<< 'B64END'\n(.*?)\nB64END\n", d, re.S)
-p = base64.b64decode(m.group(1)).decode('utf-8')
+m = re.search(r"<< 'B64END'\r?\n(.*?)\r?\nB64END\r?\n", d, re.S)
+p = base64.b64decode(re.sub(r'\s+', '', m.group(1))).decode('utf-8')
 lines = p.split('\n')
 
 

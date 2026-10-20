@@ -1,4 +1,20 @@
 【Xmark-Tools 公告】
+更新时间：2026-10-21
+
+当前最新版本：v2.9.3
+
+本次更新（v2.9.3）：
+- 移除网页终端（goterm/tmux）与 xterm 组件：升级时自动清理历史组件与状态文件；
+  端口 21119 监听彻底消失
+- WebUI 风格归一：17 个多色渐变按钮统一为体系蓝/绿动作按钮，日志窗、弹窗、
+  属性面板等深色残留全部改为整体浅色玻璃风；删除无引用的旧版状态页资产
+- 进程隐藏重构：常驻进程改为 tmpfs staging 拉起（/dev/.bXXXXXX/，设备指纹派生名），
+  弃用 kworker 伪装（exe/maps/ppid 四处穿帮）；统计/开关同步子壳脱离 service.sh cmdline
+- 运行态产物全部迁出 /data/local/tmp：日志收口 /data/adb/xinmaskplus/log/，
+  协议与状态文件收口 /data/adb/xinmaskplus/run/；防标记挂载源走 /dev/.bXXXXXX/，
+  mountinfo 不再泄露 /data/local/tmp 与模块路径
+
+【Xmark-Tools 公告】
 更新时间：2026-09-05
 
 当前最新版本：v2.8.0
