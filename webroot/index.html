@@ -3028,7 +3028,7 @@ async function procHideInit(){
 }
 async function procHideToggle(cb){
     if(cb.checked){ await T('touch /data/adb/modules/xinmaskplus/pid/proc_hide',3000); toast('已开启：游戏运行时自动隐藏守护进程'); }
-    else{ await T('rm -f /data/adb/modules/xinmaskplus/pid/proc_hide; sh /data/adb/modules/xinmaskplus/scripts/proc_hide.sh unhide_all',4000); toast('已关闭并恢复'); }
+    else{ await T('rm -f /data/adb/modules/xinmaskplus/pid/proc_hide /data/adb/xinmaskplus/persist_proc_hide; sh /data/adb/modules/xinmaskplus/scripts/proc_hide.sh unhide_all',6000); toast('已关闭并恢复'); }
 }
 async function procHideStatus(){
     const r=await T('sh /data/adb/modules/xinmaskplus/scripts/proc_hide.sh status',4000);
@@ -3044,6 +3044,9 @@ async function procHideNow(){
 window.__fmOnEnter=(function(orig){
     return function(p){ if(p==='func'){ procHideInit(); } if(orig) orig(p); };
 })(window.__fmOnEnter);
+
+// v2.9.4: 暴露到 window —— onclick 需要全局可见（本段处于 IIFE 内）
+window.procHideInit=procHideInit;window.procHideToggle=procHideToggle;window.procHideStatus=procHideStatus;window.procHideNow=procHideNow;
 
 // ===== KSU越狱工具函数 =====
 const SCRIPT_BASE = '/data/adb/modules/xinmaskplus/bin/';
@@ -3123,7 +3126,7 @@ async function checkJailbreakMode() {
 
 setTimeout(checkJailbreakMode, 2000);
 
-if(document.readyState!=='loading') { bind(); bindModels(); } else document.addEventListener('DOMContentLoaded', function(){ bind(); bindModels(); });
+if(document.readyState!=='loading') { bindModels(); } else document.addEventListener('DOMContentLoaded', function(){ bindModels(); });
         // 暴露 frz 函数到 window，使 HTML inline onclick 可以调用
         window.frzAddPkg = frzAddPkg;
         window.frzRemove = frzRemove;
