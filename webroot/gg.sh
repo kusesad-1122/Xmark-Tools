@@ -2,7 +2,7 @@
 GH_USER="kusesad-1122"
 GH_REPO="Xmark-Tools"
 RAW="https://raw.githubusercontent.com/$GH_USER/$GH_REPO/main/notice.txt"
-PROXIES="https://ghfast.top/ https://gh-proxy.com/ EMPTY"
+PROXIES="https://ghfast.top/ https://gh-proxy.com/ https://ghproxy.net/ EMPTY"
 UA="Mozilla/5.0 (Linux; Android 13; K) Mobile Safari/537.36"
 
 for P in $PROXIES; do
