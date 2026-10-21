@@ -1,4 +1,4 @@
-/* drmid_hook.c v2 增量补丁 —— 基于 libdrmid.so（苳季 DongJi_5.2.0）静态逆向结论
+/* drmid_hook.c v2 增量补丁 —— 基于同类商业改机引擎 libdrmid.so 静态逆向结论
  * 只列【需要合并进现有 drmid_hook.c】的增量；hook 引擎与主流程沿用现有实现。
  *
  * 逆向结论（libdrmid.so, aarch64, 240KB, dynsym 仅导出 A64HookFunction/V）：
@@ -28,7 +28,7 @@
  * 现有 drmid_hook.c：
  *   static const char HEX[] = "0123456789abcdef";
  * 改为（大写/小写进 SHA256 的输入不同；服务端聚类按派生 ID 字节比对，
- * 用大写可与 DongJi 系改机设备的指纹特征混在同一空间，提升混淆度）：
+ * 用大写可与同类改机设备的指纹特征混在同一空间，提升混淆度）：
  */
 static const char HEX[] = "0123456789ABCDEF";
 
@@ -77,7 +77,7 @@ static int collect_crypto_instances(crypto_inst_t *out, int max) {
 
 /* ── 不采纳项（逆向结论支撑）──
  * - 双 hook SHA256_Update：它的替身实际用原始指针，Update 未被 patch，与我们同构。
- * - extra_data 持久化：DongJi 每次启动重新随机 —— Widevine 密钥库每次重启失效重拉，
+ * - extra_data 持久化：该引擎每次启动重新随机 —— Widevine 密钥库每次重启失效重拉，
  *   我们同样每次随机，行为一致；若要"授权缓存存活"反而是负优化（更容易被聚类）。
  * - sepolicy 全开 allow hal_drm_widevine * * *：我们的最小集更安全，保持。
  */
