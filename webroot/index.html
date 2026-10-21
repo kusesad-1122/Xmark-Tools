@@ -830,6 +830,17 @@
             </div>
             <div class="func-switch-item">
 <div class="func-switch-header">
+<span class="func-switch-title">卸载 OPLUS 内核检测（inte）</span>
+<label class="toggle"><input type="checkbox" id="rmmodInteToggle" onchange="rmmodInteToggle(this)"><span class="toggle-slider"></span></label>
+</div>
+<div class="func-switch-desc">OPPO/一加/realme 设备专用：开机自动 rmmod 系统自带检测模块 inte.ko（不做挂载/分区修改）。关闭开关后重启即恢复系统默认加载；非 OPLUS 设备显示未检测到。</div>
+<div style="display:flex;gap:8px;margin-top:10px;">
+<button class="btn btn-act" style="flex:1;padding:10px 0;" onclick="rmmodInteStatus()">查看状态</button>
+</div>
+<div id="rmmodInteOut" style="display:none;margin-top:8px;background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.5);border-radius:10px;padding:10px 12px;font-family:monospace;font-size:11px;color:var(--tx2);white-space:pre-wrap;word-break:break-all;"></div>
+</div>
+<div class="func-switch-item">
+<div class="func-switch-header">
 <span class="func-switch-title">进程隐藏（实验）</span>
 <label class="toggle"><input type="checkbox" id="procHideToggle" onchange="procHideToggle(this)"><span class="toggle-slider"></span></label>
 </div>
@@ -3047,6 +3058,34 @@ window.__fmOnEnter=(function(orig){
 
 // v2.9.4: 暴露到 window —— onclick 需要全局可见（本段处于 IIFE 内）
 window.procHideInit=procHideInit;window.procHideToggle=procHideToggle;window.procHideStatus=procHideStatus;window.procHideNow=procHideNow;
+
+// ===== rmmod inte（v2.9.4 整合）=====
+async function rmmodInteInit(){
+    const on = await T('[ -f /data/adb/modules/xinmaskplus/pid/rmmod_inte ] && echo Y || echo N',3000);
+    const el=document.getElementById('rmmodInteToggle');
+    if(el) el.checked=(on.stdout||'').trim()==='Y';
+}
+async function rmmodInteToggle(cb){
+    if(cb.checked){
+        await T('touch /data/adb/modules/xinmaskplus/pid/rmmod_inte; mkdir -p /data/adb/xinmaskplus; touch /data/adb/xinmaskplus/persist_rmmod_inte; sh /data/adb/modules/xinmaskplus/scripts/rmmod_inte.sh',6000);
+        toast('已开启：下次开机自动卸载 inte.ko');
+    }else{
+        await T('rm -f /data/adb/modules/xinmaskplus/pid/rmmod_inte /data/adb/xinmaskplus/persist_rmmod_inte',4000);
+        toast('已关闭：重启后系统恢复默认加载');
+    }
+}
+async function rmmodInteStatus(){
+    const r=await T('lsmod | grep "^inte " || echo "inte 未加载"; [ -e /vendor/lib/modules/inte.ko ] || [ -e /odm/lib/modules/inte.ko ] && echo "inte.ko 文件存在" || echo "本机无 inte.ko（非 OPLUS）"; cat /data/adb/xinmaskplus/run/rmmod_inte.log 2>/dev/null | tail -n 3',6000);
+    const el=document.getElementById('rmmodInteOut');
+    if(el){ el.style.display='block'; el.textContent=(r.stdout||'无输出').trim(); }
+}
+if(window.__rmmodWrapped!==true){
+  window.__rmmodWrapped=true;
+  window.__fmOnEnter=(function(orig){
+    return function(p){ if(p==='func'){ rmmodInteInit(); } if(orig) orig(p); };
+  })(window.__fmOnEnter);
+  window.rmmodInteInit=rmmodInteInit;window.rmmodInteToggle=rmmodInteToggle;window.rmmodInteStatus=rmmodInteStatus;
+}
 
 // ===== KSU越狱工具函数 =====
 const SCRIPT_BASE = '/data/adb/modules/xinmaskplus/bin/';
